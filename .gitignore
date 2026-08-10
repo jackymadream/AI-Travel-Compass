@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.pytest_cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+.next/
+supabase login.txt
+data/_zh_hk_check.txt
+gcp-key.json
+credentials/
+.scratch/
+

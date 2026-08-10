@@ -1,0 +1,56 @@
+更新版 5 週分階段開發週期 (Phase-by-Phase Roadmap)
+
+Phase 1: Domain Modeling、基礎架構與數據庫模組 (Week 1)
+目標： 建立專案 Domain Model，完成 DB Schema 與 Seed Data，並用 Cursor + TDD 完成「模塊 1：Explore & Country Insights」。
+實作內容與 Key Steps:
+建立 CONTEXT.md（定義 Exclusions, Hard Constraints, Soft Preferences 等領域專有名詞）。
+在 Cursor 輸入 Prompt 生成 PostgreSQL 數據庫 Schema（countries, cities, user_profiles，支援 JSONB 多語言與 Index）。
+撰寫 Python 腳本匯入 30–50 個目的地的結構化 Seed Data（靜態 JSON/CSV）與生成 Embedding 寫入 Qdrant。
+採用 TDD 模式：先撰寫 pytest 測試 /api/v1/countries 端點，再編寫 FastAPI 邏輯使其通過。
+前端 Next.js 建立 Explore Grid 國家卡片（Explore & Country Insights 模塊）。
+
+Deliverables:
+CONTEXT.md (Domain Model 文檔)
+schema.sql 與 seed_data.json
+FastAPI /api/v1/countries 端點與其對應的 test_countries.py
+「模塊 1」前端瀏覽頁面
+
+Phase 2: Agentic Decision Engine 與 RAG 搭建 (Week 2-3)
+目標： 實現「模塊 2：AI Travel Compass」核心邏輯，利用 LangGraph 實現確定性過濾與語意推薦。
+實作內容與 Key Steps:
+定義 Pydantic Data Model，規範 Request/Response 的 JSON Schema。
+建立 LangGraph State Machine：
+SQL Filter Node: 硬性條件過濾（預算、治安、排除國家）。
+Vector Retrieve Node: Qdrant 語意檢索非結構化深度旅遊特色。
+Rank & Reason Node: 呼叫 LLM 生成推薦理由與費用拆解。
+Self-Correction 回路： 實作 Instructor / Pydantic Validation，若 LLM 輸出欄位不符或超預算，自動 trigger 重新 Prompt。
+FastAPI 導入 SSE (Server-Sent Events) 支持前端打字機流式輸出。
+
+Deliverables:
+agents/travel_compass.py (LangGraph 工作流)
+通過 pytest 驗證的 /api/v1/compass/recommend (SSE 端點)
+前端動態問卷與 Streaming 報告渲染組件
+
+Phase 3: AI Evaluation Harness 與 Guardrails 強化 (Week 4)
+目標： 搭建量化 AI 評測框架，展示頂尖 AI Engineer 的品質調優思維。
+實作內容與 Key Steps:
+建立包含 30 組邊界條件（如極低預算、衝突偏好、全額排除）的 Golden Test Dataset (eval_dataset.json)。
+使用 DeepEval / Ragas 撰寫 eval/run_eval.py 自動化評測腳本，量化 Constraint Adherence Rate 與 Faithfulness。
+針對低於標準的測試案例優化 Prompt 與 LangGraph Self-Correction 邏輯。
+引入 Guardrails 確保費用計算與數字加總 100% 正確。
+
+Deliverables:
+eval/run_eval.py 自動化評測腳本與 JSON 格式的 Benchmark 評測報告
+具備完整 Error Handling 與 Guardrails 的成熟 Agent 邏輯
+
+Phase 4: UI/UX 精修、Polishing 與正式部署 (Week 5)
+目標： 完成 Production 級別的產品包裝、部署與履歷專案展現。
+實作內容與 Key Steps:
+UI 精修：Tailwind CSS + Shadcn UI 美化、Dark Mode、Mapbox 地圖組件與響應式切換。
+部署：Backend 部署至 Render/Fly.io，Frontend 部署至 Vercel，DB 使用 Supabase。
+防護設置：CORS, Rate Limiting (Slowapi), Sentry 錯誤日誌監控。
+寫出符合 Senior AI Engineer 規格的 GitHub README（包含 Architecture Diagram、LangGraph State Machine 與 Evaluation Benchmark 數據表格）。
+
+Deliverables:
+可公開存取的 Live Production 網址
+包含架構圖與評測結果的高品質 GitHub Repository

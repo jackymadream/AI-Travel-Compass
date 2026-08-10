@@ -1,0 +1,679 @@
+{
+  "countries": [
+    {
+      "iso_code": "JP",
+      "name": {
+        "en": "Japan",
+        "zh-HK": "日本",
+        "ja": "日本"
+      },
+      "description": {
+        "en": "A blend of ancient tradition and cutting-edge modernity, known for cuisine, temples, and efficient transit.",
+        "zh-HK": "融合古老傳統與現代科技，以美食、寺廟及高效交通聞名。",
+        "ja": "伝統と最先端が融合し、料理、寺院、効率的な交通で知られる国。"
+      },
+      "safety_index": 5,
+      "avg_daily_cost_usd": 120.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [3, 4, 5, 10, 11],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["East Asia"],
+      "cities": [
+        {
+          "slug": "tokyo",
+          "name": {
+            "en": "Tokyo",
+            "zh-HK": "東京",
+            "ja": "東京"
+          },
+          "description": {
+            "en": "Japan's capital offers neon districts, Michelin dining, shrines, and day trips to Mt. Fuji.",
+            "zh-HK": "日本首都，匯集霓虹街區、米其林美食、神社及富士山一日遊。",
+            "ja": "ネオン街、ミシュラン飲食、神社、富士山日帰り旅行が楽しめる首都。"
+          },
+          "safety_index": 5,
+          "avg_daily_cost_usd": 130.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [3, 4, 5, 10, 11],
+            "label": {
+              "en": "Cherry blossom & mild weather",
+              "zh-HK": "賞櫻與宜人天氣",
+              "ja": "桜と過ごしやすい気候"
+            }
+          },
+          "latitude": 35.6762,
+          "longitude": 139.6503,
+          "tags": ["culture", "food", "nightlife", "urban"]
+        }
+      ]
+    },
+    {
+      "iso_code": "KR",
+      "name": {
+        "en": "South Korea",
+        "zh-HK": "南韓",
+        "ja": "韓国"
+      },
+      "description": {
+        "en": "Dynamic cities, K-culture, spicy cuisine, and mountain hiking within easy reach of Seoul.",
+        "zh-HK": "充滿活力的城市、韓流文化、辛辣美食，首爾近郊即可登山健行。",
+        "ja": "活気ある都市、Kカルチャー、辛い料理、ソウルからすぐ行ける登山。"
+      },
+      "safety_index": 4,
+      "avg_daily_cost_usd": 85.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [4, 5, 9, 10, 11],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["East Asia"],
+      "cities": [
+        {
+          "slug": "seoul",
+          "name": {
+            "en": "Seoul",
+            "zh-HK": "首爾",
+            "ja": "ソウル"
+          },
+          "description": {
+            "en": "A megacity of palaces, street food markets, skincare shopping, and vibrant nightlife in Hongdae and Itaewon.",
+            "zh-HK": "融合宮殿、街頭美食、護膚購物及弘大、梨泰院夜生活的超級城市。",
+            "ja": "宮殿、屋台グルメ、コスメ、弘大・梨泰院のナイトライフが楽しめる大都市。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 90.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [4, 5, 9, 10],
+            "label": {
+              "en": "Mild spring and colorful autumn",
+              "zh-HK": "溫和春季與繽紛秋季",
+              "ja": "穏やかな春と紅葉の秋"
+            }
+          },
+          "latitude": 37.5665,
+          "longitude": 126.9780,
+          "tags": ["culture", "food", "nightlife", "shopping", "urban"]
+        }
+      ]
+    },
+    {
+      "iso_code": "PT",
+      "name": {
+        "en": "Portugal",
+        "zh-HK": "葡萄牙",
+        "ja": "ポルトガル"
+      },
+      "description": {
+        "en": "Atlantic coastlines, historic towns, port wine, and relaxed Mediterranean pace at moderate prices.",
+        "zh-HK": "大西洋海岸、歷史古城、波特酒及悠閒的地中海式生活，消費適中。",
+        "ja": "大西洋の海岸、歴史的な街並み、ポートワイン、穏やかな地中海のペース。"
+      },
+      "safety_index": 4,
+      "avg_daily_cost_usd": 75.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [4, 5, 6, 9, 10],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["Western Europe"],
+      "cities": [
+        {
+          "slug": "porto",
+          "name": {
+            "en": "Porto",
+            "zh-HK": "波爾圖",
+            "ja": "ポルト"
+          },
+          "description": {
+            "en": "Hillside Ribeira district, azulejo tiles, port cellars, and a growing creative food scene off the usual trail.",
+            "zh-HK": "里貝拉山坡區、磁磚藝術、波特酒窖及蓬勃的創意美食，是較冷門的歐洲選擇。",
+            "ja": "リベイラの丘、タイル装飾、ポート酒セラー、創造的な食シーンが楽しめる穴場。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 70.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [4, 5, 9, 10],
+            "label": {
+              "en": "Warm shoulder seasons",
+              "zh-HK": "溫暖過渡季",
+              "ja": "過ごしやすい春と秋"
+            }
+          },
+          "latitude": 41.1579,
+          "longitude": -8.6291,
+          "tags": ["culture", "food", "budget-friendly", "off-the-beaten-path"]
+        }
+      ]
+    },
+    {
+      "iso_code": "GE",
+      "name": {
+        "en": "Georgia",
+        "zh-HK": "格魯吉亞",
+        "ja": "ジョージア"
+      },
+      "description": {
+        "en": "Caucasus hospitality, wine culture, mountain scenery, and distinctive cuisine at very low daily cost.",
+        "zh-HK": "高加索熱情好客、葡萄酒文化、山景及獨特料理，日常消費低廉。",
+        "ja": "コーカサスのおもてなし、ワイン文化、山岳景観、低コストで楽しめる料理。"
+      },
+      "safety_index": 3,
+      "avg_daily_cost_usd": 45.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [5, 6, 9, 10],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["Caucasus"],
+      "cities": [
+        {
+          "slug": "tbilisi",
+          "name": {
+            "en": "Tbilisi",
+            "zh-HK": "第比利斯",
+            "ja": "トビリシ"
+          },
+          "description": {
+            "en": "Sulfur baths, cobblestone Old Town, natural wine bars, and gateway to Kazbegi mountain hikes.",
+            "zh-HK": "硫磺浴、石板老城、自然酒酒吧，亦是前往卡茲別吉山健行的門戶。",
+            "ja": "硫黄泉、石畳の旧市街、自然ワインバー、カズベギ登山の拠点。"
+          },
+          "safety_index": 3,
+          "avg_daily_cost_usd": 40.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [5, 6, 9, 10],
+            "label": {
+              "en": "Pleasant hiking weather",
+              "zh-HK": "適合健行的宜人天氣",
+              "ja": "ハイキングに最適な季節"
+            }
+          },
+          "latitude": 41.7151,
+          "longitude": 44.8271,
+          "tags": ["culture", "food", "nature", "budget-friendly", "off-the-beaten-path"]
+        }
+      ]
+    },
+    {
+      "iso_code": "TH",
+      "name": {
+        "en": "Thailand",
+        "zh-HK": "泰國",
+        "ja": "タイ"
+      },
+      "description": {
+        "en": "Temples, tropical beaches, street food, and wellness retreats from bustling cities to northern mountains.",
+        "zh-HK": "寺廟、熱帶海灘、街頭美食及養生度假，從繁華城市到北部山區皆宜。",
+        "ja": "寺院、トロピカルビーチ、屋台グルメ、都市から北部の山まで。"
+      },
+      "safety_index": 4,
+      "avg_daily_cost_usd": 55.00,
+      "best_travel_season": {
+        "seasons": ["winter"],
+        "months": [11, 12, 1, 2],
+        "label": {
+          "en": "Cool dry season",
+          "zh-HK": "涼爽乾季",
+          "ja": "涼しく乾燥した季節"
+        }
+      },
+      "region_tags": ["Southeast Asia"],
+      "cities": [
+        {
+          "slug": "bangkok",
+          "name": {
+            "en": "Bangkok",
+            "zh-HK": "曼谷",
+            "ja": "バンコク"
+          },
+          "description": {
+            "en": "Grand Palace, floating markets, rooftop bars, and some of the world's best and cheapest street food.",
+            "zh-HK": "大皇宮、水上市場、天台酒吧，以及全球頂尖而平價的街頭美食。",
+            "ja": "王宮、水上マーケット、ルーフトップバー、世界最高級の屋台グルメ。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 60.00,
+          "best_travel_season": {
+            "seasons": ["winter"],
+            "months": [11, 12, 1, 2],
+            "label": {
+              "en": "Cool dry season",
+              "zh-HK": "涼爽乾季",
+              "ja": "涼しく乾燥した季節"
+            }
+          },
+          "latitude": 13.7563,
+          "longitude": 100.5018,
+          "tags": ["culture", "food", "nightlife", "budget-friendly", "urban"]
+        },
+        {
+          "slug": "chiang-mai",
+          "name": {
+            "en": "Chiang Mai",
+            "zh-HK": "清邁",
+            "ja": "チェンマイ"
+          },
+          "description": {
+            "en": "Northern temples, night bazaars, cooking classes, and jungle retreats—a slower alternative to Bangkok.",
+            "zh-HK": "北部寺廟、夜市、烹飪課程及叢林度假，是比曼谷更慢活的選擇。",
+            "ja": "北部の寺院、ナイトバザール、料理教室、ジャングルリトリート。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 45.00,
+          "best_travel_season": {
+            "seasons": ["winter"],
+            "months": [11, 12, 1, 2],
+            "label": {
+              "en": "Cool dry season",
+              "zh-HK": "涼爽乾季",
+              "ja": "涼しく乾燥した季節"
+            }
+          },
+          "latitude": 18.7883,
+          "longitude": 98.9853,
+          "tags": ["culture", "nature", "wellness", "budget-friendly", "off-the-beaten-path"]
+        }
+      ]
+    },
+    {
+      "iso_code": "SI",
+      "name": {
+        "en": "Slovenia",
+        "zh-HK": "斯洛文尼亞",
+        "ja": "スロベニア"
+      },
+      "description": {
+        "en": "Compact Alpine country with lakes, caves, and a charming capital often overlooked by mass tourism.",
+        "zh-HK": "小巧的阿爾卑斯國家，有湖泊、洞穴及常被大眾旅遊忽略的迷人首都。",
+        "ja": "湖、鍾乳洞、マスツーリズムから見過ごされがちな首都がある小国。"
+      },
+      "safety_index": 5,
+      "avg_daily_cost_usd": 80.00,
+      "best_travel_season": {
+        "seasons": ["spring", "summer"],
+        "months": [5, 6, 7, 8, 9],
+        "label": {
+          "en": "Late spring to early autumn",
+          "zh-HK": "晚春至初秋",
+          "ja": "晩春から初秋"
+        }
+      },
+      "region_tags": ["Central Europe"],
+      "cities": [
+        {
+          "slug": "ljubljana",
+          "name": {
+            "en": "Ljubljana",
+            "zh-HK": "盧布爾雅那",
+            "ja": "リュブリャナ"
+          },
+          "description": {
+            "en": "Pedestrian old town, castle views, craft beer, and easy day trips to Lake Bled.",
+            "zh-HK": "步行友善舊城、城堡景致、精釀啤酒，及前往布萊德湖的一日遊。",
+            "ja": "歩きやすい旧市街、城の眺望、クラフトビール、ブレッド湖への日帰り。"
+          },
+          "safety_index": 5,
+          "avg_daily_cost_usd": 75.00,
+          "best_travel_season": {
+            "seasons": ["spring", "summer"],
+            "months": [5, 6, 7, 8, 9],
+            "label": {
+              "en": "Lake and hiking season",
+              "zh-HK": "湖泊與健行季節",
+              "ja": "湖とハイキングの季節"
+            }
+          },
+          "latitude": 46.0569,
+          "longitude": 14.5058,
+          "tags": ["nature", "culture", "budget-friendly", "off-the-beaten-path"]
+        }
+      ]
+    },
+    {
+      "iso_code": "MX",
+      "name": {
+        "en": "Mexico",
+        "zh-HK": "墨西哥",
+        "ja": "メキシコ"
+      },
+      "description": {
+        "en": "Indigenous heritage, colonial architecture, diverse cuisine, and vibrant festivals across regions.",
+        "zh-HK": "原住民文化、殖民建築、多元料理及各地熱鬧節慶。",
+        "ja": "先住民の遺産、植民地建築、多様な料理、各地の祭り。"
+      },
+      "safety_index": 3,
+      "avg_daily_cost_usd": 55.00,
+      "best_travel_season": {
+        "seasons": ["winter", "spring"],
+        "months": [11, 12, 1, 2, 3, 4],
+        "label": {
+          "en": "Dry season",
+          "zh-HK": "乾季",
+          "ja": "乾季"
+        }
+      },
+      "region_tags": ["North America", "Latin America"],
+      "cities": [
+        {
+          "slug": "oaxaca",
+          "name": {
+            "en": "Oaxaca",
+            "zh-HK": "瓦哈卡",
+            "ja": "オアハカ"
+          },
+          "description": {
+            "en": "Zapotec culture, mole cuisine, mezcal distilleries, and colorful Día de los Muertos celebrations.",
+            "zh-HK": "薩波特克文化、mole 醬料理、梅斯卡爾酒坊及色彩繽紛的亡靈節慶典。",
+            "ja": "サポテック文化、モーレ料理、メスカル蒸留所、死者の日の祭り。"
+          },
+          "safety_index": 3,
+          "avg_daily_cost_usd": 50.00,
+          "best_travel_season": {
+            "seasons": ["winter", "spring"],
+            "months": [11, 12, 1, 2, 3],
+            "label": {
+              "en": "Dry season & festival period",
+              "zh-HK": "乾季與節慶期",
+              "ja": "乾季とフェスシーズン"
+            }
+          },
+          "latitude": 17.0732,
+          "longitude": -96.7266,
+          "tags": ["culture", "food", "off-the-beaten-path", "budget-friendly"]
+        }
+      ]
+    },
+    {
+      "iso_code": "IS",
+      "name": {
+        "en": "Iceland",
+        "zh-HK": "冰島",
+        "ja": "アイスランド"
+      },
+      "description": {
+        "en": "Volcanic landscapes, glaciers, northern lights, and geothermal pools in one of Europe's safest countries.",
+        "zh-HK": "火山地貌、冰川、北極光及地熱溫泉，是歐洲最安全的國家之一。",
+        "ja": "火山、氷河、オーロラ、地熱プール、ヨーロッパでも安全な国。"
+      },
+      "safety_index": 5,
+      "avg_daily_cost_usd": 180.00,
+      "best_travel_season": {
+        "seasons": ["summer"],
+        "months": [6, 7, 8],
+        "label": {
+          "en": "Midnight sun summer",
+          "zh-HK": "午夜太陽夏季",
+          "ja": "白夜の夏"
+        }
+      },
+      "region_tags": ["Northern Europe"],
+      "cities": [
+        {
+          "slug": "reykjavik",
+          "name": {
+            "en": "Reykjavik",
+            "zh-HK": "雷克雅未克",
+            "ja": "レイキャビク"
+          },
+          "description": {
+            "en": "Gateway to the Golden Circle, Blue Lagoon, whale watching, and summer midnight sun adventures.",
+            "zh-HK": "黃金圈、藍湖、賞鯨及夏季午夜太陽探險的門戶城市。",
+            "ja": "ゴールデンサークル、ブルーラグーン、ホエールウォッチング、白夜の拠点。"
+          },
+          "safety_index": 5,
+          "avg_daily_cost_usd": 185.00,
+          "best_travel_season": {
+            "seasons": ["summer"],
+            "months": [6, 7, 8],
+            "label": {
+              "en": "Road trip & hiking season",
+              "zh-HK": "自駕與健行季",
+              "ja": "ロードトリップとハイキング"
+            }
+          },
+          "latitude": 64.1466,
+          "longitude": -21.9426,
+          "tags": ["nature", "adventure", "wellness"]
+        }
+      ]
+    },
+    {
+      "iso_code": "VN",
+      "name": {
+        "en": "Vietnam",
+        "zh-HK": "越南",
+        "ja": "ベトナム"
+      },
+      "description": {
+        "en": "Street food culture, limestone karsts, motorbike adventures, and excellent value across the country.",
+        "zh-HK": "街頭美食、石灰岩峰林、機車旅行，全國性價比極高。",
+        "ja": "屋台グルメ、カルスト地形、バイク旅、コスパの良い国。"
+      },
+      "safety_index": 3,
+      "avg_daily_cost_usd": 40.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [3, 4, 10, 11],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["Southeast Asia"],
+      "cities": [
+        {
+          "slug": "hanoi",
+          "name": {
+            "en": "Hanoi",
+            "zh-HK": "河內",
+            "ja": "ハノイ"
+          },
+          "description": {
+            "en": "Old Quarter chaos, pho and egg coffee, French colonial facades, and cruises to Ha Long Bay.",
+            "zh-HK": "舊城區熱鬧、河粉與蛋咖啡、法式殖民立面，以及下龍灣巡航。",
+            "ja": "旧市街、フォーとエッグコーヒー、植民地建築、ハロン湾クルーズ。"
+          },
+          "safety_index": 3,
+          "avg_daily_cost_usd": 35.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [3, 4, 10, 11],
+            "label": {
+              "en": "Cool dry months",
+              "zh-HK": "涼爽乾燥月份",
+              "ja": "涼しく乾燥した時期"
+            }
+          },
+          "latitude": 21.0285,
+          "longitude": 105.8542,
+          "tags": ["culture", "food", "budget-friendly", "urban"]
+        }
+      ]
+    },
+    {
+      "iso_code": "MA",
+      "name": {
+        "en": "Morocco",
+        "zh-HK": "摩洛哥",
+        "ja": "モロッコ"
+      },
+      "description": {
+        "en": "Medinas, Sahara gateways, tagine cuisine, and a sensory blend of Arab, Berber, and French influences.",
+        "zh-HK": "麥地那老城、撒哈拉門戶、塔吉鍋料理，融合阿拉伯、柏柏爾及法式風情。",
+        "ja": "メディナ、サハラの入り口、タジン料理、アラブ・ベルベル・フランスの融合。"
+      },
+      "safety_index": 3,
+      "avg_daily_cost_usd": 50.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [3, 4, 5, 10, 11],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["North Africa"],
+      "cities": [
+        {
+          "slug": "marrakech",
+          "name": {
+            "en": "Marrakech",
+            "zh-HK": "馬拉喀什",
+            "ja": "マラケシュ"
+          },
+          "description": {
+            "en": "Jemaa el-Fnaa square, riad stays, souks, and desert excursions to the Agafay or Sahara.",
+            "zh-HK": "傑馬夫納廣場、傳統庭院旅舍（riad）住宿、市集及前往阿加菲或撒哈拉沙漠的行程。",
+            "ja": "ジェマ・エル＝フナ広場、リアド、スーク、サハラツアー。"
+          },
+          "safety_index": 3,
+          "avg_daily_cost_usd": 55.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [3, 4, 5, 10, 11],
+            "label": {
+              "en": "Comfortable desert edge weather",
+              "zh-HK": "沙漠邊緣舒適天氣",
+              "ja": "過ごしやすい春と秋"
+            }
+          },
+          "latitude": 31.6295,
+          "longitude": -7.9811,
+          "tags": ["culture", "adventure", "food"]
+        }
+      ]
+    },
+    {
+      "iso_code": "NZ",
+      "name": {
+        "en": "New Zealand",
+        "zh-HK": "紐西蘭",
+        "ja": "ニュージーランド"
+      },
+      "description": {
+        "en": "Dramatic fjords, adventure sports, Māori culture, and pristine nature on North and South Islands.",
+        "zh-HK": "壯麗峽灣、冒險運動、毛利文化及南北島的原始自然。",
+        "ja": "フィヨルド、冒険スポーツ、マオリ文化、南北島の自然。"
+      },
+      "safety_index": 5,
+      "avg_daily_cost_usd": 120.00,
+      "best_travel_season": {
+        "seasons": ["summer"],
+        "months": [12, 1, 2],
+        "label": {
+          "en": "Southern hemisphere summer",
+          "zh-HK": "南半球夏季",
+          "ja": "南半球の夏"
+        }
+      },
+      "region_tags": ["Oceania"],
+      "cities": [
+        {
+          "slug": "queenstown",
+          "name": {
+            "en": "Queenstown",
+            "zh-HK": "皇后鎮",
+            "ja": "クイーンズタウン"
+          },
+          "description": {
+            "en": "Bungee jumping, skiing, Milford Sound day trips, and lakeside dining in NZ's adventure capital.",
+            "zh-HK": "蹦極、滑雪、米佛峽灣一日遊及湖畔餐飲，是紐西蘭的冒險之都。",
+            "ja": "バンジー、スキー、ミルフォードサウンド、湖岸の食。冒険の首都。"
+          },
+          "safety_index": 5,
+          "avg_daily_cost_usd": 130.00,
+          "best_travel_season": {
+            "seasons": ["summer", "winter"],
+            "months": [12, 1, 2, 6, 7, 8],
+            "label": {
+              "en": "Summer hiking or winter skiing",
+              "zh-HK": "夏季健行或冬季滑雪",
+              "ja": "夏はハイキング、冬はスキー"
+            }
+          },
+          "latitude": -45.0312,
+          "longitude": 168.6626,
+          "tags": ["nature", "adventure", "food"]
+        }
+      ]
+    },
+    {
+      "iso_code": "IT",
+      "name": {
+        "en": "Italy",
+        "zh-HK": "意大利",
+        "ja": "イタリア"
+      },
+      "description": {
+        "en": "Renaissance art, regional cuisine, coastal towns, and millennia of history on every corner.",
+        "zh-HK": "文藝復興藝術、地方美食、海岸小鎮及每個角落的千年歷史。",
+        "ja": "ルネサンス芸術、郷土料理、海岸の町、至る所に歴史。"
+      },
+      "safety_index": 4,
+      "avg_daily_cost_usd": 110.00,
+      "best_travel_season": {
+        "seasons": ["spring", "autumn"],
+        "months": [4, 5, 9, 10],
+        "label": {
+          "en": "Spring & Autumn",
+          "zh-HK": "春季與秋季",
+          "ja": "春と秋"
+        }
+      },
+      "region_tags": ["Southern Europe"],
+      "cities": [
+        {
+          "slug": "rome",
+          "name": {
+            "en": "Rome",
+            "zh-HK": "羅馬",
+            "ja": "ローマ"
+          },
+          "description": {
+            "en": "Colosseum, Vatican museums, trattorias, and layers of empire spanning 2,500 years.",
+            "zh-HK": "鬥獸場、梵蒂岡博物館、小餐館及跨越 2500 年的帝國遺跡。",
+            "ja": "コロッセオ、バチカン美術館、トラットリア、2500年の歴史。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 115.00,
+          "best_travel_season": {
+            "seasons": ["spring", "autumn"],
+            "months": [4, 5, 9, 10],
+            "label": {
+              "en": "Avoid peak summer heat",
+              "zh-HK": "避開盛夏酷熱",
+              "ja": "真夏の暑さを避ける春と秋"
+            }
+          },
+          "latitude": 41.9028,
+          "longitude": 12.4964,
+          "tags": ["culture", "food", "urban"]
+        }
+      ]
+    }
+  ]
+}
