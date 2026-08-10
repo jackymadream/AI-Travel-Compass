@@ -42,6 +42,7 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import (
     Distance,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -257,6 +258,7 @@ def ensure_collection(qdrant: QdrantClient, vector_size: int) -> None:
             qdrant.delete_collection(COLLECTION_NAME)
         else:
             print(f"Collection '{COLLECTION_NAME}' already exists ({vector_size}-d).")
+            ensure_payload_indexes(qdrant)
             return
 
     qdrant.create_collection(
@@ -267,6 +269,29 @@ def ensure_collection(qdrant: QdrantClient, vector_size: int) -> None:
         f"Created collection '{COLLECTION_NAME}' "
         f"(size={vector_size}, distance=Cosine)."
     )
+    ensure_payload_indexes(qdrant)
+
+
+def ensure_payload_indexes(qdrant: QdrantClient) -> None:
+    """Payload indexes required for filtered search (city_id MatchAny, etc.)."""
+    for field_name in ("city_id", "locale", "country_id"):
+        try:
+            qdrant.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name=field_name,
+                field_schema=PayloadSchemaType.KEYWORD,
+                wait=True,
+            )
+            print(f"  payload index ready: {field_name} (keyword)")
+        except Exception as exc:  # noqa: BLE001
+            message = str(exc).lower()
+            if any(
+                token in message
+                for token in ("already exists", "duplicate", "exists", "conflict")
+            ):
+                print(f"  payload index exists: {field_name}")
+                continue
+            raise
 
 
 def init_vertex(project_id: str, location: str) -> Any:

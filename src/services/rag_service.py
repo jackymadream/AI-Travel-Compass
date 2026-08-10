@@ -143,6 +143,60 @@ def _get_qdrant_client() -> Any:
         raise VectorSearchError(f"Failed to connect to Qdrant at {url}: {exc}") from exc
 
 
+def ensure_payload_indexes(client: Any | None = None) -> None:
+    """
+    Create payload indexes required for filtered vector search.
+
+    Qdrant Cloud requires an index on ``city_id`` before MatchAny filters.
+    Uses KEYWORD (not UUID) so ``MatchAny`` / IN-style candidate scoping works.
+    """
+    from qdrant_client.http import models as qmodels
+
+    qdrant = client or _get_qdrant_client()
+    indexes = (
+        ("city_id", qmodels.PayloadSchemaType.KEYWORD),
+        ("locale", qmodels.PayloadSchemaType.KEYWORD),
+        ("country_id", qmodels.PayloadSchemaType.KEYWORD),
+    )
+    for field_name, schema in indexes:
+        try:
+            qdrant.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name=field_name,
+                field_schema=schema,
+                wait=True,
+            )
+            logger.info(
+                "Ensured Qdrant payload index %s.%s (%s)",
+                COLLECTION_NAME,
+                field_name,
+                schema,
+            )
+        except Exception as exc:  # noqa: BLE001
+            message = str(exc).lower()
+            # Already exists / concurrent create — safe to continue
+            if any(
+                token in message
+                for token in ("already exists", "duplicate", "exists", "conflict")
+            ):
+                logger.debug(
+                    "Payload index %s.%s already present: %s",
+                    COLLECTION_NAME,
+                    field_name,
+                    exc,
+                )
+                continue
+            raise VectorSearchError(
+                f"Failed to create payload index on {field_name}: {exc}"
+            ) from exc
+
+
+@lru_cache
+def _ensure_indexes_once() -> bool:
+    ensure_payload_indexes()
+    return True
+
+
 def get_query_embedding(text: str) -> list[float]:
     """
     Embed a user / semantic query with Vertex AI ``text-embedding-004``.
@@ -246,6 +300,9 @@ def search_vector_candidates(
         return []
 
     from qdrant_client.http import models as qmodels
+
+    # Ensure payload indexes exist (required on Qdrant Cloud for filtered search).
+    _ensure_indexes_once()
 
     # Payload scope: only rank destinations that passed SQL hard filters.
     # Equivalent intent to HasIdCondition, adapted to our point-id scheme.
