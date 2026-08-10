@@ -16,15 +16,11 @@ The application solves the limitations of pure semantic search by combining **ha
 
 [ User Natural Language Query ] 
 
-                            │ 
-
-                            ▼
+▼  
 
  Query Decomposition │ (Intent Extraction) 
 
-                            │ 
-
-                            ▼
+▼  
 
 ┌──────────┴───────────────────┐ 
 
@@ -36,19 +32,13 @@ The application solves the limitations of pure semantic search by combining **ha
 
 └──────────┬───────────────────┘
 
-                            │ 
-
-                            ▼
+▼  
 
  │ Reciprocal Rank │ (Score Combination & Re-ranking) │ Fusion (RRF) Engine │ 
 
-                            │ 
-
-                            ▼
+▼  
 
 [ Final Recommendations ] (Localized: EN / ZH-HK / JA)
-
-
 
 ---
 
@@ -113,6 +103,8 @@ cd frontend
 npm install
 npm run dev
 ```
+
+
 
 ## 📧 Contact & Code Access
 
