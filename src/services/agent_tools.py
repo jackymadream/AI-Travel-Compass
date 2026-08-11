@@ -9,6 +9,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from src.services.cache_service import (
+    TTL_POI_SECONDS,
+    get_cache_service,
+    poi_cache_key,
+)
+
 # Stable mock city IDs (stand in until a POIs table exists).
 MOCK_CITY_TOKYO = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 MOCK_CITY_SEOUL = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
@@ -146,7 +152,26 @@ def search_pois_tool(
 
     Preference tokens boost ranking when they appear in tags, name, or description.
     Each result includes name, category, cost_usd, duration_minutes, description.
+    Results are cached for 7 days (Redis or in-memory fallback).
     """
+    cache = get_cache_service()
+    cache_key = poi_cache_key(city_id, category, preferences, limit)
+    cached = cache.get(cache_key)
+    if isinstance(cached, list):
+        return cached
+
+    results = _search_pois_uncached(city_id, category, preferences, limit)
+    cache.set(cache_key, results, ttl_seconds=TTL_POI_SECONDS)
+    return results
+
+
+def _search_pois_uncached(
+    city_id: str,
+    category: str,
+    preferences: list[str],
+    limit: int = 5,
+) -> list[dict]:
+    """POI lookup without cache — used on miss and in tests that patch this path."""
     category_norm = (category or "").strip().lower()
     prefs = [p.strip().lower() for p in preferences if p and p.strip()]
 
