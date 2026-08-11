@@ -1,10 +1,43 @@
 # GenAI Travel Compass
 
-Personalized travel recommendations with **deterministic SQL filters** and **hybrid RAG** (Vertex AI embeddings + Qdrant), served by FastAPI and a Next.js Explore UI.
+Personalized travel recommendations with **deterministic SQL filters** and **hybrid RAG** (Vertex AI embeddings + Qdrant), plus a **tool-calling itinerary agent**, served by FastAPI and a Next.js UI.
 
 **Locales:** `en` · `zh-HK` (Traditional Chinese) · `ja`
 
-[Architecture](#architecture) · [Features](#features--roadmap) · [Setup](#local-setup) · [API](#api) · [Docs](#documentation)
+[Quick Start](#quick-start) · [Architecture](#architecture) · [Features](#features--roadmap) · [Setup](#local-setup) · [API](#api) · [Docs](#documentation)
+
+---
+
+## Quick Start
+
+```bash
+# 1. Env + deps
+cp .env.example .env          # fill SUPABASE_*, QDRANT_*, GCP_*, etc.
+pip install -r requirements.txt
+npm install
+
+# 2. Data (once)
+# Apply schema.sql in Supabase, then:
+python scripts/seed_db.py
+python scripts/embed_destinations.py
+python scripts/ensure_qdrant_indexes.py
+
+# 3. Run API + web (two terminals)
+python -m uvicorn src.main:app --reload --port 8000
+npm run dev
+```
+
+- Explore: http://localhost:3000/explore  
+- Planner: http://localhost:3000/planner  
+- API docs: http://localhost:8000/docs  
+
+**Docker:** `docker compose up --build` — full steps in [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
+
+**Smoke test** (API must be up):
+
+```bash
+python scripts/smoke_test.py --allow-degraded
+```
 
 ---
 
@@ -31,6 +64,7 @@ flowchart LR
 | Data | Supabase PostgreSQL (JSONB i18n, `cities` / `countries`) |
 | Vectors | Qdrant Cloud · 768-d Cosine · `travel_destinations` |
 | Embeddings | Google Cloud Vertex AI `text-embedding-004` |
+| Cache | Redis (optional) with in-memory TTL fallback |
 
 ---
 
@@ -57,6 +91,12 @@ flowchart LR
 - [x] Explore UI for itinerary generation (`/planner`)
 - [ ] Live LLM provider wiring (optional seam already in `AgentService`)
 
+### Phase 4 — Caching, observability & deployment (complete)
+- [x] Redis / in-memory `CacheService` for embeddings (24h) and POI results (7d)
+- [x] JSON structured logging + `X-Request-ID` middleware
+- [x] Dockerfiles + compose + `/health` / `/health/liveness` probes
+- [x] E2E smoke test (`scripts/smoke_test.py`) + [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
+
 ---
 
 ## Local setup
@@ -75,13 +115,15 @@ cd AI-Travel-Compass
 cp .env.example .env
 ```
 
-Fill `.env` (see comments in `.env.example`):
+Fill `.env` (see comments in `.env.example` and the [deployment checklist](./docs/DEPLOYMENT.md#3-environment-variables-checklist)):
 
 | Variable | Purpose |
 |----------|---------|
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Postgres API |
 | `GCP_PROJECT_ID` / `GOOGLE_APPLICATION_CREDENTIALS` | Vertex embeddings |
 | `QDRANT_URL` / `QDRANT_API_KEY` | Vector store |
+| `REDIS_URL` | Optional Redis cache (falls back to in-memory TTL) |
+| `GEMINI_API_KEY` | Optional future LLM agent (heuristic planner works without it) |
 | `NEXT_PUBLIC_API_URL` | Frontend → API (default `http://127.0.0.1:8000`) |
 | `CORS_ORIGINS` | e.g. `http://localhost:3000` |
 
@@ -116,6 +158,16 @@ npm run dev
 
 Open http://localhost:3000/explore — keep both servers running.
 
+### 5. Docker
+
+See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for full instructions.
+
+```bash
+docker compose up --build
+# Optional Redis: docker compose --profile cache up --build
+python scripts/smoke_test.py --allow-degraded
+```
+
 ---
 
 ## API
@@ -125,7 +177,8 @@ Open http://localhost:3000/explore — keep both servers running.
 | `GET` | `/api/v1/countries` | List countries (`locale`, `max_budget`, `min_safety_rating`) |
 | `POST` | `/api/v1/search` | Hybrid RAG search (`query`, `locale`, `max_budget`, `min_safety`, `tags`) |
 | `POST` | `/api/v1/itineraries/generate` | Tool-calling itinerary agent (`city_id`, `days`, `pace`, budget, prefs) |
-| `GET` | `/health` | Liveness |
+| `GET` | `/health` | Readiness: Redis + Qdrant + Supabase (`ok` / `degraded`) |
+| `GET` | `/health/liveness` | Container liveness (`alive`) |
 
 Example search body:
 
@@ -145,18 +198,22 @@ Example search body:
 ## Project layout
 
 ```
-├── app/                    # Next.js App Router (Explore UI)
-├── components/             # UI + explore filters / AI search
+├── app/                    # Next.js App Router (Explore + Planner)
+├── components/             # UI + explore / planner
 ├── src/
-│   ├── main.py             # FastAPI entry
-│   ├── routers/            # countries, search
+│   ├── main.py             # FastAPI entry + request ID middleware
+│   ├── routers/            # countries, search, itinerary, health
 │   ├── schemas/            # Pydantic contracts
-│   └── services/           # SearchService, RagService
-├── scripts/                # seed_db, embed_destinations, Qdrant indexes
-├── tests/                  # Pytest (countries, search, service)
-├── docs/                   # RAG architecture + agent domain notes
-├── schema.sql              # PostgreSQL DDL
-└── CONTEXT.md              # Domain model & hard/soft rules
+│   ├── services/           # Search, RAG, agent, cache, health
+│   └── utils/              # JSON structured logging
+├── scripts/                # seed, embed, indexes, smoke_test
+├── tests/                  # Pytest
+├── docs/                   # RAG, agent, deployment
+├── Dockerfile.backend
+├── Dockerfile.frontend
+├── docker-compose.yml
+├── schema.sql
+└── CONTEXT.md
 ```
 
 ---
@@ -165,8 +222,10 @@ Example search body:
 
 | Doc | Contents |
 |-----|----------|
+| [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) | Docker Compose, Render / Fly / Cloud Run, Vercel, env checklist |
 | [`CONTEXT.md`](./CONTEXT.md) | Domain glossary, hard vs soft constraints, SQL/LLM boundary |
 | [`docs/RAG_ARCHITECTURE.md`](./docs/RAG_ARCHITECTURE.md) | Hybrid search pipeline |
+| [`docs/AGENT_ARCHITECTURE.md`](./docs/AGENT_ARCHITECTURE.md) | Tool-calling itinerary agent |
 | [`AGENTS.md`](./AGENTS.md) | Agent skill pointers (issues, triage, domain) |
 | [`schema.sql`](./schema.sql) | Tables, indexes, i18n checks |
 

@@ -12,7 +12,6 @@ the API contract.
 
 from __future__ import annotations
 
-import logging
 from typing import Any, Callable, Protocol
 
 from src.schemas.itinerary import (
@@ -29,8 +28,9 @@ from src.services.agent_tools import (
     evaluate_schedule_and_budget_tool,
     search_pois_tool,
 )
+from src.utils.logger import elapsed_timer, get_logger, log_event
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 DEFAULT_MAX_TURNS = 3
 
@@ -107,49 +107,76 @@ class AgentService:
         """
         city_id = str(request.city_id)
         city_name = CITY_DISPLAY_NAMES.get(city_id, "Unknown city")
-        logger.info(
-            "plan_itinerary city_id=%s days=%s pace=%s max_turns=%s",
-            city_id,
-            request.days,
-            request.pace.value,
-            self.max_turns,
+        log_event(
+            logger,
+            "agent_plan_started",
+            city_id=city_id,
+            days=request.days,
+            pace=request.pace.value,
+            daily_budget_usd=request.daily_budget_usd,
+            max_turns=self.max_turns,
         )
 
-        poi_pool = self._invoke_poi_retrieval(city_id, request.preferences)
-        if not poi_pool:
-            raise AgentPlanningError(
-                f"No POIs found for city_id={city_id}",
-                violations=["NO_POIS"],
-            )
+        with elapsed_timer() as timer:
+            try:
+                poi_pool = self._invoke_poi_retrieval(city_id, request.preferences)
+                if not poi_pool:
+                    raise AgentPlanningError(
+                        f"No POIs found for city_id={city_id}",
+                        violations=["NO_POIS"],
+                    )
 
-        daily_plans: list[DailyItinerary] = []
-        reasoning_parts: list[str] = []
-        used_names: set[str] = set()
+                daily_plans: list[DailyItinerary] = []
+                reasoning_parts: list[str] = []
+                used_names: set[str] = set()
 
-        for day_number in range(1, request.days + 1):
-            day, day_reasoning = self._plan_one_day_with_retries(
-                request=request,
-                day_number=day_number,
-                poi_pool=poi_pool,
-                used_names=used_names,
-            )
-            daily_plans.append(day)
-            reasoning_parts.append(day_reasoning)
-            for act in day.activities:
-                used_names.add(act.poi_name)
+                for day_number in range(1, request.days + 1):
+                    day, day_reasoning = self._plan_one_day_with_retries(
+                        request=request,
+                        day_number=day_number,
+                        poi_pool=poi_pool,
+                        used_names=used_names,
+                    )
+                    daily_plans.append(day)
+                    reasoning_parts.append(day_reasoning)
+                    for act in day.activities:
+                        used_names.add(act.poi_name)
 
-        total_cost = sum(d.estimated_daily_cost for d in daily_plans)
-        agent_reasoning = " ".join(reasoning_parts).strip() or (
-            f"Built a {request.days}-day {request.pace.value} plan for {city_name} "
-            f"within ${request.daily_budget_usd:.0f}/day."
-        )
+                total_cost = sum(d.estimated_daily_cost for d in daily_plans)
+                agent_reasoning = " ".join(reasoning_parts).strip() or (
+                    f"Built a {request.days}-day {request.pace.value} plan for {city_name} "
+                    f"within ${request.daily_budget_usd:.0f}/day."
+                )
 
-        return ItineraryResponse(
+                response = ItineraryResponse(
+                    city_name=city_name,
+                    total_cost_usd=float(total_cost),
+                    daily_plans=daily_plans,
+                    agent_reasoning=agent_reasoning,
+                )
+            except AgentPlanningError as exc:
+                log_event(
+                    logger,
+                    "agent_plan_failed",
+                    duration_ms=timer.duration_ms,
+                    status="planning_error",
+                    city_id=city_id,
+                    violations=exc.violations,
+                    error=str(exc),
+                )
+                raise
+
+        log_event(
+            logger,
+            "agent_plan_completed",
+            duration_ms=timer.duration_ms,
+            status="success",
+            city_id=city_id,
             city_name=city_name,
-            total_cost_usd=float(total_cost),
-            daily_plans=daily_plans,
-            agent_reasoning=agent_reasoning,
+            days=len(response.daily_plans),
+            total_cost_usd=response.total_cost_usd,
         )
+        return response
 
     def _invoke_poi_retrieval(
         self,
@@ -199,12 +226,17 @@ class AgentService:
                 daily_budget_usd=request.daily_budget_usd,
                 pace=request.pace.value,
             )
-            logger.debug(
-                "day=%s turn=%s valid=%s violations=%s",
-                day_number,
-                turn,
-                last_eval.get("is_valid"),
-                last_eval.get("violations"),
+            violations = list(last_eval.get("violations") or [])
+            log_event(
+                logger,
+                "agent_loop_turn",
+                day_number=day_number,
+                turn=turn,
+                max_turns=self.max_turns,
+                is_valid=bool(last_eval.get("is_valid")),
+                violations=violations,
+                total_cost_usd=last_eval.get("total_cost_usd"),
+                total_duration_minutes=last_eval.get("total_duration_minutes"),
             )
             if last_eval.get("is_valid"):
                 daily = self._parse_daily_itinerary(draft, last_eval)
@@ -215,7 +247,16 @@ class AgentService:
                 )
                 return daily, reasoning
 
-            previous_violations = list(last_eval.get("violations") or [])
+            previous_violations = violations
+            if any("budget" in v.lower() for v in violations):
+                log_event(
+                    logger,
+                    "agent_budget_violation",
+                    day_number=day_number,
+                    turn=turn,
+                    violations=violations,
+                    daily_budget_usd=request.daily_budget_usd,
+                )
             if turn >= self.max_turns:
                 break
 

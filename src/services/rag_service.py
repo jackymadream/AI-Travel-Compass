@@ -8,7 +8,6 @@ scoping therefore uses payload ``MatchAny`` on ``city_id``.
 
 from __future__ import annotations
 
-import logging
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -17,7 +16,14 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-logger = logging.getLogger(__name__)
+from src.services.cache_service import (
+    TTL_EMBEDDING_SECONDS,
+    embedding_cache_key,
+    get_cache_service,
+)
+from src.utils.logger import elapsed_timer, get_logger, log_event
+
+logger = get_logger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 COLLECTION_NAME = "travel_destinations"
@@ -203,12 +209,45 @@ def get_query_embedding(text: str) -> list[float]:
 
     Uses task type ``RETRIEVAL_QUERY`` (documents were indexed as RETRIEVAL_DOCUMENT).
     Raises ``EmbeddingError`` on timeout, auth, or API failures.
+    Results are cached for 24h (Redis or in-memory fallback).
     """
     cleaned = (text or "").strip()
     if not cleaned:
         raise EmbeddingError("Cannot embed empty query text.")
 
     dims = _embedding_dimensions()
+    cache = get_cache_service()
+    cache_key = embedding_cache_key(cleaned, model=EMBEDDING_MODEL, dimensions=dims)
+    cached = cache.get(cache_key)
+    if isinstance(cached, list) and cached and all(
+        isinstance(x, (int, float)) for x in cached
+    ):
+        log_event(
+            logger,
+            "embedding_cache_hit",
+            duration_ms=0.0,
+            cache_key=cache_key,
+            backend=cache.backend_name,
+            dimensions=dims,
+        )
+        return [float(x) for x in cached]
+
+    with elapsed_timer() as timer:
+        vector = _compute_query_embedding(cleaned, dims=dims)
+    cache.set(cache_key, vector, ttl_seconds=TTL_EMBEDDING_SECONDS)
+    log_event(
+        logger,
+        "embedding_cache_miss",
+        duration_ms=timer.duration_ms,
+        cache_key=cache_key,
+        backend=cache.backend_name,
+        dimensions=dims,
+    )
+    return vector
+
+
+def _compute_query_embedding(cleaned: str, *, dims: int) -> list[float]:
+    """Call Vertex AI; separated so cache hits skip this path."""
     model = _get_embedding_model()
 
     try:
@@ -317,24 +356,25 @@ def search_vector_candidates(
 
     client = _get_qdrant_client()
     try:
-        # qdrant-client >=1.10: query_points; fall back to search for older APIs
-        if hasattr(client, "query_points"):
-            response = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=query_vector,
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-            )
-            points = response.points
-        else:
-            points = client.search(
-                collection_name=COLLECTION_NAME,
-                query_vector=query_vector,
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-            )
+        with elapsed_timer() as timer:
+            # qdrant-client >=1.10: query_points; fall back to search for older APIs
+            if hasattr(client, "query_points"):
+                response = client.query_points(
+                    collection_name=COLLECTION_NAME,
+                    query=query_vector,
+                    query_filter=query_filter,
+                    limit=limit,
+                    with_payload=True,
+                )
+                points = response.points
+            else:
+                points = client.search(
+                    collection_name=COLLECTION_NAME,
+                    query_vector=query_vector,
+                    query_filter=query_filter,
+                    limit=limit,
+                    with_payload=True,
+                )
     except Exception as exc:  # noqa: BLE001
         raise VectorSearchError(
             f"Qdrant search failed on '{COLLECTION_NAME}': {exc}"
@@ -365,6 +405,16 @@ def search_vector_candidates(
                 payload=payload,
             )
         )
+
+    log_event(
+        logger,
+        "vector_search_completed",
+        duration_ms=timer.duration_ms,
+        candidate_count=len(unique_ids),
+        hit_count=len(hits),
+        limit=limit,
+        collection=COLLECTION_NAME,
+    )
     return hits
 
 
