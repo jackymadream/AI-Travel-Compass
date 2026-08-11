@@ -1,8 +1,15 @@
 # Deployment Guide — GenAI Travel Compass
 
-How to run locally with Docker and deploy the FastAPI backend + Next.js frontend to the cloud.
+How to run locally with Docker and deploy the FastAPI backend + Next.js frontend.
 
 **Related:** [README](../README.md) · [`.env.example`](../.env.example) · [`scripts/smoke_test.py`](../scripts/smoke_test.py)
+
+**Production hosts:**
+
+| Role | URL |
+|------|-----|
+| Frontend (Next.js) | https://travel.jackymadream.com |
+| API (FastAPI / Cloud Run) | https://api.jackymadream.com |
 
 ---
 
@@ -61,59 +68,61 @@ Pipeline: **liveness → readiness → search → itinerary generation**.
 
 ## 2. Cloud deployment
 
-Deploy **backend** and **frontend** as separate services. Point the frontend’s `NEXT_PUBLIC_API_URL` at the public API URL, and set backend `CORS_ORIGINS` to the frontend origin(s).
+Deploy **backend** and **frontend** as separate services.
+
+- Frontend `NEXT_PUBLIC_API_URL` → `https://api.jackymadream.com`
+- Backend `CORS_ORIGINS` → `https://travel.jackymadream.com` (+ localhost for local UI)
 
 ### 2.1 FastAPI backend
 
-Pick one host (patterns are equivalent):
-
-#### Render
-
-1. New **Web Service** from this repo.
-2. Runtime: Docker → `Dockerfile.backend` (or native: build `pip install -r requirements.txt`, start `uvicorn src.main:app --host 0.0.0.0 --port $PORT`).
-3. Set environment variables from the [checklist](#3-environment-variables-checklist).
-4. Mount / upload GCP credentials (or use Render secret files) and set `GOOGLE_APPLICATION_CREDENTIALS`.
-5. Health check path: `/health/liveness`.
-
-#### Fly.io
+#### Google Cloud Run (reference deployment)
 
 ```bash
-# from repo root (install flyctl first)
-fly launch --dockerfile Dockerfile.backend --name travel-compass-api --no-deploy
-fly secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... QDRANT_URL=... # etc.
-fly deploy --dockerfile Dockerfile.backend
-```
-
-Set `[http_service].force_https` and a health check on `/health/liveness` in `fly.toml` if generated.
-
-#### Google Cloud Run
-
-```bash
-gcloud builds submit --tag gcr.io/$PROJECT_ID/travel-compass-api -f Dockerfile.backend
-gcloud run deploy travel-compass-api \
-  --image gcr.io/$PROJECT_ID/travel-compass-api \
-  --region $REGION \
+gcloud builds submit --config cloudbuild.yaml --project travel-compass-ai
+gcloud run deploy ai-travel-backend \
+  --image asia-east1-docker.pkg.dev/travel-compass-ai/ai-travel/ai-travel-backend:latest \
+  --region asia-east1 \
   --allow-unauthenticated \
-  --set-env-vars "SUPABASE_URL=...,QDRANT_URL=...,CORS_ORIGINS=https://your-app.vercel.app" \
-  --set-secrets "SUPABASE_SERVICE_ROLE_KEY=supabase-key:latest,QDRANT_API_KEY=qdrant-key:latest"
+  --port 8080 \
+  --env-vars-file run-env.yaml
 ```
 
-Mount the Vertex service-account JSON via Secret Manager or Workload Identity. Prefer Workload Identity on GKE/Cloud Run when possible instead of key files.
+Default Cloud Run URL (also works without custom domain):  
+`https://ai-travel-backend-209308720273.asia-east1.run.app`
+
+Custom domain: map `api.jackymadream.com` to the Cloud Run service, then in DNS add the CNAME Google shows (typically `api` → `ghs.googlehosted.com`). Use TLS **Full** / **Full (strict)** at your DNS/CDN provider.
+
+Health checks:
+
+- `https://api.jackymadream.com/health/liveness` → `{"status":"alive"}`
+- `https://api.jackymadream.com/health` → Redis / Qdrant / Supabase readiness
+
+Update CORS (Cloud Shell / bash — commas need `^;^` delimiter):
+
+```bash
+gcloud run services update ai-travel-backend \
+  --region asia-east1 \
+  --project travel-compass-ai \
+  --update-env-vars='^;^CORS_ORIGINS=https://travel.jackymadream.com,http://localhost:3000,http://127.0.0.1:3000'
+```
+
+#### Render / Fly.io (alternatives)
+
+Same Docker image (`Dockerfile.backend`), set env vars from the [checklist](#3-environment-variables-checklist), health path `/health/liveness`.
 
 ### 2.2 Next.js frontend → Vercel
 
-1. Import the GitHub repo into [Vercel](https://vercel.com).
-2. Framework preset: **Next.js** (root directory = repo root).
-3. Environment variable:
-   - `NEXT_PUBLIC_API_URL` = `https://<your-api-host>` (no trailing slash)
-4. Deploy. Routes: `/explore`, `/planner`.
-5. Update backend `CORS_ORIGINS` to include `https://<your-vercel-app>.vercel.app`.
+1. Import this GitHub repo into [Vercel](https://vercel.com).
+2. Framework: **Next.js** (repo root).
+3. Domain: `travel.jackymadream.com` (CNAME in DNS → value shown in Vercel Domains UI).
+4. Production env: `NEXT_PUBLIC_API_URL=https://api.jackymadream.com` (no trailing slash).
+5. Deploy. Routes: `/explore`, `/planner`.
 
-Local production-like frontend image (optional):
+Optional local production image:
 
 ```bash
 docker build -f Dockerfile.frontend \
-  --build-arg NEXT_PUBLIC_API_URL=https://api.example.com \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.jackymadream.com \
   -t travel-compass-web .
 ```
 
@@ -132,10 +141,10 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 | `QDRANT_URL` | Backend | Cluster URL |
 | `QDRANT_API_KEY` | Backend | Cluster API key |
 | `GCP_PROJECT_ID` | Backend | Vertex AI project |
-| `GCP_LOCATION` | Backend | Default `us-central1` |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Backend | Path to service-account JSON (or use cloud IAM) |
-| `CORS_ORIGINS` | Backend | Comma-separated frontend origins |
-| `NEXT_PUBLIC_API_URL` | Frontend | Public API base URL |
+| `GCP_LOCATION` | Backend | e.g. `us-central1` or `asia-southeast1` |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Backend | Path to service-account JSON (or cloud IAM) |
+| `CORS_ORIGINS` | Backend | `https://travel.jackymadream.com` + localhost |
+| `NEXT_PUBLIC_API_URL` | Frontend | Prod: `https://api.jackymadream.com` |
 
 ### Recommended / optional
 
@@ -145,23 +154,23 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 | `VERTEX_EMBEDDING_TIMEOUT_SEC` | Backend | Default `30` |
 | `EMBEDDING_DIMENSIONS` | Backend | `256` / `512` / `768` (default 768) |
 | `LOG_LEVEL` | Backend | `INFO` / `DEBUG` |
-| `GEMINI_API_KEY` | Backend (future LLM) | Optional live LLM for itinerary agent; heuristic planner works without it |
+| `GEMINI_API_KEY` | Backend (future LLM) | Optional; heuristic planner works without it |
 | `SMOKE_BASE_URL` | Smoke script | Override API URL for `scripts/smoke_test.py` |
 | `SMOKE_ALLOW_DEGRADED` | Smoke script | `true` to accept `/health` degraded |
 
 ### Vertex / Gemini naming
 
-- Embeddings today use **Vertex AI** (`text-embedding-004`) via `GCP_*` + `GOOGLE_APPLICATION_CREDENTIALS`.
-- `GEMINI_API_KEY` is reserved for optional generative itinerary planning (Phase 3 LLM seam); not required for smoke tests that use the heuristic agent.
+- Embeddings use **Vertex AI** (`text-embedding-004`) via `GCP_*` + credentials/IAM.
+- `GEMINI_API_KEY` is reserved for an optional generative itinerary LLM seam.
 
 ---
 
 ## 4. Post-deploy verification
 
-1. `GET /health/liveness` → `{"status":"alive"}`
-2. `GET /health` → prefer `status: ok` (degraded is acceptable if Redis is optional)
-3. Run `python scripts/smoke_test.py --base-url https://<api>`
-4. Open the Vercel app → Explore search + Planner generate
+1. `GET https://api.jackymadream.com/health/liveness` → `{"status":"alive"}`
+2. `GET https://api.jackymadream.com/health` → prefer `status: ok` (degraded OK if Redis optional)
+3. `python scripts/smoke_test.py --base-url https://api.jackymadream.com --allow-degraded`
+4. Open `https://travel.jackymadream.com/explore` and `/planner`
 
 ---
 
@@ -170,4 +179,4 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 - Never commit `.env`, `credentials/*.json`, or service-role keys.
 - Use the **service role** key only on the backend.
 - Restrict `CORS_ORIGINS` to known frontend hosts in production.
-- Prefer cloud secret managers (Render secrets, Fly secrets, GCP Secret Manager, Vercel env) over baking secrets into images.
+- Prefer cloud secret managers over baking secrets into images.

@@ -31,6 +31,8 @@ npm run dev
 - Planner: http://localhost:3000/planner  
 - API docs: http://localhost:8000/docs  
 
+**Live demo:** [travel.jackymadream.com](https://travel.jackymadream.com) · **API:** [api.jackymadream.com](https://api.jackymadream.com)
+
 **Docker:** `docker compose up --build` — full steps in [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
 
 **Smoke test** (API must be up):
@@ -124,8 +126,8 @@ Fill `.env` (see comments in `.env.example` and the [deployment checklist](./doc
 | `QDRANT_URL` / `QDRANT_API_KEY` | Vector store |
 | `REDIS_URL` | Optional Redis cache (falls back to in-memory TTL) |
 | `GEMINI_API_KEY` | Optional future LLM agent (heuristic planner works without it) |
-| `NEXT_PUBLIC_API_URL` | Frontend → API (default `http://127.0.0.1:8000`) |
-| `CORS_ORIGINS` | e.g. `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | Frontend → API (local `http://127.0.0.1:8000`; prod `https://api.jackymadream.com`) |
+| `CORS_ORIGINS` | Allowed UI origins (prod `https://travel.jackymadream.com` + localhost) |
 
 ### 2. Database & vectors
 
@@ -222,7 +224,7 @@ Example search body:
 
 | Doc | Contents |
 |-----|----------|
-| [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) | Docker Compose, Render / Fly / Cloud Run, Vercel, env checklist |
+| [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) | Docker, Cloud Run, Vercel, env checklist |
 | [`CONTEXT.md`](./CONTEXT.md) | Domain glossary, hard vs soft constraints, SQL/LLM boundary |
 | [`docs/RAG_ARCHITECTURE.md`](./docs/RAG_ARCHITECTURE.md) | Hybrid search pipeline |
 | [`docs/AGENT_ARCHITECTURE.md`](./docs/AGENT_ARCHITECTURE.md) | Tool-calling itinerary agent |
@@ -239,4 +241,4 @@ LinkedIn: [linkedin.com/in/jacky-ma-546062370](https://www.linkedin.com/in/jacky
 
 ---
 
-MIT-style use for portfolio / interview demos unless otherwise noted. Active development.
+MIT-style use unless otherwise noted. Active development.
