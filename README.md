@@ -50,9 +50,12 @@ flowchart LR
 - [x] Explore AI search bar, match scores, empty-reason UX
 - [x] Qdrant payload indexes for `city_id` filtering
 
-### Phase 3 — Agentic itinerary (planned)
-- [ ] LangGraph multi-step planner over the frozen candidate set
-- [ ] Day-by-day itinerary + hard-rule validation node
+### Phase 3 — Agentic itinerary
+- [x] Agent architecture doc + itinerary schemas + `AgentService` stub
+- [x] Agent tools: POI search + schedule/budget evaluator (+ unit tests)
+- [x] Tool-calling agent loop + `POST /api/v1/itineraries/generate` (TDD)
+- [x] Explore UI for itinerary generation (`/planner`)
+- [ ] Live LLM provider wiring (optional seam already in `AgentService`)
 
 ---
 
@@ -121,6 +124,7 @@ Open http://localhost:3000/explore — keep both servers running.
 |--------|------|-------------|
 | `GET` | `/api/v1/countries` | List countries (`locale`, `max_budget`, `min_safety_rating`) |
 | `POST` | `/api/v1/search` | Hybrid RAG search (`query`, `locale`, `max_budget`, `min_safety`, `tags`) |
+| `POST` | `/api/v1/itineraries/generate` | Tool-calling itinerary agent (`city_id`, `days`, `pace`, budget, prefs) |
 | `GET` | `/health` | Liveness |
 
 Example search body:

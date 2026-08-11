@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AiSearchBar } from "@/components/explore/ai-search-bar";
 import { DestinationCard } from "@/components/explore/country-card";
 import { ExploreFilters } from "@/components/explore/explore-filters";
+import { SiteNav } from "@/components/site-nav";
 import {
   emptyReasonMessage,
   fetchCountries,
@@ -146,17 +147,20 @@ export function ExploreClient() {
       />
 
       <section className="min-w-0 space-y-6">
-        <header className="animate-fade-up">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
-            Explore
-          </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl tracking-tight text-[var(--foreground)] md:text-5xl">
-            Travel Compass
-          </h1>
-          <p className="mt-2 max-w-2xl text-[var(--muted-foreground)]">
-            Describe your trip in natural language, or browse with hard filters.
-            Budget, safety, and locale always apply before ranking.
-          </p>
+        <header className="animate-fade-up space-y-4">
+          <SiteNav active="explore" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
+              Explore
+            </p>
+            <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl tracking-tight text-[var(--foreground)] md:text-5xl">
+              Travel Compass
+            </h1>
+            <p className="mt-2 max-w-2xl text-[var(--muted-foreground)]">
+              Describe your trip in natural language, or browse with hard filters.
+              Budget, safety, and locale always apply before ranking.
+            </p>
+          </div>
         </header>
 
         <AiSearchBar
