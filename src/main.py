@@ -30,11 +30,10 @@ app = FastAPI(
     description="Personalized travel recommendations with deterministic filtering + GenAI.",
 )
 
-# Default includes local + production custom-domain frontends.
+# Default: production UI host + local dev.
 # Override entirely via CORS_ORIGINS (comma-separated) in the environment.
 _DEFAULT_CORS_ORIGINS = (
-    "https://jackymadream.com,"
-    "https://www.jackymadream.com,"
+    "https://travel.jackymadream.com,"
     "http://localhost:3000,"
     "http://127.0.0.1:3000"
 )
