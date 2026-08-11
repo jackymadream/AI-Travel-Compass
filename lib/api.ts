@@ -53,6 +53,53 @@ export type SearchResponse = {
   results: SearchHit[];
 };
 
+export type TripPace = "relaxed" | "moderate" | "packed";
+export type ActivityCategory = "attraction" | "food" | "rest";
+
+export type ItineraryRequest = {
+  city_id: string;
+  days: number;
+  pace: TripPace;
+  daily_budget_usd: number;
+  preferences?: string[];
+  locale?: Locale;
+};
+
+export type Activity = {
+  time_slot: string;
+  poi_name: string;
+  category: ActivityCategory;
+  cost_usd: number;
+  duration_minutes: number;
+  description: string;
+};
+
+export type DailyItinerary = {
+  day_number: number;
+  theme: string;
+  estimated_daily_cost: number;
+  activities: Activity[];
+};
+
+export type ItineraryResponse = {
+  city_name: string;
+  total_cost_usd: number;
+  daily_plans: DailyItinerary[];
+  agent_reasoning: string;
+};
+
+/** Mock city IDs backed by Phase 3 POI dataset (see agent_tools). */
+export const PLANNER_CITIES = [
+  {
+    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    name: "Tokyo",
+  },
+  {
+    id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    name: "Seoul",
+  },
+] as const;
+
 const DEFAULT_API_BASE = "http://127.0.0.1:8000";
 
 export function getApiBaseUrl(): string {
@@ -112,6 +159,54 @@ export async function searchDestinations(
   }
 
   return (await res.json()) as SearchResponse;
+}
+
+export async function generateItinerary(
+  payload: ItineraryRequest,
+  signal?: AbortSignal
+): Promise<ItineraryResponse> {
+  const res = await fetch(`${getApiBaseUrl()}/api/v1/itineraries/generate`, {
+    method: "POST",
+    signal,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Itinerary generation failed"));
+  }
+
+  return (await res.json()) as ItineraryResponse;
+}
+
+async function formatApiError(res: Response, fallback: string): Promise<string> {
+  const raw = await res.text().catch(() => "");
+  if (!raw) {
+    return `${fallback} (${res.status})`;
+  }
+  try {
+    const parsed = JSON.parse(raw) as {
+      detail?: string | { message?: string; violations?: string[] };
+    };
+    const detail = parsed.detail;
+    if (typeof detail === "string") {
+      return `${fallback} (${res.status}): ${detail}`;
+    }
+    if (detail && typeof detail === "object") {
+      const message = detail.message || fallback;
+      const violations = detail.violations?.length
+        ? ` — ${detail.violations.join("; ")}`
+        : "";
+      return `${message}${violations}`;
+    }
+  } catch {
+    // not JSON
+  }
+  return `${fallback} (${res.status}): ${raw}`;
 }
 
 export function matchPercent(score: number): number {

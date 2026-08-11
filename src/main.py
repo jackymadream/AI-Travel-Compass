@@ -7,7 +7,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.routers import countries, search
+from src.routers import countries, itinerary, search
 
 app = FastAPI(
     title="GenAI Travel Compass",
@@ -34,6 +34,7 @@ app.add_middleware(
 
 app.include_router(countries.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
+app.include_router(itinerary.router, prefix="/api/v1")
 
 
 @app.get("/health")
