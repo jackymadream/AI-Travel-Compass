@@ -1,0 +1,14 @@
+# Cloud Build: push backend image to Artifact Registry
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - asia-east1-docker.pkg.dev/$PROJECT_ID/ai-travel/ai-travel-backend:latest
+      - -f
+      - Dockerfile.backend
+      - .
+images:
+  - asia-east1-docker.pkg.dev/$PROJECT_ID/ai-travel/ai-travel-backend:latest
+options:
+  logging: CLOUD_LOGGING_ONLY
