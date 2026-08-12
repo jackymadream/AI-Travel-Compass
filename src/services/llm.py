@@ -38,18 +38,17 @@ def _load_env() -> None:
 
 
 def _resolve_credentials() -> tuple[str, str]:
-    _load_env()
+    from src.services.gcp_credentials import configure_google_credentials, load_project_env
+
+    load_project_env()
     project_id = os.getenv("GCP_PROJECT_ID", "").strip()
     location = os.getenv("GCP_LOCATION", "").strip() or DEFAULT_LOCATION
     if not project_id:
         raise LlmServiceError("GCP_PROJECT_ID is not set")
-    creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
-    if creds:
-        path = Path(creds).expanduser()
-        if not path.is_absolute():
-            path = (ROOT_DIR / path).resolve()
-        if path.is_file():
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(path)
+    try:
+        configure_google_credentials()
+    except FileNotFoundError as exc:
+        raise LlmServiceError(str(exc)) from exc
     return project_id, location
 
 

@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
-from dotenv import load_dotenv
+from src.services.gcp_credentials import configure_google_credentials, load_project_env
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 EMBEDDING_MODEL = "text-embedding-004"
@@ -29,27 +29,15 @@ class EmbeddingServiceError(Exception):
 
 
 def _load_env() -> None:
-    load_dotenv(ROOT_DIR / ".env")
+    load_project_env()
 
 
-def resolve_credentials_path() -> Path:
-    """Ensure ADC credentials path exists and is absolute."""
-    _load_env()
-    raw = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
-    if not raw:
-        raise EmbeddingServiceError(
-            "GOOGLE_APPLICATION_CREDENTIALS is not set. "
-            "Point it at a GCP service-account JSON key."
-        )
-    path = Path(raw).expanduser()
-    if not path.is_absolute():
-        path = (ROOT_DIR / path).resolve()
-    if not path.is_file():
-        raise EmbeddingServiceError(
-            f"GOOGLE_APPLICATION_CREDENTIALS file not found: {path}"
-        )
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(path)
-    return path
+def resolve_credentials_path() -> Path | None:
+    """Optional key file locally; Cloud Run uses ambient ADC when unset."""
+    try:
+        return configure_google_credentials()
+    except FileNotFoundError as exc:
+        raise EmbeddingServiceError(str(exc)) from exc
 
 
 def embedding_dimensions() -> int:
