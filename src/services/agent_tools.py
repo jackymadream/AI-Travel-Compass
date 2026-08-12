@@ -148,14 +148,31 @@ def search_pois_tool(
     limit: int = 5,
 ) -> list[dict]:
     """
-    Query POIs from the mock dataset filtered by ``city_id`` and ``category``.
+    Query POIs for a city/category (Phase 5.2 live path).
 
-    Preference tokens boost ranking when they appear in tags, name, or description.
-    Each result includes name, category, cost_usd, duration_minutes, description.
-    Results are cached for 7 days (Redis or in-memory fallback).
+    Prefer Qdrant ``travel_pois`` + Supabase ``pois`` via ``src.tools.search_pois``.
+    Fall back to the in-memory mock dataset when live search is empty or
+    ``USE_MOCK_POIS=true`` (keeps unit tests / offline planner working).
     """
+    from src.tools.search_pois import search_pois, use_mock_pois
+
+    if use_mock_pois():
+        return _search_pois_cached_mock(city_id, category, preferences, limit)
+
+    live = search_pois(city_id, category, preferences, limit)
+    if live:
+        return live
+    return _search_pois_cached_mock(city_id, category, preferences, limit)
+
+
+def _search_pois_cached_mock(
+    city_id: str,
+    category: str,
+    preferences: list[str],
+    limit: int = 5,
+) -> list[dict]:
     cache = get_cache_service()
-    cache_key = poi_cache_key(city_id, category, preferences, limit)
+    cache_key = poi_cache_key(city_id, category, preferences, limit) + ":mock"
     cached = cache.get(cache_key)
     if isinstance(cached, list):
         return cached

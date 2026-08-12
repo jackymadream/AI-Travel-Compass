@@ -8,9 +8,12 @@ import time
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from src.routers import countries, health, itinerary, search
+from src.routers import cities, countries, health, itinerary, search
+from src.services.rate_limit import limiter
 from src.utils.logger import (
     REQUEST_ID_HEADER,
     clear_trace_id,
@@ -29,6 +32,8 @@ app = FastAPI(
     version="0.1.0",
     description="Personalized travel recommendations with deterministic filtering + GenAI.",
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Default: production UI host + local dev.
 # Override entirely via CORS_ORIGINS (comma-separated) in the environment.
@@ -111,5 +116,6 @@ app.add_middleware(RequestIdMiddleware)
 
 app.include_router(health.router)
 app.include_router(countries.router, prefix="/api/v1")
+app.include_router(cities.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
 app.include_router(itinerary.router, prefix="/api/v1")

@@ -13,4 +13,5 @@ data/_zh_hk_check.txt
 gcp-key.json
 credentials/
 .scratch/
+data/tmp_*
 

@@ -674,6 +674,60 @@
           "tags": ["culture", "food", "urban"]
         }
       ]
+    },
+    {
+      "iso_code": "GB",
+      "name": {
+        "en": "United Kingdom",
+        "zh-HK": "英國",
+        "ja": "イギリス"
+      },
+      "description": {
+        "en": "Historic cities, museums, and parks across England, Scotland, Wales, and Northern Ireland.",
+        "zh-HK": "英格蘭、蘇格蘭、威爾斯及北愛爾蘭的歷史城市、博物館與公園。",
+        "ja": "イングランド、スコットランド、ウェールズ、北アイルランドの歴史都市、博物館、公園。"
+      },
+      "safety_index": 4,
+      "avg_daily_cost_usd": 150.00,
+      "best_travel_season": {
+        "seasons": ["spring", "summer", "autumn"],
+        "months": [4, 5, 6, 7, 8, 9],
+        "label": {
+          "en": "Spring–Autumn",
+          "zh-HK": "春至秋",
+          "ja": "春〜秋"
+        }
+      },
+      "region_tags": ["Europe", "Western Europe"],
+      "cities": [
+        {
+          "slug": "london",
+          "name": {
+            "en": "London",
+            "zh-HK": "倫敦",
+            "ja": "ロンドン"
+          },
+          "description": {
+            "en": "Capital with museums, parks, theatre, and global food scenes.",
+            "zh-HK": "博物館、公園、劇場與國際美食之都。",
+            "ja": "博物館、公園、劇場、国際的な食が揃う首都。"
+          },
+          "safety_index": 4,
+          "avg_daily_cost_usd": 160.00,
+          "best_travel_season": {
+            "seasons": ["spring", "summer", "autumn"],
+            "months": [4, 5, 6, 7, 8, 9],
+            "label": {
+              "en": "Mild seasons",
+              "zh-HK": "溫和季節",
+              "ja": "穏やかな季節"
+            }
+          },
+          "latitude": 51.5074,
+          "longitude": -0.1278,
+          "tags": ["culture", "food", "urban", "museum"]
+        }
+      ]
     }
   ]
 }

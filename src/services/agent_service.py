@@ -39,6 +39,34 @@ CITY_DISPLAY_NAMES: dict[str, str] = {
     MOCK_CITY_SEOUL: "Seoul",
 }
 
+
+def _resolve_city_name(city_id: str) -> str:
+    """Prefer Supabase city name; fall back to mock display map."""
+    if city_id in CITY_DISPLAY_NAMES:
+        return CITY_DISPLAY_NAMES[city_id]
+    try:
+        from src.deps import get_supabase
+
+        rows = (
+            get_supabase()
+            .table("cities")
+            .select("name, slug")
+            .eq("id", city_id)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if rows:
+            name = rows[0].get("name") or {}
+            if isinstance(name, dict):
+                return str(name.get("en") or name.get("ja") or rows[0].get("slug") or "City")
+            return str(name)
+    except Exception:  # noqa: BLE001
+        pass
+    return "Unknown city"
+
+
 # How many POIs of each category to request when drafting a day.
 _PACE_DRAFT_COUNTS: dict[str, dict[str, int]] = {
     TripPace.RELAXED.value: {"attraction": 1, "food": 1, "rest": 1},
@@ -106,7 +134,7 @@ class AgentService:
           4. Parse validated days into ``ItineraryResponse``.
         """
         city_id = str(request.city_id)
-        city_name = CITY_DISPLAY_NAMES.get(city_id, "Unknown city")
+        city_name = _resolve_city_name(city_id)
         log_event(
             logger,
             "agent_plan_started",
