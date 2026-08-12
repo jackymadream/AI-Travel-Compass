@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCATION = "us-central1"
+# Generative models are often unavailable in asia-* embedding regions.
 FLASH_MODEL = os.getenv("GEMINI_FLASH_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
 PRO_MODEL = os.getenv("GEMINI_PRO_MODEL", "gemini-1.5-pro").strip() or "gemini-1.5-pro"
 
@@ -42,7 +43,13 @@ def _resolve_credentials() -> tuple[str, str]:
 
     load_project_env()
     project_id = os.getenv("GCP_PROJECT_ID", "").strip()
-    location = os.getenv("GCP_LOCATION", "").strip() or DEFAULT_LOCATION
+    # Prefer GEMINI_LOCATION so embeddings can stay in asia-southeast1 while
+    # Gemini runs in a supported region (typically us-central1).
+    location = (
+        os.getenv("GEMINI_LOCATION", "").strip()
+        or os.getenv("GCP_LOCATION", "").strip()
+        or DEFAULT_LOCATION
+    )
     if not project_id:
         raise LlmServiceError("GCP_PROJECT_ID is not set")
     try:
@@ -198,8 +205,12 @@ Return JSON only:
 Rules: stay under daily budget; include mix of categories when possible;
 do not invent POIs; cost/duration must match the pool when possible.
 """.strip()
-        raw = self.generate_pro(prompt)
-        data = _extract_json_object(raw)
+        try:
+            raw = self.generate_pro(prompt)
+            data = _extract_json_object(raw)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Pro itinerary draft failed; re-raising for agent fallback: %s", exc)
+            raise LlmServiceError(str(exc)) from exc
         if "day_number" not in data:
             data["day_number"] = day_number
         if "activities" not in data:
