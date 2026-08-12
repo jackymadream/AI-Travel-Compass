@@ -36,6 +36,7 @@ export function PlannerClient() {
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [result, setResult] = useState<ItineraryResponse | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export function PlannerClient() {
     setLoading(true);
     setError(null);
     setSaveMessage(null);
+    setSavedId(null);
 
     try {
       const data = await generateItinerary(
@@ -94,7 +96,7 @@ export function PlannerClient() {
   }
 
   async function handleSave() {
-    if (!result) return;
+    if (!result || savedId) return;
     setSaving(true);
     setSaveMessage(null);
     setError(null);
@@ -108,18 +110,17 @@ export function PlannerClient() {
       if (!token) {
         throw new Error("Sign in to save itineraries.");
       }
-      const saved = await saveItinerary(
-        {
-          title: `${result.city_name} — ${days} day plan`,
-          destination: result.city_name,
-          city_id: cityId,
-          days_data: result.daily_plans,
-          total_cost_usd: result.total_cost_usd,
-          agent_reasoning: result.agent_reasoning,
-        },
-        token
-      );
-      setSaveMessage(`Saved itinerary ${saved.id.slice(0, 8)}…`);
+      const payload = {
+        title: `${result.city_name} — ${days} day plan`,
+        destination: result.city_name,
+        city_id: cityId,
+        days_data: result.daily_plans,
+        total_cost_usd: result.total_cost_usd,
+        agent_reasoning: result.agent_reasoning,
+      };
+      const saved = await saveItinerary(payload, token);
+      setSavedId(saved.id);
+      setSaveMessage("Saved ✓");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -202,6 +203,14 @@ export function PlannerClient() {
         {saveMessage && (
           <p className="text-sm text-[var(--primary)]" role="status">
             {saveMessage}
+            {savedId ? (
+              <>
+                {" — "}
+                <a href="/itineraries" className="underline underline-offset-2">
+                  My itineraries
+                </a>
+              </>
+            ) : null}
           </p>
         )}
 
@@ -228,17 +237,29 @@ export function PlannerClient() {
                   <p className="text-sm text-[var(--muted-foreground)]">
                     Trip total ${result.total_cost_usd.toFixed(0)}
                   </p>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    disabled={saving}
-                    onClick={() => {
-                      void handleSave();
-                    }}
-                  >
-                    {saving ? "Saving…" : "Save itinerary"}
-                  </Button>
+                  {savedId ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled
+                      aria-label="Itinerary already saved"
+                    >
+                      Saved ✓
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={saving}
+                      onClick={() => {
+                        void handleSave();
+                      }}
+                    >
+                      {saving ? "Saving…" : "Save itinerary"}
+                    </Button>
+                  )}
                 </div>
               </div>
               <DayTimeline days={result.daily_plans} />

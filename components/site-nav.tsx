@@ -6,12 +6,13 @@ import { AuthStatus } from "@/components/auth-status";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/explore", label: "Explore" },
-  { href: "/planner", label: "Planner" },
+  { href: "/explore", label: "Explore", active: "explore" },
+  { href: "/planner", label: "Planner", active: "planner" },
+  { href: "/itineraries", label: "My itineraries", active: "itineraries" },
 ] as const;
 
 type SiteNavProps = {
-  active: "explore" | "planner";
+  active: "explore" | "planner" | "itineraries";
   className?: string;
 };
 
@@ -26,7 +27,7 @@ export function SiteNav({ active, className }: SiteNavProps) {
     >
       <div className="flex flex-wrap items-center gap-2">
         {LINKS.map((link) => {
-          const isActive = link.href.includes(active);
+          const isActive = link.active === active;
           return (
             <Link
               key={link.href}

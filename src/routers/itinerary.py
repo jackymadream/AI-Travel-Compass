@@ -167,3 +167,38 @@ async def get_itinerary(
     if not rows:
         raise HTTPException(status_code=404, detail="Itinerary not found")
     return _row_to_saved(rows[0])
+
+
+@router.put("/{itinerary_id}", response_model=SavedItinerary)
+async def update_itinerary(
+    itinerary_id: UUID,
+    body: SaveItineraryRequest,
+    user: CurrentUserDep,
+    supabase: SupabaseDep,
+) -> SavedItinerary:
+    """Update an existing saved itinerary owned by the caller."""
+    patch = {
+        "title": body.title,
+        "destination": body.destination,
+        "city_id": str(body.city_id) if body.city_id else None,
+        "days_data": _days_payload(body.days_data),
+        "total_cost_usd": body.total_cost_usd,
+        "agent_reasoning": body.agent_reasoning,
+    }
+    try:
+        result = (
+            supabase.table("user_itineraries")
+            .update(patch)
+            .eq("id", str(itinerary_id))
+            .eq("user_id", user.id)
+            .execute()
+        )
+        rows = result.data or []
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update itinerary: {exc}",
+        ) from exc
+    if not rows:
+        raise HTTPException(status_code=404, detail="Itinerary not found")
+    return _row_to_saved(rows[0])

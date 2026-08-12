@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -73,28 +74,70 @@ def _init_vertex() -> tuple[str, str]:
 
 
 def _generate(model_name: str, prompt: str, *, temperature: float = 0.2) -> str:
+    """
+    Call Vertex Gemini with lightweight retries for transient errors.
+
+    Retries on rate limits / 429 / 503 / UNAVAILABLE before raising
+    ``LlmServiceError`` (agent then falls back to heuristics).
+    """
     _init_vertex()
     try:
         from vertexai.generative_models import GenerativeModel
     except ImportError as exc:
         raise LlmServiceError("vertexai.generative_models unavailable") from exc
 
-    try:
-        model = GenerativeModel(model_name)
-        response = model.generate_content(
-            prompt,
-            generation_config={
-                "temperature": temperature,
-                "max_output_tokens": 2048,
-            },
-        )
-        text = getattr(response, "text", None) or ""
-        if not text and getattr(response, "candidates", None):
-            parts = response.candidates[0].content.parts
-            text = "".join(getattr(p, "text", "") or "" for p in parts)
-        return (text or "").strip()
-    except Exception as exc:  # noqa: BLE001
-        raise LlmServiceError(f"{model_name} failed: {exc}") from exc
+    attempts = max(1, int(os.getenv("GEMINI_RETRY_ATTEMPTS", "3")))
+    base_delay = float(os.getenv("GEMINI_RETRY_BASE_DELAY_SEC", "0.6"))
+    last_exc: BaseException | None = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            model = GenerativeModel(model_name)
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "temperature": temperature,
+                    "max_output_tokens": 2048,
+                },
+            )
+            text = getattr(response, "text", None) or ""
+            if not text and getattr(response, "candidates", None):
+                parts = response.candidates[0].content.parts
+                text = "".join(getattr(p, "text", "") or "" for p in parts)
+            return (text or "").strip()
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            if attempt >= attempts or not _is_transient_llm_error(exc):
+                raise LlmServiceError(f"{model_name} failed: {exc}") from exc
+            delay = base_delay * (2 ** (attempt - 1))
+            logger.warning(
+                "Transient Gemini error (attempt %s/%s), retry in %.1fs: %s",
+                attempt,
+                attempts,
+                delay,
+                exc,
+            )
+            time.sleep(delay)
+
+    raise LlmServiceError(f"{model_name} failed: {last_exc}")
+
+
+def _is_transient_llm_error(exc: BaseException) -> bool:
+    message = str(exc).lower()
+    tokens = (
+        "429",
+        "503",
+        "500",
+        "rate limit",
+        "resource exhausted",
+        "unavailable",
+        "deadline",
+        "timeout",
+        "temporarily",
+        "quota",
+        "try again",
+    )
+    return any(token in message for token in tokens)
 
 
 def _extract_json_object(text: str) -> dict[str, Any]:
