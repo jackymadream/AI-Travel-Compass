@@ -102,7 +102,7 @@ def test_poi_search_cache_hit_avoids_recomputation(memory_cache: CacheService) -
     assert second == sample
     assert calls["n"] == 1
     # Key should be present with POI TTL path exercised via set.
-    key = poi_cache_key(MOCK_CITY_TOKYO, "food", ["ramen"], 3)
+    key = poi_cache_key(MOCK_CITY_TOKYO, "food", ["ramen"], 3) + ":mock"
     assert memory_cache.get(key) == sample
     assert TTL_POI_SECONDS == 7 * 24 * 60 * 60
 

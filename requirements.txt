@@ -8,4 +8,7 @@ python-dotenv>=1.0.0
 supabase>=2.0.0
 qdrant-client>=1.9.0
 redis>=5.0.0
+google-cloud-aiplatform>=1.60.0
+slowapi>=0.1.9
+limits>=3.0.0
 

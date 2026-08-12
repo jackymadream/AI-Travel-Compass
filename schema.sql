@@ -150,6 +150,82 @@ COMMENT ON COLUMN cities.longitude IS 'Optional centroid for map rendering and p
 COMMENT ON COLUMN cities.tags IS 'Soft preference tags for ranking/RAG, e.g. culture, nature, budget-friendly.';
 
 -- ---------------------------------------------------------------------------
+-- pois (Phase 5.1 — Overpass / Places ingest)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE pois (
+  id                    UUID PRIMARY KEY,
+  city_id               UUID NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
+  name                  TEXT NOT NULL,
+  category              TEXT NOT NULL,
+  description           TEXT NOT NULL DEFAULT '',
+  latitude              NUMERIC(9, 6),
+  longitude             NUMERIC(9, 6),
+  price_level           SMALLINT,
+  rating                NUMERIC(3, 2),
+  safety_score          SMALLINT NOT NULL DEFAULT 3,
+  tags                  TEXT[] NOT NULL DEFAULT '{}',
+  cost_usd              NUMERIC(10, 2),
+  duration_minutes      INTEGER,
+  osm_id                BIGINT,
+  osm_type              TEXT,
+  source                TEXT NOT NULL DEFAULT 'overpass',
+  places_primary_type   TEXT,
+  user_ratings_total    INTEGER,
+  address               TEXT,
+  is_active             BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT pois_category_valid CHECK (category IN ('attraction', 'food', 'rest')),
+  CONSTRAINT pois_price_level_range CHECK (
+    price_level IS NULL OR price_level BETWEEN 0 AND 4
+  ),
+  CONSTRAINT pois_rating_range CHECK (rating IS NULL OR (rating >= 0 AND rating <= 5)),
+  CONSTRAINT pois_safety_score_range CHECK (safety_score BETWEEN 1 AND 5),
+  CONSTRAINT pois_duration_positive CHECK (
+    duration_minutes IS NULL OR duration_minutes >= 1
+  ),
+  CONSTRAINT pois_latitude_range CHECK (
+    latitude IS NULL OR latitude BETWEEN -90 AND 90
+  ),
+  CONSTRAINT pois_longitude_range CHECK (
+    longitude IS NULL OR longitude BETWEEN -180 AND 180
+  )
+);
+
+COMMENT ON TABLE pois IS 'Real-world POIs ingested from OSM Overpass (+ optional Google Places enrichment).';
+COMMENT ON COLUMN pois.price_level IS '0=free … 4=very expensive; from Places or OSM heuristic.';
+COMMENT ON COLUMN pois.safety_score IS 'Inherited from city.safety_index unless overridden.';
+
+-- ---------------------------------------------------------------------------
+-- user_itineraries (Phase 5.3 — Supabase Auth persistence)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE user_itineraries (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id           UUID NOT NULL,
+  title             TEXT NOT NULL,
+  destination       TEXT NOT NULL,
+  city_id           UUID REFERENCES cities(id) ON DELETE SET NULL,
+  days_data         JSONB NOT NULL DEFAULT '[]'::JSONB,
+  total_cost_usd    NUMERIC(12, 2),
+  agent_reasoning   TEXT,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT user_itineraries_title_nonempty CHECK (char_length(trim(title)) > 0),
+  CONSTRAINT user_itineraries_destination_nonempty CHECK (char_length(trim(destination)) > 0),
+  CONSTRAINT user_itineraries_days_data_object_or_array CHECK (
+    jsonb_typeof(days_data) IN ('array', 'object')
+  )
+);
+
+COMMENT ON TABLE user_itineraries IS 'Persisted itineraries owned by Supabase Auth users.';
+COMMENT ON COLUMN user_itineraries.user_id IS 'auth.users.id (Supabase Auth subject).';
+COMMENT ON COLUMN user_itineraries.days_data IS 'JSON daily plans (DailyItinerary[] or wrapped object).';
+
+-- ---------------------------------------------------------------------------
 -- user_profiles
 -- ---------------------------------------------------------------------------
 
@@ -225,6 +301,14 @@ CREATE TRIGGER trg_user_profiles_updated_at
   BEFORE UPDATE ON user_profiles
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+CREATE TRIGGER trg_pois_updated_at
+  BEFORE UPDATE ON pois
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_user_itineraries_updated_at
+  BEFORE UPDATE ON user_itineraries
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 -- ---------------------------------------------------------------------------
 -- Indexes — countries
 -- ---------------------------------------------------------------------------
@@ -260,6 +344,27 @@ CREATE INDEX idx_cities_best_travel_seasons_gin ON cities USING GIN ((best_trave
 CREATE INDEX idx_cities_best_travel_months_gin ON cities USING GIN ((best_travel_season->'months'));
 CREATE INDEX idx_cities_country_cost_safety ON cities (country_id, avg_daily_cost_usd, safety_index);
 CREATE INDEX idx_cities_tags_gin ON cities USING GIN (tags);
+
+-- ---------------------------------------------------------------------------
+-- Indexes — pois
+-- ---------------------------------------------------------------------------
+
+CREATE UNIQUE INDEX idx_pois_osm_unique
+  ON pois (osm_type, osm_id)
+  WHERE osm_id IS NOT NULL AND osm_type IS NOT NULL;
+CREATE INDEX idx_pois_city_id ON pois (city_id);
+CREATE INDEX idx_pois_category ON pois (category);
+CREATE INDEX idx_pois_city_category ON pois (city_id, category);
+CREATE INDEX idx_pois_active ON pois (is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_pois_tags_gin ON pois USING GIN (tags);
+
+-- ---------------------------------------------------------------------------
+-- Indexes — user_itineraries
+-- ---------------------------------------------------------------------------
+
+CREATE INDEX idx_user_itineraries_user_id ON user_itineraries (user_id);
+CREATE INDEX idx_user_itineraries_user_created ON user_itineraries (user_id, created_at DESC);
+CREATE INDEX idx_user_itineraries_city_id ON user_itineraries (city_id);
 
 -- ---------------------------------------------------------------------------
 -- Indexes — user_profiles

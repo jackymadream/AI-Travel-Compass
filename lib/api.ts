@@ -88,17 +88,27 @@ export type ItineraryResponse = {
   agent_reasoning: string;
 };
 
-/** Mock city IDs backed by Phase 3 POI dataset (see agent_tools). */
+/** Fallback cities if GET /cities is unavailable (mock POI IDs). */
 export const PLANNER_CITIES = [
   {
     id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    name: "Tokyo",
+    name: "Tokyo (mock)",
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-    name: "Seoul",
+    name: "Seoul (mock)",
   },
 ] as const;
+
+export type CitySummary = {
+  id: string;
+  slug: string;
+  name: string;
+  country_iso?: string | null;
+  safety_index?: number | null;
+  avg_daily_cost_usd?: number | null;
+  tags?: string[];
+};
 
 const DEFAULT_API_BASE = "http://127.0.0.1:8000";
 
@@ -106,6 +116,22 @@ export function getApiBaseUrl(): string {
   return (
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || DEFAULT_API_BASE
   );
+}
+
+export async function fetchCities(
+  locale: Locale = "en",
+  signal?: AbortSignal
+): Promise<CitySummary[]> {
+  const params = new URLSearchParams({ locale, limit: "50" });
+  const res = await fetch(`${getApiBaseUrl()}/api/v1/cities?${params}`, {
+    signal,
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load cities (${res.status})`);
+  }
+  return (await res.json()) as CitySummary[];
 }
 
 export async function fetchCountries(
@@ -181,6 +207,65 @@ export async function generateItinerary(
   }
 
   return (await res.json()) as ItineraryResponse;
+}
+
+export type SavedItinerary = {
+  id: string;
+  user_id: string;
+  title: string;
+  destination: string;
+  city_id?: string | null;
+  days_data: unknown;
+  total_cost_usd?: number | null;
+  agent_reasoning?: string | null;
+  created_at: string;
+};
+
+export async function saveItinerary(
+  payload: {
+    title: string;
+    destination: string;
+    city_id?: string;
+    days_data: unknown;
+    total_cost_usd?: number;
+    agent_reasoning?: string;
+  },
+  accessToken: string,
+  signal?: AbortSignal
+): Promise<SavedItinerary> {
+  const res = await fetch(`${getApiBaseUrl()}/api/v1/itineraries`, {
+    method: "POST",
+    signal,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Failed to save itinerary"));
+  }
+  return (await res.json()) as SavedItinerary;
+}
+
+export async function listSavedItineraries(
+  accessToken: string,
+  signal?: AbortSignal
+): Promise<{ items: SavedItinerary[]; count: number }> {
+  const res = await fetch(`${getApiBaseUrl()}/api/v1/itineraries`, {
+    signal,
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Failed to load saved itineraries"));
+  }
+  return (await res.json()) as { items: SavedItinerary[]; count: number };
 }
 
 async function formatApiError(res: Response, fallback: string): Promise<string> {

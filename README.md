@@ -99,6 +99,12 @@ flowchart LR
 - [x] Dockerfiles + compose + `/health` / `/health/liveness` probes
 - [x] E2E smoke test (`scripts/smoke_test.py`) + [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
 
+### Phase 5 — Real-world POI data
+- [x] **5.1** Overpass POI ingest + optional Places enrichment (`scripts/ingest_real_pois.py`)
+- [x] **5.2** Live POI search (Qdrant `travel_pois` + Supabase fallback), Gemini Flash/Pro LLM seam, SlowAPI search rate limit (15/min)
+- [x] **5.3** Supabase Auth (Google / magic link), `user_itineraries` persistence, save/list API
+- [ ] Expand city coverage beyond seed destinations
+
 ---
 
 ## Local setup
@@ -128,15 +134,21 @@ Fill `.env` (see comments in `.env.example` and the [deployment checklist](./doc
 | `GEMINI_API_KEY` | Optional future LLM agent (heuristic planner works without it) |
 | `NEXT_PUBLIC_API_URL` | Frontend → API (local `http://127.0.0.1:8000`; prod `https://api.jackymadream.com`) |
 | `CORS_ORIGINS` | Allowed UI origins (prod `https://travel.jackymadream.com` + localhost) |
+| `GOOGLE_PLACES_API_KEY` | Optional Places enrichment for `ingest_real_pois.py` |
 
 ### 2. Database & vectors
 
 ```bash
 # Apply schema.sql in the Supabase SQL editor (if not already applied)
+# For existing DBs: also run scripts/migrate_add_pois.sql
 pip install -r requirements.txt
 python scripts/seed_db.py
 python scripts/embed_destinations.py
 python scripts/ensure_qdrant_indexes.py   # city_id / locale / country_id indexes
+
+# Phase 5.1 — real POIs (Overpass; optional Places if GOOGLE_PLACES_API_KEY set)
+python scripts/ingest_real_pois.py --city tokyo --limit 10 --dry-run
+python scripts/ingest_real_pois.py --city tokyo --limit 100
 ```
 
 ### 3. Backend
@@ -208,7 +220,7 @@ Example search body:
 │   ├── schemas/            # Pydantic contracts
 │   ├── services/           # Search, RAG, agent, cache, health
 │   └── utils/              # JSON structured logging
-├── scripts/                # seed, embed, indexes, smoke_test
+├── scripts/                # seed, embed, indexes, smoke_test, ingest_real_pois
 ├── tests/                  # Pytest
 ├── docs/                   # RAG, agent, deployment
 ├── Dockerfile.backend

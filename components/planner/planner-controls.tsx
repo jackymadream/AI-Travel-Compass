@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   PLANNER_CITIES,
+  type CitySummary,
   type Locale,
   type TripPace,
 } from "@/lib/api";
@@ -40,6 +41,7 @@ const LOCALES: { value: Locale; label: string }[] = [
 
 export type PlannerControlsProps = {
   cityId: string;
+  cities?: CitySummary[];
   days: number;
   pace: TripPace;
   dailyBudget: number;
@@ -57,6 +59,7 @@ export type PlannerControlsProps = {
 
 export function PlannerControls({
   cityId,
+  cities,
   days,
   pace,
   dailyBudget,
@@ -71,6 +74,15 @@ export function PlannerControls({
   onLocaleChange,
   onGenerate,
 }: PlannerControlsProps) {
+  const cityOptions =
+    cities && cities.length > 0
+      ? cities
+      : PLANNER_CITIES.map((c) => ({
+          id: c.id,
+          slug: c.name.toLowerCase(),
+          name: c.name,
+        }));
+
   function togglePreference(pref: string) {
     if (preferences.includes(pref)) {
       onPreferencesChange(preferences.filter((p) => p !== pref));
@@ -100,9 +112,12 @@ export function PlannerControls({
             <SelectValue placeholder="Select city" />
           </SelectTrigger>
           <SelectContent>
-            {PLANNER_CITIES.map((city) => (
+            {cityOptions.map((city) => (
               <SelectItem key={city.id} value={city.id}>
                 {city.name}
+                {"country_iso" in city && city.country_iso
+                  ? ` (${city.country_iso})`
+                  : ""}
               </SelectItem>
             ))}
           </SelectContent>
