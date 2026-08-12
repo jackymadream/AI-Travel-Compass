@@ -14,13 +14,12 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-
 from src.services.cache_service import (
     TTL_EMBEDDING_SECONDS,
     embedding_cache_key,
     get_cache_service,
 )
+from src.services.gcp_credentials import configure_google_credentials, load_project_env
 from src.utils.logger import elapsed_timer, get_logger, log_event
 
 logger = get_logger(__name__)
@@ -61,24 +60,17 @@ class VectorHit:
 
 
 def _load_env() -> None:
-    load_dotenv(ROOT_DIR / ".env")
+    load_project_env()
 
 
-def _resolve_credentials_path() -> Path:
-    _load_env()
-    raw = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
-    if not raw:
-        raise EmbeddingError(
-            "GOOGLE_APPLICATION_CREDENTIALS is not set. "
-            "Point it at a GCP service-account JSON key."
-        )
-    path = Path(raw).expanduser()
-    if not path.is_absolute():
-        path = (ROOT_DIR / path).resolve()
-    if not path.is_file():
-        raise EmbeddingError(f"GOOGLE_APPLICATION_CREDENTIALS file not found: {path}")
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(path)
-    return path
+def _resolve_credentials_path() -> Path | None:
+    """
+    Optional key file for local; on Cloud Run use ambient ADC (no file).
+    """
+    try:
+        return configure_google_credentials()
+    except FileNotFoundError as exc:
+        raise EmbeddingError(str(exc)) from exc
 
 
 def _embedding_dimensions() -> int:

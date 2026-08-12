@@ -318,13 +318,22 @@ class AgentService:
         turn: int,
     ) -> dict[str, Any]:
         if self._llm is not None:
-            return self._llm.propose_daily_plan(
-                request=request,
-                day_number=day_number,
-                poi_pool=poi_pool,
-                previous_violations=previous_violations,
-                turn=turn,
-            )
+            try:
+                return self._llm.propose_daily_plan(
+                    request=request,
+                    day_number=day_number,
+                    poi_pool=poi_pool,
+                    previous_violations=previous_violations,
+                    turn=turn,
+                )
+            except Exception as exc:  # noqa: BLE001
+                log_event(
+                    logger,
+                    "agent_llm_fallback",
+                    day_number=day_number,
+                    turn=turn,
+                    error=str(exc),
+                )
         return self._heuristic_propose_daily_plan(
             request=request,
             day_number=day_number,

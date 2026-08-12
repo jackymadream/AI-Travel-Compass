@@ -250,6 +250,89 @@ export async function saveItinerary(
   return (await res.json()) as SavedItinerary;
 }
 
+export async function updateItinerary(
+  itineraryId: string,
+  payload: {
+    title: string;
+    destination: string;
+    city_id?: string;
+    days_data: unknown;
+    total_cost_usd?: number;
+    agent_reasoning?: string;
+  },
+  accessToken: string,
+  signal?: AbortSignal
+): Promise<SavedItinerary> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/v1/itineraries/${encodeURIComponent(itineraryId)}`,
+    {
+      method: "PUT",
+      signal,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Failed to update itinerary"));
+  }
+  return (await res.json()) as SavedItinerary;
+}
+
+export async function getSavedItinerary(
+  itineraryId: string,
+  accessToken: string,
+  signal?: AbortSignal
+): Promise<SavedItinerary> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/v1/itineraries/${encodeURIComponent(itineraryId)}`,
+    {
+      signal,
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Failed to load itinerary"));
+  }
+  return (await res.json()) as SavedItinerary;
+}
+
+export function itineraryDurationDays(daysData: unknown): number {
+  if (Array.isArray(daysData)) {
+    return daysData.length;
+  }
+  if (
+    daysData &&
+    typeof daysData === "object" &&
+    Array.isArray((daysData as { daily_plans?: unknown }).daily_plans)
+  ) {
+    return ((daysData as { daily_plans: unknown[] }).daily_plans).length;
+  }
+  return 0;
+}
+
+export function asDailyPlans(daysData: unknown): DailyItinerary[] {
+  if (Array.isArray(daysData)) {
+    return daysData as DailyItinerary[];
+  }
+  if (
+    daysData &&
+    typeof daysData === "object" &&
+    Array.isArray((daysData as { daily_plans?: unknown }).daily_plans)
+  ) {
+    return (daysData as { daily_plans: DailyItinerary[] }).daily_plans;
+  }
+  return [];
+}
+
 export async function listSavedItineraries(
   accessToken: string,
   signal?: AbortSignal

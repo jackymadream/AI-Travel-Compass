@@ -133,5 +133,41 @@ def test_itinerary_crud_with_valid_auth(client: TestClient) -> None:
         body = listed.json()
         assert body["count"] == 1
         assert body["items"][0]["id"] == str(itinerary_id)
+
+        updated_row = {
+            **saved_row,
+            "title": "Tokyo weekend (updated)",
+            "total_cost_usd": 55,
+        }
+        update_chain = MagicMock()
+        update_chain.eq.return_value = update_chain
+        update_chain.execute.return_value = MagicMock(data=[updated_row])
+        table.update.return_value = update_chain
+
+        updated = client.put(
+            f"/api/v1/itineraries/{itinerary_id}",
+            json={
+                "title": "Tokyo weekend (updated)",
+                "destination": "Tokyo",
+                "days_data": saved_row["days_data"],
+                "total_cost_usd": 55,
+            },
+            headers={"Authorization": "Bearer test-token"},
+        )
+        assert updated.status_code == 200, updated.text
+        assert updated.json()["title"] == "Tokyo weekend (updated)"
+        assert updated.json()["total_cost_usd"] == 55
     finally:
         app.dependency_overrides.clear()
+
+
+def test_update_itinerary_requires_auth(client: TestClient) -> None:
+    res = client.put(
+        f"/api/v1/itineraries/{uuid4()}",
+        json={
+            "title": "x",
+            "destination": "Tokyo",
+            "days_data": [],
+        },
+    )
+    assert res.status_code == 401

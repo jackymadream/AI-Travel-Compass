@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,7 @@ logger = get_logger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCATION = "us-central1"
+# Generative models are often unavailable in asia-* embedding regions.
 FLASH_MODEL = os.getenv("GEMINI_FLASH_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
 PRO_MODEL = os.getenv("GEMINI_PRO_MODEL", "gemini-1.5-pro").strip() or "gemini-1.5-pro"
 
@@ -38,18 +40,23 @@ def _load_env() -> None:
 
 
 def _resolve_credentials() -> tuple[str, str]:
-    _load_env()
+    from src.services.gcp_credentials import configure_google_credentials, load_project_env
+
+    load_project_env()
     project_id = os.getenv("GCP_PROJECT_ID", "").strip()
-    location = os.getenv("GCP_LOCATION", "").strip() or DEFAULT_LOCATION
+    # Prefer GEMINI_LOCATION so embeddings can stay in asia-southeast1 while
+    # Gemini runs in a supported region (typically us-central1).
+    location = (
+        os.getenv("GEMINI_LOCATION", "").strip()
+        or os.getenv("GCP_LOCATION", "").strip()
+        or DEFAULT_LOCATION
+    )
     if not project_id:
         raise LlmServiceError("GCP_PROJECT_ID is not set")
-    creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "").strip()
-    if creds:
-        path = Path(creds).expanduser()
-        if not path.is_absolute():
-            path = (ROOT_DIR / path).resolve()
-        if path.is_file():
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(path)
+    try:
+        configure_google_credentials()
+    except FileNotFoundError as exc:
+        raise LlmServiceError(str(exc)) from exc
     return project_id, location
 
 
@@ -67,28 +74,70 @@ def _init_vertex() -> tuple[str, str]:
 
 
 def _generate(model_name: str, prompt: str, *, temperature: float = 0.2) -> str:
+    """
+    Call Vertex Gemini with lightweight retries for transient errors.
+
+    Retries on rate limits / 429 / 503 / UNAVAILABLE before raising
+    ``LlmServiceError`` (agent then falls back to heuristics).
+    """
     _init_vertex()
     try:
         from vertexai.generative_models import GenerativeModel
     except ImportError as exc:
         raise LlmServiceError("vertexai.generative_models unavailable") from exc
 
-    try:
-        model = GenerativeModel(model_name)
-        response = model.generate_content(
-            prompt,
-            generation_config={
-                "temperature": temperature,
-                "max_output_tokens": 2048,
-            },
-        )
-        text = getattr(response, "text", None) or ""
-        if not text and getattr(response, "candidates", None):
-            parts = response.candidates[0].content.parts
-            text = "".join(getattr(p, "text", "") or "" for p in parts)
-        return (text or "").strip()
-    except Exception as exc:  # noqa: BLE001
-        raise LlmServiceError(f"{model_name} failed: {exc}") from exc
+    attempts = max(1, int(os.getenv("GEMINI_RETRY_ATTEMPTS", "3")))
+    base_delay = float(os.getenv("GEMINI_RETRY_BASE_DELAY_SEC", "0.6"))
+    last_exc: BaseException | None = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            model = GenerativeModel(model_name)
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "temperature": temperature,
+                    "max_output_tokens": 2048,
+                },
+            )
+            text = getattr(response, "text", None) or ""
+            if not text and getattr(response, "candidates", None):
+                parts = response.candidates[0].content.parts
+                text = "".join(getattr(p, "text", "") or "" for p in parts)
+            return (text or "").strip()
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            if attempt >= attempts or not _is_transient_llm_error(exc):
+                raise LlmServiceError(f"{model_name} failed: {exc}") from exc
+            delay = base_delay * (2 ** (attempt - 1))
+            logger.warning(
+                "Transient Gemini error (attempt %s/%s), retry in %.1fs: %s",
+                attempt,
+                attempts,
+                delay,
+                exc,
+            )
+            time.sleep(delay)
+
+    raise LlmServiceError(f"{model_name} failed: {last_exc}")
+
+
+def _is_transient_llm_error(exc: BaseException) -> bool:
+    message = str(exc).lower()
+    tokens = (
+        "429",
+        "503",
+        "500",
+        "rate limit",
+        "resource exhausted",
+        "unavailable",
+        "deadline",
+        "timeout",
+        "temporarily",
+        "quota",
+        "try again",
+    )
+    return any(token in message for token in tokens)
 
 
 def _extract_json_object(text: str) -> dict[str, Any]:
@@ -199,8 +248,12 @@ Return JSON only:
 Rules: stay under daily budget; include mix of categories when possible;
 do not invent POIs; cost/duration must match the pool when possible.
 """.strip()
-        raw = self.generate_pro(prompt)
-        data = _extract_json_object(raw)
+        try:
+            raw = self.generate_pro(prompt)
+            data = _extract_json_object(raw)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Pro itinerary draft failed; re-raising for agent fallback: %s", exc)
+            raise LlmServiceError(str(exc)) from exc
         if "day_number" not in data:
             data["day_number"] = day_number
         if "activities" not in data:

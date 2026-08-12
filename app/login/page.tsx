@@ -1,18 +1,37 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { SiteNav } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function safeNextPath(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
+    return "/itineraries";
+  }
+  return raw;
+}
+
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const nextPath = useMemo(
+    () => safeNextPath(searchParams.get("next")),
+    [searchParams]
+  );
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const configured = isSupabaseConfigured();
+
+  function authCallbackUrl(origin: string): string {
+    const callback = new URL("/auth/callback", origin);
+    callback.searchParams.set("next", nextPath);
+    return callback.toString();
+  }
 
   async function handleMagicLink(e: FormEvent) {
     e.preventDefault();
@@ -25,7 +44,7 @@ export default function LoginPage() {
       const origin = window.location.origin;
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${origin}/auth/callback` },
+        options: { emailRedirectTo: authCallbackUrl(origin) },
       });
       if (authError) throw authError;
       setMessage("Check your email for the magic link.");
@@ -45,7 +64,7 @@ export default function LoginPage() {
       const origin = window.location.origin;
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${origin}/auth/callback` },
+        options: { redirectTo: authCallbackUrl(origin) },
       });
       if (authError) throw authError;
     } catch (err) {
@@ -55,8 +74,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto max-w-lg px-4 py-12">
-      <SiteNav active="planner" />
+    <>
       <h1 className="mt-8 font-[family-name:var(--font-display)] text-4xl tracking-tight">
         Sign in
       </h1>
@@ -115,6 +133,17 @@ export default function LoginPage() {
           Back to planner
         </Link>
       </p>
+    </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <main className="mx-auto max-w-lg px-4 py-12">
+      <SiteNav active="itineraries" />
+      <Suspense fallback={<p className="mt-8 text-sm text-[var(--muted-foreground)]">Loading…</p>}>
+        <LoginForm />
+      </Suspense>
     </main>
   );
 }
