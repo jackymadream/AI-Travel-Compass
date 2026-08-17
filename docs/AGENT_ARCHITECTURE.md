@@ -67,13 +67,27 @@ The agent may call tools **multiple times** (retrieve → draft → evaluate →
 **Typical outputs (per POI):**
 
 - `poi_name`, `category`, `cost_usd`, `duration_minutes`, short `description`
-- Optional geo / opening hours when available later
+- Optional `lat` / `lon` / `address` / `poi_id` / `tags` / `photo_url`
 
 **Rules:**
 
-1. Retrieval is **scoped to `city_id`** (SQL and/or RAG over city-local corpus only).
-2. Names and cost/duration claims come from tool results — the LLM must not fabricate POIs.
-3. Prefer preference-aligned POIs; still return a diverse mix so the evaluator can fill rest slots.
+1. Retrieval is **scoped to `city_id`** (SQL and/or RAG over city-local corpus only). Limit is ~24 per category so multi-day plans can skip already-used stops.
+2. Names and cost/duration claims come from tool results — the LLM must not fabricate attraction/rest POIs.
+3. Prefer notable POIs (wikipedia/wikidata, museum/castle/attraction tags) over bare `place_of_worship` neighborhood churches.
+4. **Hard-skip** `poi_name` / `poi_id` already used on earlier days until that category’s unused pool is empty.
+5. Meal slots are **food types** (ramen, monjayaki, …), not restaurant brands. They are injected after retrieval, not taken from the food POI pool.
+
+### 3.1 Itinerary photos
+
+[`src/services/poi_photos.py`](../src/services/poi_photos.py) resolves `photo_url`:
+
+1. Wikidata **P18** (Commons file) when the POI has a `wikidata` id or `wikidata:Q…` tag.
+2. Wikipedia REST summary thumbnail only if the page **title tokens overlap** the POI name and, when both have coordinates, they are within ~25 km.
+3. Otherwise category-shaped Unsplash stock from [`data/poi_category_photos.json`](../data/poi_category_photos.json) (shrine vs park vs sports — not one Japan postcard list).
+
+Only `upload.wikimedia.org` / Commons FilePath URLs and **allowlisted** Unsplash photo IDs are emitted. The planner UI swaps a 404 image to a category placeholder (`onError`).
+
+Meals use cuisine-keyword Unsplash URLs from the same allowlist (`monjayaki` before generic `sushi`; yakiniku is grilled meat, not Korean BBQ stock).
 
 ---
 
@@ -85,12 +99,15 @@ The agent may call tools **multiple times** (retrieve → draft → evaluate →
 |-------|----------------|
 | Day count | Exactly `request.days` daily plans, `day_number` 1..N contiguous |
 | Pace | Activity load fits `relaxed` / `moderate` / `packed` budgets (count + total minutes) |
-| Time slots | Non-overlapping `time_slot`s within a day; sensible meal/rest spacing |
+| Time slots | Non-overlapping `time_slot`s within a day; afternoon non-meals start at **13:45** after lunch |
+| Meals | Each day has Lunch (~12:00) and Dinner (~18:30) `is_food_slot` activities |
+| Cuisine family | Lunch and dinner (and earlier days) do not reuse the same family (sushi, ramen, yakiniku, …) |
 | Daily cost | Sum of activity `cost_usd` ≤ `daily_budget_usd` (or soft warn → hard fail in strict mode) |
 | Categories | Packed days still include rest/food as required by pace policy |
-| Grounding | Every `poi_name` appeared in a prior POI Retrieval result for this run |
+| Grounding | Attraction/rest `poi_name`s came from POI Retrieval for this run |
+| Uniqueness | Non-meal `poi_name`s are unique across days while unused pool remains |
 
-**On failure:** Return structured errors (e.g. `DAY_OVER_BUDGET`, `PACE_TOO_DENSE`, `UNGROUNDED_POI`). The agent revises with tools; it must not skip validation.
+**On failure:** Return structured errors (e.g. `DAY_OVER_BUDGET`, `PACE_TOO_DENSE`, `MISSING_MEALS`, `OVERLAPPING_SLOTS`). The agent revises with tools; it must not skip validation.
 
 **On success:** Mark plan valid for schema emit.
 
@@ -107,7 +124,7 @@ The agent may call tools **multiple times** (retrieve → draft → evaluate →
 
 ### Nested shapes
 
-- **`Activity`:** `time_slot`, `poi_name`, `category` (`attraction` \| `food` \| `rest`), `cost_usd`, `duration_minutes`, `description`
+- **`Activity`:** `time_slot`, `poi_name`, `category` (`attraction` \| `food` \| `rest`), `cost_usd`, `duration_minutes`, `description`, optional `photo_url` / `lat` / `lon` / `poi_id` / `address`, plus meal flags `is_food_slot` and `meal_role` (`lunch` \| `dinner`)
 - **`DailyItinerary`:** `day_number`, `theme`, `estimated_daily_cost`, `activities`
 
 Emit only after Schedule Evaluator **pass**. Parse/validate with Pydantic (`extra` policy + field bounds) at the API boundary.
@@ -116,14 +133,23 @@ Emit only after Schedule Evaluator **pass**. Parse/validate with Pydantic (`extr
 
 ## 6. Agent service entry point
 
-`AgentService.plan_itinerary(request: ItineraryRequest) -> ItineraryResponse` is the single application entry (see stub in `src/services/agent_service.py`).
+`AgentService.plan_itinerary(request: ItineraryRequest) -> ItineraryResponse` is the application entry ([`src/services/agent_service.py`](../src/services/agent_service.py)).
 
-Future wiring (later Phase 3 steps):
+Live path:
 
 1. Load city metadata (locale-aware name).
-2. Run tool-calling agent (LLM + POI Retrieval + Schedule Evaluator).
-3. Map validated draft → `ItineraryResponse`.
-4. Optional: `ValidateHardRules`-style re-check vs destination `avg_daily_cost_usd` / profile (CONTEXT.md §7.2).
+2. Retrieve city-scoped POIs (Qdrant `travel_pois` + Supabase `pois`; mock pool when `USE_MOCK_POIS=true`).
+3. Draft each day (Gemini Pro when Vertex is configured, else heuristic) with rotated meals and unique photos.
+4. Run the Schedule Evaluator; refine until valid or `max_turns`.
+5. Emit `ItineraryResponse`. HTTP: `POST /api/v1/itineraries/generate`. Persist via `user_itineraries` when the user is signed in.
+
+Quality eval (running API): `python scripts/eval_itinerary_flow.py`.
+
+Re-seed Overpass POIs (filters obscure worship; replaces prior overpass rows for that city):
+
+```bash
+python scripts/seed_city_pois.py --city tokyo --skip-places --limit 60
+```
 
 ---
 
@@ -139,11 +165,7 @@ POI retrieval may reuse Vertex/Qdrant patterns from Phase 2, but collections and
 
 ---
 
-## 8. Non-goals (Step 1)
+## 8. Non-goals
 
-- Live LLM / LangGraph wiring
-- HTTP router for itinerary
-- Persisting itineraries
 - Multi-city routes
-
-Step 1 delivers this architecture note, Pydantic contracts, and the agent service stub only.
+- Google Places **Photo** API (out of scope; Wikidata/Wikipedia + allowlisted Unsplash only)

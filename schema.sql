@@ -87,31 +87,41 @@ $$;
 CREATE TABLE countries (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   iso_code            CHAR(2) NOT NULL,
+  slug                TEXT,
   name                JSONB NOT NULL,
   description         JSONB NOT NULL,
   safety_index        SMALLINT NOT NULL,
   avg_daily_cost_usd  NUMERIC(10, 2) NOT NULL,
   best_travel_season  JSONB NOT NULL,
   region_tags         TEXT[] NOT NULL DEFAULT '{}',
+  tags                TEXT[] NOT NULL DEFAULT '{}',
+  photo_url           TEXT,
+  top_cities          JSONB NOT NULL DEFAULT '[]'::jsonb,
   is_active           BOOLEAN NOT NULL DEFAULT TRUE,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   CONSTRAINT countries_iso_code_unique UNIQUE (iso_code),
+  CONSTRAINT countries_slug_unique UNIQUE (slug),
   CONSTRAINT countries_safety_index_range CHECK (safety_index BETWEEN 1 AND 5),
   CONSTRAINT countries_avg_daily_cost_positive CHECK (avg_daily_cost_usd > 0),
   CONSTRAINT countries_name_i18n CHECK (is_valid_i18n_text(name)),
   CONSTRAINT countries_description_i18n CHECK (is_valid_i18n_text(description)),
-  CONSTRAINT countries_best_travel_season_valid CHECK (is_valid_best_travel_season(best_travel_season))
+  CONSTRAINT countries_best_travel_season_valid CHECK (is_valid_best_travel_season(best_travel_season)),
+  CONSTRAINT countries_top_cities_is_array CHECK (jsonb_typeof(top_cities) = 'array')
 );
 
 COMMENT ON TABLE countries IS 'Destination countries with multilingual metadata and travel signals.';
 COMMENT ON COLUMN countries.name IS 'Localized display name: en / zh-HK / ja.';
-COMMENT ON COLUMN countries.description IS 'Localized introduction for recommendation cards and GenAI context.';
+COMMENT ON COLUMN countries.description IS 'Localized introduction for recommendation cards and GenAI context (Phase 6.1 summary).';
 COMMENT ON COLUMN countries.safety_index IS 'Subjective safety score from 1 (low) to 5 (high).';
 COMMENT ON COLUMN countries.avg_daily_cost_usd IS 'Estimated average daily spend per traveler in USD.';
 COMMENT ON COLUMN countries.best_travel_season IS 'Structured season guidance with seasons, months, and localized label.';
 COMMENT ON COLUMN countries.region_tags IS 'Region labels for hard exclusion filters, e.g. {East Asia, Middle East}.';
+COMMENT ON COLUMN countries.slug IS 'Stable text id for browse UI (e.g. japan); UUID id remains the PK.';
+COMMENT ON COLUMN countries.tags IS 'Theme tags for soft browse filters (culture, nature, food, beach, etc.).';
+COMMENT ON COLUMN countries.photo_url IS 'Representative landscape/architecture image URL (Unsplash).';
+COMMENT ON COLUMN countries.top_cities IS 'JSONB snapshot of 2–4 representative cities for country cards.';
 
 -- ---------------------------------------------------------------------------
 -- cities
@@ -318,6 +328,7 @@ CREATE INDEX idx_countries_safety_index ON countries (safety_index);
 CREATE INDEX idx_countries_avg_daily_cost_usd ON countries (avg_daily_cost_usd);
 CREATE INDEX idx_countries_safety_cost ON countries (safety_index, avg_daily_cost_usd);
 CREATE INDEX idx_countries_region_tags_gin ON countries USING GIN (region_tags);
+CREATE INDEX idx_countries_tags_gin ON countries USING GIN (tags);
 CREATE INDEX idx_countries_name_en ON countries ((name->>'en'));
 CREATE INDEX idx_countries_name_zh_hk ON countries ((name->>'zh-HK'));
 CREATE INDEX idx_countries_name_ja ON countries ((name->>'ja'));

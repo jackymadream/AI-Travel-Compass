@@ -187,6 +187,30 @@ def upsert_poi_vectors(
     return upsert_points(POIS_COLLECTION, points, client=client)
 
 
+def delete_poi_vectors(
+    point_ids: Sequence[str],
+    *,
+    client: Any | None = None,
+) -> int:
+    """Delete points from ``travel_pois`` by id. Returns requested count."""
+    ids = [str(i) for i in point_ids if i]
+    if not ids:
+        return 0
+    from qdrant_client.http import models as qmodels
+
+    qdrant = client or get_qdrant_client()
+    try:
+        qdrant.delete(
+            collection_name=POIS_COLLECTION,
+            points_selector=qmodels.PointIdsList(points=ids),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise QdrantServiceError(
+            f"Qdrant delete failed on '{POIS_COLLECTION}': {exc}"
+        ) from exc
+    return len(ids)
+
+
 def search_poi_vectors(
     *,
     query_vector: Sequence[float],

@@ -1,0 +1,111 @@
+{
+  "travel_styles": [
+    "culture",
+    "food",
+    "nature",
+    "urban",
+    "beach",
+    "romance",
+    "history",
+    "adventure",
+    "scenic",
+    "wellness",
+    "design",
+    "outdoors",
+    "mountains",
+    "nightlife"
+  ],
+  "specialty_interests": [
+    "anime",
+    "manga",
+    "pop-culture",
+    "k-pop",
+    "onsen",
+    "temples",
+    "wine",
+    "skiing",
+    "hiking",
+    "northern-lights",
+    "street-food",
+    "architecture",
+    "festivals",
+    "diving",
+    "desert",
+    "islands",
+    "markets",
+    "museums"
+  ],
+  "synonyms": {
+    "anime": [
+      "anime",
+      "manga",
+      "otaku",
+      "ghibli",
+      "akihabara",
+      "cosplay",
+      "anime pilgrimage"
+    ],
+    "pop-culture": [
+      "pop culture",
+      "pop-culture",
+      "geek culture",
+      "fandom"
+    ],
+    "k-pop": ["k-pop", "kpop", "korean pop", "k drama", "k-drama"],
+    "onsen": ["onsen", "hot spring", "hot springs", "thermal bath"],
+    "temples": ["temple", "temples", "shrine", "shrines", "pagoda"],
+    "northern-lights": [
+      "northern lights",
+      "northern-lights",
+      "aurora",
+      "aurora borealis",
+      "polar lights"
+    ],
+    "wine": ["wine", "vineyard", "vineyards", "winery", "enotourism"],
+    "skiing": ["ski", "skiing", "snowboard", "snowboarding", "alpine ski"],
+    "hiking": [
+      "hike",
+      "hiking",
+      "trek",
+      "trekking",
+      "trail",
+      "mountain hike"
+    ],
+    "street-food": [
+      "street food",
+      "street-food",
+      "hawker",
+      "night market food",
+      "food stall"
+    ],
+    "nightlife": ["nightlife", "night life", "clubs", "bars scene"],
+    "desert": ["desert", "sahara", "dune", "dunes", "riad"],
+    "islands": ["island", "islands", "archipelago", "island hopping"],
+    "diving": ["dive", "diving", "scuba", "snorkel", "snorkeling"],
+    "festivals": ["festival", "festivals", "carnival", "fiesta"],
+    "architecture": ["architecture", "modern architecture", "historic architecture"],
+    "markets": ["market", "markets", "bazaar", "souk", "souks"],
+    "museums": ["museum", "museums", "gallery", "galleries"],
+    "food": ["food", "cuisine", "gastronomy", "culinary", "tapas", "paella"],
+    "beach": ["beach", "beaches", "coast", "coastal", "seaside"],
+    "nature": ["nature", "outdoors", "wildlife", "national park"],
+    "romance": ["romance", "romantic", "honeymoon"],
+    "history": ["history", "historic", "heritage", "ruins"],
+    "adventure": ["adventure", "adrenaline", "extreme sports"],
+    "culture": ["culture", "cultural", "arts"]
+  },
+  "semantic_expansions": {
+    "anime": "anime manga otaku pop culture themed districts Akihabara Tokyo Japan",
+    "k-pop": "K-pop Korean pop culture Seoul entertainment districts South Korea",
+    "onsen": "onsen hot springs bathhouses wellness Japan",
+    "northern-lights": "northern lights aurora borealis Arctic winter Iceland Norway Finland",
+    "wine": "wine vineyards tasting cellars gastronomy",
+    "skiing": "skiing snowboarding alpine resorts mountains",
+    "hiking": "hiking trekking mountain trails scenic outdoors",
+    "street-food": "street food night markets hawker stalls local cuisine",
+    "desert": "desert dunes riads souks Sahara Morocco",
+    "islands": "islands beaches coastal ferries archipelago",
+    "diving": "scuba diving snorkeling coral reefs underwater",
+    "temples": "temples shrines spiritual heritage culture"
+  }
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,6 +23,9 @@ class TripPace(str, Enum):
     PACKED = "packed"
 
 
+MealRole = Literal["lunch", "dinner"]
+
+
 class Activity(BaseModel):
     """Single timed stop within a day."""
 
@@ -38,6 +42,23 @@ class Activity(BaseModel):
     cost_usd: float = Field(..., ge=0, description="Estimated activity cost in USD.")
     duration_minutes: int = Field(..., ge=1, le=24 * 60)
     description: str = Field(..., min_length=1, max_length=2000)
+    is_food_slot: bool = Field(
+        default=False,
+        description="True for Lunch/Dinner meal recommendations (food types, not venues).",
+    )
+    meal_role: MealRole | None = Field(
+        default=None,
+        description="lunch or dinner when is_food_slot is true.",
+    )
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
+    poi_id: str | None = Field(default=None, max_length=64)
+    address: str | None = Field(default=None, max_length=500)
+    photo_url: str | None = Field(default=None, max_length=2000)
+    is_custom: bool = Field(
+        default=False,
+        description="User-inserted custom waypoint.",
+    )
 
 
 class DailyItinerary(BaseModel):

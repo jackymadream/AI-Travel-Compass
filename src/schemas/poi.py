@@ -41,9 +41,11 @@ class PoiRecord(BaseModel):
     user_ratings_total: int | None = Field(default=None, ge=0)
     primary_type: str | None = None
     address: str | None = None
+    photo_url: str | None = None
     source: str = "overpass"
     osm_type: str | None = None
     osm_id: int | None = None
+    wikidata: str | None = None
 
     def embedding_text(self) -> str:
         """Structured chunk for Vertex ``RETRIEVAL_DOCUMENT`` embeddings."""
@@ -85,9 +87,11 @@ class PoiRecord(BaseModel):
             "user_ratings_total": self.user_ratings_total,
             "primary_type": self.primary_type,
             "address": self.address,
+            "photo_url": self.photo_url,
             "source": self.source,
             "osm_type": self.osm_type,
             "osm_id": self.osm_id,
+            "wikidata": self.wikidata,
             "text": self.embedding_text(),
         }
 
@@ -115,5 +119,6 @@ class PoiRecord(BaseModel):
             "places_primary_type": self.primary_type,
             "user_ratings_total": self.user_ratings_total,
             "address": self.address,
+            "photo_url": self.photo_url,
             "is_active": True,
         }

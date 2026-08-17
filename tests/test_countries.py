@@ -17,6 +17,7 @@ SAMPLE_COUNTRIES: list[dict[str, Any]] = [
     {
         "id": "11111111-1111-1111-1111-111111111111",
         "iso_code": "JP",
+        "slug": "japan",
         "name": {"en": "Japan", "zh-HK": "日本", "ja": "日本"},
         "description": {
             "en": "Ancient tradition and modernity.",
@@ -35,11 +36,26 @@ SAMPLE_COUNTRIES: list[dict[str, Any]] = [
             },
         },
         "region_tags": ["East Asia"],
+        "tags": ["culture", "food", "urban"],
+        "photo_url": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1600",
+        "top_cities": [
+            {
+                "slug": "tokyo",
+                "name": {"en": "Tokyo", "zh-HK": "東京", "ja": "東京"},
+                "photo_url": None,
+            },
+            {
+                "slug": "kyoto",
+                "name": {"en": "Kyoto", "zh-HK": "京都", "ja": "京都"},
+                "photo_url": None,
+            },
+        ],
         "is_active": True,
     },
     {
         "id": "22222222-2222-2222-2222-222222222222",
         "iso_code": "VN",
+        "slug": "vietnam",
         "name": {"en": "Vietnam", "zh-HK": "越南", "ja": "ベトナム"},
         "description": {
             "en": "Street food and karsts.",
@@ -58,11 +74,26 @@ SAMPLE_COUNTRIES: list[dict[str, Any]] = [
             },
         },
         "region_tags": ["Southeast Asia"],
+        "tags": ["food", "budget", "nature"],
+        "photo_url": "https://images.unsplash.com/photo-1528127269322-539801943592?w=1600",
+        "top_cities": [
+            {
+                "slug": "hanoi",
+                "name": {"en": "Hanoi", "zh-HK": "河內", "ja": "ハノイ"},
+                "photo_url": None,
+            },
+            {
+                "slug": "da-nang",
+                "name": {"en": "Da Nang", "zh-HK": "峴港", "ja": "ダナン"},
+                "photo_url": None,
+            },
+        ],
         "is_active": True,
     },
     {
         "id": "33333333-3333-3333-3333-333333333333",
         "iso_code": "IS",
+        "slug": "iceland",
         "name": {"en": "Iceland", "zh-HK": "冰島", "ja": "アイスランド"},
         "description": {
             "en": "Volcanoes and northern lights.",
@@ -81,6 +112,20 @@ SAMPLE_COUNTRIES: list[dict[str, Any]] = [
             },
         },
         "region_tags": ["Northern Europe"],
+        "tags": ["nature", "adventure", "scenic"],
+        "photo_url": "https://images.unsplash.com/photo-1504829857797-ddff29ac9f1b?w=1600",
+        "top_cities": [
+            {
+                "slug": "reykjavik",
+                "name": {"en": "Reykjavik", "zh-HK": "雷克雅未克", "ja": "レイキャビク"},
+                "photo_url": None,
+            },
+            {
+                "slug": "vik",
+                "name": {"en": "Vik", "zh-HK": "維克", "ja": "ヴィーク"},
+                "photo_url": None,
+            },
+        ],
         "is_active": True,
     },
 ]
@@ -93,6 +138,7 @@ def _mock_supabase(rows: list[dict[str, Any]]) -> MagicMock:
     state: dict[str, Any] = {
         "max_budget": None,
         "min_safety": None,
+        "tags": None,
     }
 
     def execute() -> MagicMock:
@@ -105,6 +151,13 @@ def _mock_supabase(rows: list[dict[str, Any]]) -> MagicMock:
         if state["min_safety"] is not None:
             filtered = [
                 r for r in filtered if r["safety_index"] >= state["min_safety"]
+            ]
+        if state["tags"]:
+            wanted = set(state["tags"])
+            filtered = [
+                r
+                for r in filtered
+                if wanted.intersection({t.lower() for t in (r.get("tags") or [])})
             ]
         result.data = filtered
         return result
@@ -124,8 +177,14 @@ def _mock_supabase(rows: list[dict[str, Any]]) -> MagicMock:
             state["min_safety"] = int(value)
         return query
 
+    def overlaps(column: str, value: Any) -> MagicMock:
+        if column == "tags":
+            state["tags"] = [str(v).lower() for v in value]
+        return query
+
     query.lte.side_effect = lte
     query.gte.side_effect = gte
+    query.overlaps.side_effect = overlaps
     query.execute.side_effect = execute
     client.table.return_value = query
     return client
@@ -216,15 +275,40 @@ class TestListCountriesDeterministicFiltering:
             c["avg_daily_cost_usd"] <= 150 and c["safety_index"] >= 5 for c in body
         )
 
+    def test_filter_by_tags_overlap(self, client: TestClient) -> None:
+        response = client.get(
+            "/api/v1/countries",
+            params=[("tags", "nature"), ("tags", "adventure")],
+        )
+        assert response.status_code == 200
+        body = response.json()
+        iso_codes = {c["iso_code"] for c in body}
+        assert iso_codes == {"VN", "IS"}
+
+    def test_filter_by_comma_separated_tags(self, client: TestClient) -> None:
+        response = client.get(
+            "/api/v1/countries",
+            params={"tags": "culture,urban"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert {c["iso_code"] for c in body} == {"JP"}
+
     def test_response_includes_deterministic_fields(self, client: TestClient) -> None:
         response = client.get("/api/v1/countries", params={"locale": "en"})
         assert response.status_code == 200
-        country = response.json()[0]
+        country = next(c for c in response.json() if c["iso_code"] == "JP")
         assert "id" in country
+        assert country["slug"] == "japan"
         assert "iso_code" in country
         assert "name" in country
         assert "description" in country
         assert "safety_index" in country
         assert "avg_daily_cost_usd" in country
         assert "best_travel_season" in country
+        assert country["best_season"] == "Spring & Autumn"
         assert "region_tags" in country
+        assert country["tags"] == ["culture", "food", "urban"]
+        assert "unsplash.com" in (country["photo_url"] or "")
+        assert len(country["top_cities"]) == 2
+        assert country["top_cities"][0]["name"] == "Tokyo"

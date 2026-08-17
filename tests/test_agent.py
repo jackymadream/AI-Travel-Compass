@@ -42,11 +42,22 @@ async def test_plan_itinerary_multi_day_grounded_and_under_budget() -> None:
     for day in result.daily_plans:
         assert day.estimated_daily_cost <= request.daily_budget_usd
         assert day.activities
+        meals = [a for a in day.activities if a.is_food_slot]
+        assert len(meals) >= 2
+        assert {m.meal_role for m in meals} >= {"lunch", "dinner"}
         for act in day.activities:
             assert act.poi_name
             assert act.category.value in {"attraction", "food", "rest"}
             assert act.cost_usd >= 0
             assert act.duration_minutes >= 1
+
+    non_meal = [
+        a.poi_name
+        for d in result.daily_plans
+        for a in d.activities
+        if not a.is_food_slot
+    ]
+    assert len(non_meal) == len(set(non_meal))
 
 
 @pytest.mark.asyncio
@@ -62,7 +73,10 @@ async def test_plan_itinerary_relaxed_pace_limits_activity_count() -> None:
 
     result = await service.plan_itinerary(request)
     assert len(result.daily_plans) == 1
-    assert len(result.daily_plans[0].activities) <= 3
+    assert len(result.daily_plans[0].activities) <= 5
+    meals = [a for a in result.daily_plans[0].activities if a.is_food_slot]
+    assert len(meals) >= 2
+    assert {m.meal_role for m in meals} >= {"lunch", "dinner"}
 
 
 @pytest.mark.asyncio
@@ -86,7 +100,7 @@ async def test_plan_itinerary_retries_when_draft_over_budget() -> None:
             expensive = next(p for p in poi_pool if p["name"] == "Ginza Sushi Counter")
             museum = next(p for p in poi_pool if p["name"] == "Tokyo National Museum")
             rest = next(p for p in poi_pool if p["category"] == "rest")
-            # Always return costly trio; agent refine + re-evaluate should drop cost.
+            # Always return costly trio + required meals; refine should drop venue cost.
             return {
                 "day_number": day_number,
                 "theme": "Luxury day",
@@ -98,22 +112,45 @@ async def test_plan_itinerary_retries_when_draft_over_budget() -> None:
                         "cost_usd": expensive["cost_usd"],
                         "duration_minutes": expensive["duration_minutes"],
                         "description": expensive["description"],
+                        "is_food_slot": False,
                     },
                     {
-                        "time_slot": "12:00-14:30",
+                        "time_slot": "12:00-13:30",
+                        "poi_name": "Japanese Ramen / Teishoku",
+                        "category": "food",
+                        "cost_usd": 12,
+                        "duration_minutes": 90,
+                        "description": "Lunch food type",
+                        "is_food_slot": True,
+                        "meal_role": "lunch",
+                    },
+                    {
+                        "time_slot": "14:00-16:30",
                         "poi_name": museum["name"],
                         "category": museum["category"],
                         "cost_usd": museum["cost_usd"],
                         "duration_minutes": museum["duration_minutes"],
                         "description": museum["description"],
+                        "is_food_slot": False,
                     },
                     {
-                        "time_slot": "15:00-16:00",
+                        "time_slot": "16:45-17:45",
                         "poi_name": rest["name"],
                         "category": rest["category"],
                         "cost_usd": rest["cost_usd"],
                         "duration_minutes": rest["duration_minutes"],
                         "description": rest["description"],
+                        "is_food_slot": False,
+                    },
+                    {
+                        "time_slot": "18:30-20:00",
+                        "poi_name": "Izakaya / Sushi Set",
+                        "category": "food",
+                        "cost_usd": 20,
+                        "duration_minutes": 90,
+                        "description": "Dinner food type",
+                        "is_food_slot": True,
+                        "meal_role": "dinner",
                     },
                 ],
             }
@@ -124,13 +161,13 @@ async def test_plan_itinerary_retries_when_draft_over_budget() -> None:
         city_id=TOKYO,
         days=1,
         pace=TripPace.MODERATE,
-        daily_budget_usd=50.0,
+        daily_budget_usd=80.0,
         preferences=["food"],
     )
 
     result = await service.plan_itinerary(request)
 
-    assert result.daily_plans[0].estimated_daily_cost <= 50.0
+    assert result.daily_plans[0].estimated_daily_cost <= 80.0
     assert llm.calls >= 1
 
 

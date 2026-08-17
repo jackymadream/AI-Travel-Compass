@@ -61,6 +61,19 @@ def _sample_day(*, activities: list[dict]) -> dict:
     }
 
 
+def _meal(role: str, *, cost: float = 15.0) -> dict:
+    return {
+        "time_slot": "12:00-13:30" if role == "lunch" else "18:30-20:00",
+        "poi_name": "Regional Lunch" if role == "lunch" else "Local Dinner",
+        "category": "food",
+        "cost_usd": cost,
+        "duration_minutes": 90,
+        "description": f"{role} food type",
+        "is_food_slot": True,
+        "meal_role": role,
+    }
+
+
 def test_evaluate_schedule_valid_moderate_plan() -> None:
     daily_plan = _sample_day(
         activities=[
@@ -72,14 +85,7 @@ def test_evaluate_schedule_valid_moderate_plan() -> None:
                 "duration_minutes": 120,
                 "description": "Temple visit",
             },
-            {
-                "time_slot": "12:00-13:00",
-                "poi_name": "Ramen shop",
-                "category": "food",
-                "cost_usd": 15,
-                "duration_minutes": 60,
-                "description": "Lunch",
-            },
+            _meal("lunch", cost=15),
             {
                 "time_slot": "14:00-15:00",
                 "poi_name": "Park rest",
@@ -88,6 +94,7 @@ def test_evaluate_schedule_valid_moderate_plan() -> None:
                 "duration_minutes": 60,
                 "description": "Break",
             },
+            _meal("dinner", cost=20),
         ]
     )
 
@@ -99,10 +106,31 @@ def test_evaluate_schedule_valid_moderate_plan() -> None:
 
     assert result["is_valid"] is True
     assert result["violations"] == []
-    assert result["total_cost_usd"] == pytest.approx(20.0)
-    # 120+60+60 activity + travel buffer between hops
+    assert result["total_cost_usd"] == pytest.approx(40.0)
     assert result["total_duration_minutes"] > 240
     assert "suggested_adjustments" in result
+
+
+def test_evaluate_schedule_missing_meals() -> None:
+    daily_plan = _sample_day(
+        activities=[
+            {
+                "time_slot": "10:00-12:00",
+                "poi_name": "Museum",
+                "category": "attraction",
+                "cost_usd": 10,
+                "duration_minutes": 120,
+                "description": "Art",
+            }
+        ]
+    )
+    result = evaluate_schedule_and_budget_tool(
+        daily_plan=daily_plan,
+        daily_budget_usd=100.0,
+        pace="moderate",
+    )
+    assert result["is_valid"] is False
+    assert any("MISSING_MEALS" in v for v in result["violations"])
 
 
 def test_evaluate_schedule_over_budget_reports_shortfall() -> None:
@@ -110,12 +138,13 @@ def test_evaluate_schedule_over_budget_reports_shortfall() -> None:
         activities=[
             {
                 "time_slot": "10:00-12:00",
-                "poi_name": "Fine dining",
-                "category": "food",
+                "poi_name": "Fine dining venue",
+                "category": "attraction",
                 "cost_usd": 80,
                 "duration_minutes": 120,
                 "description": "Kaiseki",
             },
+            _meal("lunch", cost=20),
             {
                 "time_slot": "14:00-16:00",
                 "poi_name": "Museum",
@@ -124,6 +153,7 @@ def test_evaluate_schedule_over_budget_reports_shortfall() -> None:
                 "duration_minutes": 120,
                 "description": "Art",
             },
+            _meal("dinner", cost=20),
         ]
     )
 
@@ -134,8 +164,8 @@ def test_evaluate_schedule_over_budget_reports_shortfall() -> None:
     )
 
     assert result["is_valid"] is False
-    assert result["total_cost_usd"] == pytest.approx(120.0)
-    assert any("Over budget by $20" in v for v in result["violations"])
+    assert result["total_cost_usd"] == pytest.approx(160.0)
+    assert any("Over budget" in v for v in result["violations"])
     assert result["suggested_adjustments"]
 
 
@@ -144,13 +174,15 @@ def test_evaluate_schedule_too_packed_for_relaxed_pace() -> None:
         {
             "time_slot": f"{9 + i}:00-{10 + i}:00",
             "poi_name": f"Stop {i}",
-            "category": "attraction" if i % 2 == 0 else "food",
+            "category": "attraction",
             "cost_usd": 10,
             "duration_minutes": 90,
             "description": f"Activity {i}",
+            "is_food_slot": False,
         }
-        for i in range(5)
+        for i in range(4)
     ]
+    activities.extend([_meal("lunch"), _meal("dinner")])
     daily_plan = _sample_day(activities=activities)
 
     result = evaluate_schedule_and_budget_tool(
