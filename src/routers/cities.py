@@ -1,8 +1,6 @@
-"""Cities listing for planner UI (Phase 5)."""
+"""Cities listing for planner UI (Phase 5 / 6.2)."""
 
 from __future__ import annotations
-
-from typing import Any
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict, Field
@@ -18,6 +16,7 @@ class CitySummary(BaseModel):
     id: str
     slug: str
     name: str
+    country_id: str | None = None
     country_iso: str | None = None
     safety_index: int | None = None
     avg_daily_cost_usd: float | None = None
@@ -28,7 +27,7 @@ class CitySummary(BaseModel):
 async def list_cities(
     supabase: SupabaseDep,
     locale: str = Query(default="en"),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=200, ge=1, le=500),
 ) -> list[CitySummary]:
     """Active cities with localized display names (for planner city picker)."""
     cities = (
@@ -60,12 +59,14 @@ async def list_cities(
         else:
             label = str(name_obj)
         tags = row.get("tags") or []
+        country_id = row.get("country_id")
         results.append(
             CitySummary(
                 id=str(row["id"]),
                 slug=str(row["slug"]),
                 name=str(label),
-                country_iso=iso_by_id.get(row.get("country_id")),
+                country_id=str(country_id) if country_id else None,
+                country_iso=iso_by_id.get(country_id),
                 safety_index=row.get("safety_index"),
                 avg_daily_cost_usd=float(row["avg_daily_cost_usd"])
                 if row.get("avg_daily_cost_usd") is not None

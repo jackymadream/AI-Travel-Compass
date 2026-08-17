@@ -6,21 +6,35 @@ export type BestTravelSeason = {
   label: string;
 };
 
+export type TopCity = {
+  slug: string;
+  name: string;
+  photo_url?: string | null;
+  description?: string;
+  tags?: string[];
+};
+
 export type Country = {
   id: string;
   iso_code: string;
+  slug?: string | null;
   name: string;
   description: string;
   safety_index: number;
   avg_daily_cost_usd: number;
   best_travel_season: BestTravelSeason;
+  best_season?: string;
   region_tags: string[];
+  tags?: string[];
+  photo_url?: string | null;
+  top_cities?: TopCity[];
 };
 
 export type CountryFilters = {
   locale: Locale;
   maxBudget: number;
   minSafety: number;
+  tags?: string[];
 };
 
 export type SearchRequest = {
@@ -72,6 +86,14 @@ export type Activity = {
   cost_usd: number;
   duration_minutes: number;
   description: string;
+  is_food_slot?: boolean;
+  meal_role?: "lunch" | "dinner" | null;
+  lat?: number | null;
+  lon?: number | null;
+  poi_id?: string | null;
+  address?: string | null;
+  photo_url?: string | null;
+  is_custom?: boolean;
 };
 
 export type DailyItinerary = {
@@ -104,6 +126,7 @@ export type CitySummary = {
   id: string;
   slug: string;
   name: string;
+  country_id?: string | null;
   country_iso?: string | null;
   safety_index?: number | null;
   avg_daily_cost_usd?: number | null;
@@ -120,9 +143,10 @@ export function getApiBaseUrl(): string {
 
 export async function fetchCities(
   locale: Locale = "en",
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  limit = 200
 ): Promise<CitySummary[]> {
-  const params = new URLSearchParams({ locale, limit: "50" });
+  const params = new URLSearchParams({ locale, limit: String(limit) });
   const res = await fetch(`${getApiBaseUrl()}/api/v1/cities?${params}`, {
     signal,
     headers: { Accept: "application/json" },
@@ -143,12 +167,24 @@ export async function fetchCountries(
     max_budget: String(filters.maxBudget),
     min_safety_rating: String(filters.minSafety),
   });
+  for (const tag of filters.tags ?? []) {
+    const cleaned = tag.trim();
+    if (cleaned) params.append("tags", cleaned);
+  }
+
+  // Bust any intermediary HTTP caches (stale photo_url payloads caused
+  // a race where an older response overwrote a fresh one in Explore).
+  params.set("_cb", String(Date.now()));
 
   const res = await fetch(
     `${getApiBaseUrl()}/api/v1/countries?${params.toString()}`,
     {
       signal,
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
       cache: "no-store",
     }
   );
@@ -377,9 +413,15 @@ async function formatApiError(res: Response, fallback: string): Promise<string> 
   return `${fallback} (${res.status}): ${raw}`;
 }
 
+/**
+ * Honest match % from hybrid ranking score.
+ * Scores in [0, 1] map linearly to 0–100; values already on a 0–100 scale are clamped.
+ * Weak matches stay low — do not inflate into a 70–99 band.
+ */
 export function matchPercent(score: number): number {
-  const pct = score <= 1 ? score * 100 : score;
-  return Math.max(0, Math.min(100, Math.round(pct)));
+  if (!Number.isFinite(score)) return 0;
+  const unit = score <= 1 ? score : score / 100;
+  return Math.max(0, Math.min(100, Math.round(unit * 100)));
 }
 
 export function emptyReasonMessage(reason: string | null | undefined): string {

@@ -22,6 +22,7 @@ from src.schemas.search import (
     SearchRequest,
     SearchResponse,
 )
+from src.services.intent_extraction import extract_intent_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,12 @@ class SearchService:
         ranked = await self.rank_results(
             candidates=candidates,
             vector_hits=vector_hits,
-            tags=list(hard_filters.get("tags") or request.tags or []),
+            tags=list(
+                dict.fromkeys(
+                    list(intent.interests or [])
+                    + list(request.tags or [])
+                )
+            ),
             locale=locale,
             limit=request.limit,
         )
@@ -87,22 +93,12 @@ class SearchService:
 
     async def extract_intent(self, request: SearchRequest) -> ExtractedIntent:
         """
-        Decompose NL query into hard filters vs semantic residue.
+        Decompose NL query into hard filters vs soft interests + semantic residue.
 
-        Stub: copies explicit request fields; later add LLM/rules extractor.
+        Interests are soft (ranking / query expansion only). Explicit request
+        budget/safety/tags still win in ``_merge_hard_filters``.
         """
-        hard: dict[str, Any] = {}
-        if request.max_budget is not None:
-            hard["max_budget"] = request.max_budget
-        if request.min_safety is not None:
-            hard["min_safety"] = request.min_safety
-        if request.tags:
-            hard["tags"] = list(request.tags)
-
-        return ExtractedIntent(
-            hard_filters=hard,
-            semantic_query=request.query.strip(),
-        )
+        return extract_intent_from_request(request)
 
     async def sql_filter_candidates(
         self,

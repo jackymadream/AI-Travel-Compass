@@ -16,6 +16,7 @@ from src.services.cache_service import (
     poi_cache_key,
 )
 from src.services.embedding import EmbeddingServiceError, embed_query
+from src.services.itinerary_i18n import category_photo
 from src.services.qdrant_service import (
     POIS_COLLECTION,
     QdrantServiceError,
@@ -167,7 +168,7 @@ def _search_supabase(
             .select(
                 "id, city_id, name, category, description, tags, cost_usd, "
                 "duration_minutes, price_level, rating, safety_score, "
-                "latitude, longitude"
+                "latitude, longitude, address, photo_url"
             )
             .eq("city_id", city_id)
             .eq("category", category)
@@ -211,6 +212,7 @@ def _normalize_poi(
     description = str(raw.get("description") or name).strip()
     return {
         "city_id": str(raw.get("city_id") or city_id),
+        "id": str(raw["id"]) if raw.get("id") else (str(raw["poi_id"]) if raw.get("poi_id") else None),
         "name": name,
         "category": cat,
         "cost_usd": float(cost),
@@ -223,6 +225,15 @@ def _normalize_poi(
         else None,
         "lat": raw.get("lat", raw.get("latitude")),
         "lon": raw.get("lon", raw.get("longitude")),
+        "address": raw.get("address"),
+        "city": raw.get("city"),
+        "photo_url": raw.get("photo_url")
+        or category_photo(
+            cat,
+            hash(name) % 4,
+            city=str(raw.get("city") or "") or None,
+            poi_name=name,
+        ),
     }
 
 

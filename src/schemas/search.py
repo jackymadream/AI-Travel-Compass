@@ -55,7 +55,7 @@ class SearchRequest(BaseModel):
 
 
 class ExtractedIntent(BaseModel):
-    """Result of intent decomposition (hard vs semantic)."""
+    """Result of intent decomposition (hard vs soft vs semantic)."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -65,7 +65,14 @@ class ExtractedIntent(BaseModel):
     )
     semantic_query: str = Field(
         default="",
-        description="Residue text used for embedding / vector search.",
+        description="Residue / expanded text used for embedding / vector search.",
+    )
+    interests: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Soft interest tags extracted from NL (ranking + expansion only; "
+            "never hard SQL tag gates)."
+        ),
     )
 
 

@@ -20,13 +20,16 @@ Environment setup
      QDRANT_API_KEY                   # optional for local Qdrant
 
 2. Seed Postgres first (so city_id / country_id exist):
-     python scripts/seed_db.py
+     python scripts/seed_countries.py   # Phase 6.1 (preferred)
+     # or: python scripts/seed_db.py
 
 3. Install / update dependencies:
      pip install -r requirements.txt
 
 4. Run:
      python scripts/embed_destinations.py
+
+Uses ``data/countries_phase6.json`` when present, otherwise ``data/seed_data.json``.
 """
 
 from __future__ import annotations
@@ -49,7 +52,9 @@ from qdrant_client.http.models import (
 from supabase import Client, create_client
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-SEED_FILE = ROOT_DIR / "data" / "seed_data.json"
+LEGACY_SEED_FILE = ROOT_DIR / "data" / "seed_data.json"
+PHASE6_SEED_FILE = ROOT_DIR / "data" / "countries_phase6.json"
+SEED_FILE = PHASE6_SEED_FILE if PHASE6_SEED_FILE.exists() else LEGACY_SEED_FILE
 
 COLLECTION_NAME = "travel_destinations"
 EMBEDDING_MODEL = "text-embedding-004"
@@ -384,7 +389,7 @@ def build_points(
             if not db_row:
                 skipped.append(
                     f"{iso}/{slug}: not found in Supabase "
-                    "(run scripts/seed_db.py first)"
+                    "(run scripts/seed_countries.py or seed_db.py first)"
                 )
                 continue
 

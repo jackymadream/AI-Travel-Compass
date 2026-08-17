@@ -108,6 +108,9 @@ PLACES_PRICE_MAP = {
     "PRICE_LEVEL_VERY_EXPENSIVE": 4,
 }
 
+# Keep obscure neighborhood churches out unless the city would miss this floor.
+MIN_ATTRACTION = 6
+
 
 def load_env() -> None:
     load_dotenv(ROOT_DIR / ".env")
@@ -177,6 +180,53 @@ def format_address(tags: dict[str, str]) -> str | None:
     return ", ".join(cleaned) if cleaned else tags.get("addr:full")
 
 
+def _poi_record_from_element(
+    el: dict[str, Any],
+    *,
+    name: str,
+    display: str,
+    category: str,
+    soft_tags: list[str],
+    cost: float,
+    duration: int,
+    city_id: str | None,
+    safety_score: int,
+    wiki_qid: str,
+) -> PoiRecord:
+    tags = el.get("tags") or {}
+    osm_id = int(el["id"])
+    lat = el.get("lat")
+    lon = el.get("lon")
+    desc_bits = [
+        tags.get("description"),
+        tags.get("tourism"),
+        tags.get("amenity"),
+        tags.get("cuisine"),
+    ]
+    description = " · ".join(str(b) for b in desc_bits if b) or f"{name} in {display}"
+    return PoiRecord(
+        id=poi_id_from_osm("node", osm_id),
+        name=name,
+        city=display,
+        category=category,  # type: ignore[arg-type]
+        description=description[:2000],
+        lat=float(lat) if lat is not None else None,
+        lon=float(lon) if lon is not None else None,
+        price_level=0 if cost <= 0 else (1 if cost < 15 else 2 if cost < 40 else 3),
+        rating=None,
+        safety_score=safety_score,
+        city_id=city_id,
+        tags=soft_tags,
+        cost_usd=float(cost),
+        duration_minutes=int(duration),
+        address=format_address({str(k): str(v) for k, v in tags.items()}),
+        source="overpass",
+        osm_type="node",
+        osm_id=osm_id,
+        wikidata=wiki_qid or None,
+    )
+
+
 def elements_to_pois(
     elements: list[dict[str, Any]],
     *,
@@ -188,6 +238,7 @@ def elements_to_pois(
     meta = CITY_REGISTRY[city_key]
     display = meta["display_name"]
     seen_names: set[str] = set()
+    deferred_worship: list[PoiRecord] = []
     by_category: dict[str, list[PoiRecord]] = {
         "attraction": [],
         "food": [],
@@ -207,44 +258,47 @@ def elements_to_pois(
         if not classified:
             continue
         category, soft_tags, cost, duration = classified
+        wiki_qid = str(tags.get("wikidata") or "").strip()
+        has_wiki = bool(tags.get("wikipedia") or wiki_qid)
+        obscure_worship = (
+            tags.get("amenity") == "place_of_worship"
+            and not has_wiki
+            and not tags.get("tourism")
+        )
+        if wiki_qid:
+            soft_tags = list(dict.fromkeys([*soft_tags, f"wikidata:{wiki_qid}", "wikipedia"]))
+        elif tags.get("wikipedia"):
+            soft_tags = list(dict.fromkeys([*soft_tags, "wikipedia"]))
+        record = _poi_record_from_element(
+            el,
+            name=name,
+            display=display,
+            category=category,
+            soft_tags=soft_tags,
+            cost=cost,
+            duration=duration,
+            city_id=city_id,
+            safety_score=safety_score,
+            wiki_qid=wiki_qid,
+        )
+        if obscure_worship:
+            deferred_worship.append(record)
+            seen_names.add(name.lower())
+            continue
         # Cap per category while scanning so we do not hold tens of thousands of records.
         if len(by_category[category]) >= max(limit, 10):
             continue
-        osm_id = int(el["id"])
-        lat = el.get("lat")
-        lon = el.get("lon")
-        desc_bits = [
-            tags.get("description"),
-            tags.get("tourism"),
-            tags.get("amenity"),
-            tags.get("cuisine"),
-        ]
-        description = " · ".join(str(b) for b in desc_bits if b) or f"{name} in {display}"
-
-        record = PoiRecord(
-            id=poi_id_from_osm("node", osm_id),
-            name=name,
-            city=display,
-            category=category,  # type: ignore[arg-type]
-            description=description[:2000],
-            lat=float(lat) if lat is not None else None,
-            lon=float(lon) if lon is not None else None,
-            price_level=0 if cost <= 0 else (1 if cost < 15 else 2 if cost < 40 else 3),
-            rating=None,
-            safety_score=safety_score,
-            city_id=city_id,
-            tags=soft_tags,
-            cost_usd=float(cost),
-            duration_minutes=int(duration),
-            address=format_address({str(k): str(v) for k, v in tags.items()}),
-            source="overpass",
-            osm_type="node",
-            osm_id=osm_id,
-        )
         seen_names.add(name.lower())
         by_category[category].append(record)
         if all(len(by_category[c]) >= max(limit, 10) for c in by_category):
             break
+
+    need = max(0, MIN_ATTRACTION - len(by_category["attraction"]))
+    for rec in deferred_worship:
+        if need <= 0:
+            break
+        by_category["attraction"].append(rec)
+        need -= 1
 
     # Round-robin categories so agent tools get attraction/food/rest coverage.
     pois: list[PoiRecord] = []
@@ -352,7 +406,17 @@ def resolve_city_row(supabase: Any, city_key: str) -> dict[str, Any] | None:
 def upsert_supabase_pois(supabase: Any, pois: list[PoiRecord]) -> int:
     rows = [p.supabase_row() for p in pois]
     # PostgREST upsert on primary key
-    supabase.table("pois").upsert(rows, on_conflict="id").execute()
+    try:
+        supabase.table("pois").upsert(rows, on_conflict="id").execute()
+    except Exception as exc:  # noqa: BLE001
+        # photo_url column is optional until migrate_poi_photo_url.sql is applied.
+        msg = str(exc).lower()
+        if "photo_url" in msg:
+            for row in rows:
+                row.pop("photo_url", None)
+            supabase.table("pois").upsert(rows, on_conflict="id").execute()
+        else:
+            raise
     return len(rows)
 
 

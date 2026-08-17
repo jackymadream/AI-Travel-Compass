@@ -136,12 +136,20 @@ Soft preferences **MUST NOT** appear in mandatory SQL `WHERE` clauses. They infl
 | `party_size`                                      | Companion type: solo (1), couple (2), family/group (≥3/≥4)                  |
 | `preferred_seasons[]`, `preferred_months[]`       | Season alignment scoring (agentic)                                          |
 | `preferred_country_ids[]`, `preferred_city_ids[]` | Boost favorites (agentic)                                                   |
-| `interests[]`                                     | Tag overlap for ranking and RAG queries                                     |
-| `cities.tags[]`                                   | Destination soft tags (`culture`, `nature`, `budget-friendly`, …)           |
+| `interests[]`                                     | Soft tag overlap for ranking and RAG (see interest taxonomy)                |
+| `cities.tags[]`                                   | Destination soft tags: travel styles + specialty interests                  |
 | `accessibility_needs[]`                           | Strong soft signal for itinerary design                                     |
 | `personalization_notes`                           | Free-text LLM context; cannot bypass hard rules                             |
 | `preferred_locale`                                | Output language: `en`, `zh-HK` (Traditional Chinese), `ja`                  |
 
+### 5.1 Interest taxonomy (canonical tags)
+
+Controlled vocabulary lives in [`data/interest_taxonomy.json`](./data/interest_taxonomy.json):
+
+- **Travel styles:** `culture`, `food`, `nature`, `urban`, `beach`, `romance`, `history`, `adventure`, `scenic`, `wellness`, `design`, `outdoors`, `mountains`, `nightlife`.
+- **Specialty interests:** `anime`, `manga`, `pop-culture`, `k-pop`, `onsen`, `temples`, `wine`, `skiing`, `hiking`, `northern-lights`, `street-food`, `architecture`, `festivals`, `diving`, `desert`, `islands`, `markets`, `museums`.
+
+Rule-based NL search extracts specialty/style synonyms into soft `interests` and expands the semantic query. **Interests MUST NOT be applied as hard SQL `tags` gates** (they only affect ranking + embeddings).
 
 ---
 
@@ -307,6 +315,7 @@ I18n JSONB indexes: per-locale B-tree on `(name->>'en'|'zh-HK'|'ja')` plus GIN `
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-06 | Initial domain model.                                                                                              |
 | 2026-08-06 | Aligned terminology with schema; added SQL/agent boundary contract; exclusion columns and `region_tags` in schema. |
+| 2026-08-18 | Itinerary meals are food **types** (not restaurant brands); cuisine families must not repeat same-day. POI photos: Wikidata/Wikipedia with title overlap, else allowlisted Unsplash. |
 | 2026-08-06 | Documented `cities.tags`; `zh-HK` I18n must be Traditional Chinese.                                                |
 
 

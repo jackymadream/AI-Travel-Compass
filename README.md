@@ -91,7 +91,7 @@ flowchart LR
 - [x] Agent tools: POI search + schedule/budget evaluator (+ unit tests)
 - [x] Tool-calling agent loop + `POST /api/v1/itineraries/generate` (TDD)
 - [x] Explore UI for itinerary generation (`/planner`)
-- [ ] Live LLM provider wiring (optional seam already in `AgentService`)
+- [x] Gemini Flash/Pro itinerary draft with heuristic fallback; Wikidata/Wikipedia photos; unique POIs and meals across days
 
 ### Phase 4 — Caching, observability & deployment (complete)
 - [x] Redis / in-memory `CacheService` for embeddings (24h) and POI results (7d)
@@ -104,6 +104,10 @@ flowchart LR
 - [x] **5.2** Live POI search (Qdrant `travel_pois` + Supabase fallback), Gemini Flash/Pro LLM seam, SlowAPI search rate limit (15/min)
 - [x] **5.3** Supabase Auth (Google / magic link), `user_itineraries` persistence, save/list API
 - [ ] Expand city coverage beyond seed destinations
+
+### Phase 6 — Country browse experience
+- [x] **6.1** Extended country schema (`slug`, `photo_url`, `tags`, `top_cities`), 28-country Unsplash seed (`scripts/seed_countries.py`), `GET /api/v1/countries` tags filter
+- [x] Country card browse UI (photos, tags, city chips) on `/explore`
 
 ---
 
@@ -141,14 +145,21 @@ Fill `.env` (see comments in `.env.example` and the [deployment checklist](./doc
 ```bash
 # Apply schema.sql in the Supabase SQL editor (if not already applied)
 # For existing DBs: also run scripts/migrate_add_pois.sql
+# Phase 6.1 columns: scripts/migrate_phase6_countries.sql
 pip install -r requirements.txt
-python scripts/seed_db.py
+python scripts/seed_db.py                 # legacy smaller seed
+python scripts/seed_countries.py          # Phase 6.1: 28 countries + photos/tags/cities
 python scripts/embed_destinations.py
 python scripts/ensure_qdrant_indexes.py   # city_id / locale / country_id indexes
 
 # Phase 5.1 — real POIs (Overpass; optional Places if GOOGLE_PLACES_API_KEY set)
 python scripts/ingest_real_pois.py --city tokyo --limit 10 --dry-run
-python scripts/ingest_real_pois.py --city tokyo --limit 100
+python scripts/seed_city_pois.py --city tokyo --skip-places --limit 60
+# Neighborhood churches without wikipedia/wikidata are skipped; prior Overpass
+# rows for that city are replaced so stale POIs do not linger.
+
+# Optional: itinerary quality eval against a running API
+python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000
 ```
 
 ### 3. Backend
@@ -188,7 +199,7 @@ python scripts/smoke_test.py --allow-degraded
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/v1/countries` | List countries (`locale`, `max_budget`, `min_safety_rating`) |
+| `GET` | `/api/v1/countries` | List countries (`locale`, `max_budget`, `min_safety_rating`, `tags`) |
 | `POST` | `/api/v1/search` | Hybrid RAG search (`query`, `locale`, `max_budget`, `min_safety`, `tags`) |
 | `POST` | `/api/v1/itineraries/generate` | Tool-calling itinerary agent (`city_id`, `days`, `pace`, budget, prefs) |
 | `GET` | `/health` | Readiness: Redis + Qdrant + Supabase (`ok` / `degraded`) |
@@ -220,7 +231,8 @@ Example search body:
 │   ├── schemas/            # Pydantic contracts
 │   ├── services/           # Search, RAG, agent, cache, health
 │   └── utils/              # JSON structured logging
-├── scripts/                # seed, embed, indexes, smoke_test, ingest_real_pois
+├── scripts/                # seed, embed, indexes, smoke_test, ingest, eval
+├── data/                   # photo allowlist, interest taxonomy, phase-6 countries
 ├── tests/                  # Pytest
 ├── docs/                   # RAG, agent, deployment
 ├── Dockerfile.backend
@@ -239,7 +251,7 @@ Example search body:
 | [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) | Docker, Cloud Run, Vercel, env checklist |
 | [`CONTEXT.md`](./CONTEXT.md) | Domain glossary, hard vs soft constraints, SQL/LLM boundary |
 | [`docs/RAG_ARCHITECTURE.md`](./docs/RAG_ARCHITECTURE.md) | Hybrid search pipeline |
-| [`docs/AGENT_ARCHITECTURE.md`](./docs/AGENT_ARCHITECTURE.md) | Tool-calling itinerary agent |
+| [`docs/AGENT_ARCHITECTURE.md`](./docs/AGENT_ARCHITECTURE.md) | Tool-calling itinerary agent (photos, meals, uniqueness) |
 | [`AGENTS.md`](./AGENTS.md) | Agent skill pointers (issues, triage, domain) |
 | [`schema.sql`](./schema.sql) | Tables, indexes, i18n checks |
 
