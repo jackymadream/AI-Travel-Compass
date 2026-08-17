@@ -14,7 +14,8 @@ type ActivityPhotoProps = {
 export function ActivityPhoto({ activity, className }: ActivityPhotoProps) {
   const [failed, setFailed] = useState(false);
   const badge = activityBadgeStyle(activity);
-  const showPlaceholder = !activity.photo_url || failed;
+  const src = activity.photo_url;
+  const showPlaceholder = !src || failed;
 
   if (showPlaceholder) {
     return (
@@ -31,7 +32,7 @@ export function ActivityPhoto({ activity, className }: ActivityPhotoProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={activity.photo_url}
+      src={src}
       alt=""
       className={cn("shrink-0 object-cover", className)}
       onError={() => setFailed(true)}
