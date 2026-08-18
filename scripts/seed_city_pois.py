@@ -67,6 +67,8 @@ BBOX_DELTA = 0.12
 MIN_ATTRACTION = 6
 MIN_FOOD = 4
 MIN_REST = 2
+MIN_NIGHTLIFE = 8
+MIN_POPULAR = 12
 
 SYNTHETIC_TEMPLATES: dict[str, list[dict[str, Any]]] = {
     "attraction": [
@@ -203,6 +205,68 @@ SYNTHETIC_TEMPLATES: dict[str, list[dict[str, Any]]] = {
     ],
 }
 
+NIGHTLIFE_TEMPLATES: list[dict[str, Any]] = [
+    {
+        "suffix": "Laneway Bar Crawl",
+        "category": "food",
+        "tags": ["food", "nightlife", "bar"],
+        "cost": 20,
+        "duration": 75,
+        "desc": "Compact alley bars and late-night drinks.",
+    },
+    {
+        "suffix": "Jazz Club Evening",
+        "category": "attraction",
+        "tags": ["attraction", "nightlife", "music"],
+        "cost": 28,
+        "duration": 90,
+        "desc": "Live-music nightlife stop after dinner.",
+    },
+    {
+        "suffix": "Night Market Lights",
+        "category": "attraction",
+        "tags": ["attraction", "nightlife", "market"],
+        "cost": 0,
+        "duration": 75,
+        "desc": "Evening market streets and neon neighborhoods.",
+    },
+    {
+        "suffix": "Rooftop Cocktail Terrace",
+        "category": "food",
+        "tags": ["food", "nightlife", "bar"],
+        "cost": 24,
+        "duration": 60,
+        "desc": "Skyline drinks with a later start time.",
+    },
+]
+
+POPULAR_TEMPLATES: list[dict[str, Any]] = [
+    {
+        "suffix": "Iconic Landmark Circuit",
+        "category": "attraction",
+        "tags": ["attraction", "popular", "sightseeing", "wikipedia"],
+        "cost": 0,
+        "duration": 90,
+        "desc": "The city's best-known landmark walking loop.",
+    },
+    {
+        "suffix": "Flagship Museum",
+        "category": "attraction",
+        "tags": ["attraction", "popular", "museum", "wikipedia"],
+        "cost": 15,
+        "duration": 120,
+        "desc": "Headline museum most first-time visitors book.",
+    },
+    {
+        "suffix": "Observation Deck",
+        "category": "attraction",
+        "tags": ["attraction", "popular", "viewpoint", "wikipedia"],
+        "cost": 20,
+        "duration": 75,
+        "desc": "Popular observation deck with city views.",
+    },
+]
+
 
 def load_env() -> None:
     load_dotenv(ROOT_DIR / ".env")
@@ -270,12 +334,66 @@ def poi_id_synthetic(city_id: str, category: str, index: int) -> str:
     )
 
 
+def count_by_tag(pois: list[PoiRecord], tag: str) -> int:
+    needle = tag.lower()
+    return sum(
+        1
+        for p in pois
+        if any(needle == str(t).lower() or needle in str(t).lower() for t in p.tags)
+    )
+
+
 def count_by_category(pois: list[PoiRecord]) -> dict[str, int]:
     counts = {"attraction": 0, "food": 0, "rest": 0}
     for p in pois:
         if p.category in counts:
             counts[p.category] += 1
     return counts
+
+
+def _synthetic_record(
+    *,
+    city: dict[str, Any],
+    city_id: str,
+    display: str,
+    safety: int,
+    tmpl: dict[str, Any],
+    index: int,
+    key: str,
+) -> PoiRecord:
+    lat0 = float(city["lat"])
+    lon0 = float(city["lon"])
+    city_tags = [str(t) for t in city.get("tags") or []]
+    jitter_lat = ((index % 5) - 2) * 0.008
+    jitter_lon = ((index // 5) % 5 - 2) * 0.008
+    category = str(tmpl.get("category") or "attraction")
+    name = f"{display} {tmpl['suffix']}" if index == 0 else f"{display} {tmpl['suffix']} {index + 1}"
+    tags = list(dict.fromkeys([*tmpl["tags"], *city_tags[:4]]))
+    return PoiRecord(
+        id=poi_id_synthetic(city_id, key, index),
+        name=name,
+        city=display,
+        category=category,  # type: ignore[arg-type]
+        description=f"{tmpl['desc']} ({display})",
+        lat=lat0 + jitter_lat,
+        lon=lon0 + jitter_lon,
+        price_level=0 if tmpl["cost"] <= 0 else (1 if tmpl["cost"] < 20 else 2),
+        rating=4.3,
+        safety_score=safety,
+        city_id=city_id,
+        tags=tags,
+        cost_usd=float(tmpl["cost"]),
+        duration_minutes=int(tmpl["duration"]),
+        address=f"Central {display}",
+        photo_url=category_photo(
+            category,
+            index,
+            city=display,
+            iso=str(city.get("iso") or "").lower() or None,
+            poi_name=name,
+        ),
+        source="synthetic",
+    )
 
 
 def build_synthetic_pois(
@@ -290,11 +408,8 @@ def build_synthetic_pois(
         "food": MIN_FOOD,
         "rest": MIN_REST,
     }
-    lat0 = float(city["lat"])
-    lon0 = float(city["lon"])
     display = city["display_name"]
     safety = int(city.get("safety_index") or 3)
-    city_tags = [str(t) for t in city.get("tags") or []]
     extras: list[PoiRecord] = []
 
     for category, need in targets.items():
@@ -302,42 +417,64 @@ def build_synthetic_pois(
         templates = SYNTHETIC_TEMPLATES[category]
         index = 0
         while have + len([p for p in extras if p.category == category]) < need:
-            tmpl = templates[index % len(templates)]
-            # Slight spatial scatter so the map is not a single point.
-            jitter_lat = ((index % 5) - 2) * 0.008
-            jitter_lon = ((index // 5) % 5 - 2) * 0.008
-            name = f"{display} {tmpl['suffix']}"
-            tags = list(dict.fromkeys([*tmpl["tags"], *city_tags[:4]]))
+            tmpl = dict(templates[index % len(templates)])
+            tmpl["category"] = category
             extras.append(
-                PoiRecord(
-                    id=poi_id_synthetic(city_id, category, index),
-                    name=name,
-                    city=display,
-                    category=category,  # type: ignore[arg-type]
-                    description=f"{tmpl['desc']} ({display})",
-                    lat=lat0 + jitter_lat,
-                    lon=lon0 + jitter_lon,
-                    price_level=0 if tmpl["cost"] <= 0 else (1 if tmpl["cost"] < 20 else 2),
-                    rating=4.2,
-                    safety_score=safety,
+                _synthetic_record(
+                    city=city,
                     city_id=city_id,
-                    tags=tags,
-                    cost_usd=float(tmpl["cost"]),
-                    duration_minutes=int(tmpl["duration"]),
-                    address=f"Central {display}",
-                    photo_url=category_photo(
-                        category,
-                        index,
-                        city=display,
-                        iso=str(city.get("iso") or "").lower() or None,
-                        poi_name=name,
-                    ),
-                    source="synthetic",
+                    display=display,
+                    safety=safety,
+                    tmpl=tmpl,
+                    index=index,
+                    key=category,
                 )
             )
             index += 1
             if index > 40:
                 break
+
+    combined = [*existing, *extras]
+    nightlife_have = count_by_tag(combined, "nightlife")
+    night_index = 0
+    while nightlife_have < MIN_NIGHTLIFE:
+        tmpl = NIGHTLIFE_TEMPLATES[night_index % len(NIGHTLIFE_TEMPLATES)]
+        extras.append(
+            _synthetic_record(
+                city=city,
+                city_id=city_id,
+                display=display,
+                safety=safety,
+                tmpl=tmpl,
+                index=night_index,
+                key="nightlife",
+            )
+        )
+        nightlife_have += 1
+        night_index += 1
+        if night_index > 40:
+            break
+
+    combined = [*existing, *extras]
+    popular_have = count_by_tag(combined, "popular")
+    pop_index = 0
+    while popular_have < MIN_POPULAR:
+        tmpl = POPULAR_TEMPLATES[pop_index % len(POPULAR_TEMPLATES)]
+        extras.append(
+            _synthetic_record(
+                city=city,
+                city_id=city_id,
+                display=display,
+                safety=safety,
+                tmpl=tmpl,
+                index=pop_index,
+                key="popular",
+            )
+        )
+        popular_have += 1
+        pop_index += 1
+        if pop_index > 40:
+            break
     return extras
 
 

@@ -16,6 +16,7 @@ export const SEARCH_SUGGESTIONS = [
 type AiSearchBarProps = {
   initialQuery?: string;
   loading?: boolean;
+  placeholder?: string;
   onSearch: (query: string) => void;
   onClear: () => void;
 };
@@ -23,6 +24,7 @@ type AiSearchBarProps = {
 export function AiSearchBar({
   initialQuery = "",
   loading = false,
+  placeholder = "Describe the trip you want…",
   onSearch,
   onClear,
 }: AiSearchBarProps) {
@@ -56,7 +58,7 @@ export function AiSearchBar({
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Describe your ideal trip…"
+            placeholder={placeholder}
             className="h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] pl-10 pr-4 text-sm outline-none ring-[var(--ring)] placeholder:text-[var(--muted-foreground)] focus:ring-2"
           />
         </label>

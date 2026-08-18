@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "explore": "Explore",
+    "planner": "Planner",
+    "itineraries": "My itineraries"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "notConfigured": "Auth not configured"
+  },
+  "explore": {
+    "kicker": "Explore",
+    "title": "Travel Compass",
+    "subtitle": "Describe your trip in natural language, or browse with hard filters. Budget, safety, and locale always apply before ranking.",
+    "filters": "Filters",
+    "refine": "Refine destinations",
+    "hardConstraints": "Hard constraints applied before ranking.",
+    "maxBudget": "Max daily budget",
+    "minSafety": "Minimum safety",
+    "locale": "Locale",
+    "loading": "Loading destinations…",
+    "searching": "Searching destinations…",
+    "matches": "{count} AI match",
+    "matchesPlural": "{count} AI matches",
+    "destinations": "{count} destination",
+    "destinationsPlural": "{count} destinations",
+    "updating": "Updating",
+    "searchPlaceholder": "Describe the trip you want…"
+  },
+  "planner": {
+    "kicker": "Itinerary planner",
+    "title": "Day-by-day with the agent",
+    "subtitle": "Set days, pace, and budget. The agent retrieves grounded POIs, evaluates the schedule, and returns a validated timeline with a route map.",
+    "controls": "Controls",
+    "planTrip": "Plan the trip",
+    "agentHint": "The agent retrieves POIs, then validates budget and pace.",
+    "generate": "Generate itinerary",
+    "planning": "Planning…"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Google OAuth or magic link via Supabase Auth. Required to save itineraries.",
+    "google": "Continue with Google",
+    "magic": "Email magic link",
+    "send": "Send magic link",
+    "back": "Back to planner"
+  }
+}

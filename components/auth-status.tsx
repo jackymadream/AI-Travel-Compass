@@ -6,8 +6,10 @@ import type { User } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 export function AuthStatus() {
+  const t = useTranslations("auth");
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const configured = isSupabaseConfigured();
@@ -36,14 +38,16 @@ export function AuthStatus() {
 
   if (!configured) {
     return (
-      <span className="text-xs text-[var(--muted-foreground)]">Auth not configured</span>
+      <span className="text-xs text-[var(--muted-foreground)]">
+        {t("notConfigured")}
+      </span>
     );
   }
 
   if (!user) {
     return (
       <Button asChild variant="secondary" size="sm">
-        <Link href="/login">Sign in</Link>
+        <Link href="/login">{t("signIn")}</Link>
       </Button>
     );
   }
@@ -61,7 +65,7 @@ export function AuthStatus() {
           void createClient().auth.signOut();
         }}
       >
-        Sign out
+        {t("signOut")}
       </Button>
     </div>
   );

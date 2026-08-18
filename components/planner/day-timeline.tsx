@@ -1,9 +1,10 @@
 "use client";
 
-import { MapPin, Timer } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Timer } from "lucide-react";
 
 import type { Activity, DailyItinerary } from "@/lib/api";
 import { ActivityPhoto } from "@/components/planner/activity-photo";
+import type { ScheduleWarning } from "@/lib/itinerary-edit";
 import { activityBadgeStyle } from "@/lib/planner-styles";
 import { cn } from "@/lib/utils";
 
@@ -15,15 +16,40 @@ type DayTimelineProps = {
     dayNumber: number,
     index: number
   ) => void;
+  editable?: boolean;
+  warnings?: ScheduleWarning[];
+  onMoveActivity?: (
+    dayNumber: number,
+    index: number,
+    direction: -1 | 1
+  ) => void;
 };
 
 export function DayTimeline({
   days,
   selectedKey = null,
   onSelectActivity,
+  editable = false,
+  warnings = [],
+  onMoveActivity,
 }: DayTimelineProps) {
   return (
     <div className="space-y-8">
+      {warnings.length > 0 ? (
+        <div
+          className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          role="status"
+        >
+          <p className="font-medium">Schedule notes</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            {warnings.map((warning) => (
+              <li key={`${warning.dayNumber}-${warning.message}`}>
+                Day {warning.dayNumber}: {warning.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {days.map((day, index) => (
         <section
           key={day.day_number}
@@ -51,6 +77,16 @@ export function DayTimeline({
                 activity={activity}
                 isLast={activityIndex === day.activities.length - 1}
                 selected={selectedKey === `${day.day_number}-${activityIndex}`}
+                canMoveUp={editable && activityIndex > 0}
+                canMoveDown={
+                  editable && activityIndex < day.activities.length - 1
+                }
+                onMove={
+                  onMoveActivity
+                    ? (direction) =>
+                        onMoveActivity(day.day_number, activityIndex, direction)
+                    : undefined
+                }
                 onSelect={
                   onSelectActivity
                     ? () =>
@@ -75,11 +111,17 @@ function TimelineItem({
   isLast,
   selected,
   onSelect,
+  canMoveUp,
+  canMoveDown,
+  onMove,
 }: {
   activity: Activity;
   isLast: boolean;
   selected?: boolean;
   onSelect?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (direction: -1 | 1) => void;
 }) {
   const badge = activityBadgeStyle(activity);
   const label = activity.is_food_slot
@@ -87,6 +129,7 @@ function TimelineItem({
       ? "Dinner"
       : "Lunch"
     : badge.label;
+  const title = activity.display_name || activity.poi_name;
 
   const content = (
     <>
@@ -120,7 +163,7 @@ function TimelineItem({
                 </p>
                 <h4 className="flex items-start gap-2 font-medium text-[var(--foreground)]">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
-                  <span>{activity.poi_name}</span>
+                  <span>{title}</span>
                 </h4>
               </div>
               <span
@@ -151,6 +194,34 @@ function TimelineItem({
 
   return (
     <li className={cn("relative pb-6", isLast && "pb-0")}>
+      {onMove ? (
+        <div className="absolute -left-[2.65rem] top-8 flex flex-col gap-0.5">
+          <button
+            type="button"
+            className="rounded bg-[var(--card)] p-0.5 text-[var(--muted-foreground)] disabled:opacity-30"
+            disabled={!canMoveUp}
+            aria-label="Move stop earlier"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMove(-1);
+            }}
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            className="rounded bg-[var(--card)] p-0.5 text-[var(--muted-foreground)] disabled:opacity-30"
+            disabled={!canMoveDown}
+            aria-label="Move stop later"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMove(1);
+            }}
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : null}
       {onSelect ? (
         <button type="button" className="block w-full" onClick={onSelect}>
           {content}

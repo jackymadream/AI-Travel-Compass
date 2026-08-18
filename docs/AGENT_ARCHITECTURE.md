@@ -95,21 +95,27 @@ Meals use cuisine-keyword Unsplash URLs from the same allowlist (`monjayaki` bef
 
 **Purpose:** Deterministic validation of draft `DailyItinerary` lists before they leave the agent.
 
-| Check | Rule (initial) |
-|-------|----------------|
+| Check | Rule |
+|-------|------|
 | Day count | Exactly `request.days` daily plans, `day_number` 1..N contiguous |
-| Pace | Activity load fits `relaxed` / `moderate` / `packed` budgets (count + total minutes) |
-| Time slots | Non-overlapping `time_slot`s within a day; afternoon non-meals start at **13:45** after lunch |
-| Meals | Each day has Lunch (~12:00) and Dinner (~18:30) `is_food_slot` activities |
+| Pace | Count **and** duration must fit `PACE_LIMITS` (includes lunch + dinner). Evaluator adds **30 min travel between consecutive stops**. Moderate: ≤7 activities, ≤600 min; relaxed: ≤5 / 420; packed: ≤10 / 780 |
+| Time slots | Non-overlapping `time_slot`s. Lunch is pinned at 12:00 + duration; later stops start after lunch + 30 min; dinner follows the last afternoon stop |
+| Meals | Each day has Lunch and Dinner `is_food_slot` activities (`meal_role` lunch / dinner) |
 | Cuisine family | Lunch and dinner (and earlier days) do not reuse the same family (sushi, ramen, yakiniku, …) |
-| Daily cost | Sum of activity `cost_usd` ≤ `daily_budget_usd` (or soft warn → hard fail in strict mode) |
-| Categories | Packed days still include rest/food as required by pace policy |
+| Daily cost | Sum of activity `cost_usd` ≤ `daily_budget_usd` |
 | Grounding | Attraction/rest `poi_name`s came from POI Retrieval for this run |
 | Uniqueness | Non-meal `poi_name`s are unique across days while unused pool remains |
 
-**On failure:** Return structured errors (e.g. `DAY_OVER_BUDGET`, `PACE_TOO_DENSE`, `MISSING_MEALS`, `OVERLAPPING_SLOTS`). The agent revises with tools; it must not skip validation.
+The Gemini draft prompt repeats those pace caps (count, minutes, travel hops). The evaluator is still the source of truth.
 
-**On success:** Mark plan valid for schema emit.
+**On failure:** Return structured strings (`Over budget by $N`, `MISSING_MEALS`, `OVERLAPPING_SLOTS`, `Schedule too packed for {pace}…`). The agent revises: drop expensive stops, drop attractions until both pace caps pass, then rebuild slots.
+
+**After `max_turns` (3):**
+
+- **Hard fail** (raises `AgentPlanningError`): over budget, missing lunch/dinner, leftover overlaps.
+- **Best effort:** leftover issues are **pace-only** (too many activities or too many minutes). Emit the day with `DailyItinerary.warnings` so the UI can show a schedule note instead of failing the whole trip.
+
+**On success:** Mark the day valid for schema emit.
 
 ---
 
@@ -119,15 +125,15 @@ Meals use cuisine-keyword Unsplash URLs from the same allowlist (`monjayaki` bef
 |-------|---------|
 | `city_name` | Localized city display name |
 | `total_cost_usd` | Sum of daily estimated costs |
-| `daily_plans` | `list[DailyItinerary]` — theme, cost, ordered `Activity` rows |
+| `daily_plans` | `list[DailyItinerary]` — theme, cost, optional `warnings[]`, ordered `Activity` rows |
 | `agent_reasoning` | Short explanation of pacing / preference trade-offs |
 
 ### Nested shapes
 
 - **`Activity`:** `time_slot`, `poi_name`, `category` (`attraction` \| `food` \| `rest`), `cost_usd`, `duration_minutes`, `description`, optional `photo_url` / `lat` / `lon` / `poi_id` / `address`, plus meal flags `is_food_slot` and `meal_role` (`lunch` \| `dinner`)
-- **`DailyItinerary`:** `day_number`, `theme`, `estimated_daily_cost`, `activities`
+- **`DailyItinerary`:** `day_number`, `theme`, `estimated_daily_cost`, `warnings` (pace notes after retries), `activities`
 
-Emit only after Schedule Evaluator **pass**. Parse/validate with Pydantic (`extra` policy + field bounds) at the API boundary.
+Emit after Schedule Evaluator **pass**, or after max turns when only pace caps remain (warnings attached). Parse/validate with Pydantic (`extra` policy + field bounds) at the API boundary.
 
 ---
 
@@ -140,10 +146,10 @@ Live path:
 1. Load city metadata (locale-aware name).
 2. Retrieve city-scoped POIs (Qdrant `travel_pois` + Supabase `pois`; mock pool when `USE_MOCK_POIS=true`).
 3. Draft each day (Gemini Pro when Vertex is configured, else heuristic) with rotated meals and unique photos.
-4. Run the Schedule Evaluator; refine until valid or `max_turns`.
+4. Run the Schedule Evaluator; refine until valid or `max_turns`. Pace-only leftovers become day `warnings`; budget / meals / overlaps still fail the request.
 5. Emit `ItineraryResponse`. HTTP: `POST /api/v1/itineraries/generate`. Persist via `user_itineraries` when the user is signed in.
 
-Quality eval (running API): `python scripts/eval_itinerary_flow.py`.
+Gemini drafts use Vertex (`GEMINI_LOCATION`, usually `us-central1`) even when embeddings stay on `GCP_LOCATION` (`asia-southeast1`). Quality eval (running API): `python scripts/eval_itinerary_flow.py`. The eval checks meals, uniqueness, overlaps, and that a day over the pace cap either fits or carries warnings.
 
 Re-seed Overpass POIs (filters obscure worship; replaces prior overpass rows for that city):
 

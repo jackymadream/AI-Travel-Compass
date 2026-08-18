@@ -7,6 +7,9 @@ import pytest
 from src.services.agent_tools import (
     MOCK_CITY_TOKYO,
     evaluate_schedule_and_budget_tool,
+    pace_constraint_prompt,
+    pace_only_violations,
+    scheduled_total_minutes,
     search_pois_tool,
 )
 
@@ -194,3 +197,30 @@ def test_evaluate_schedule_too_packed_for_relaxed_pace() -> None:
     assert result["is_valid"] is False
     assert any("relaxed" in v.lower() for v in result["violations"])
     assert any("packed" in v.lower() or "too" in v.lower() for v in result["violations"])
+    assert any("30 min" in s or "travel" in s.lower() for s in result["suggested_adjustments"])
+
+
+def test_scheduled_total_minutes_includes_travel_hops() -> None:
+    activities = [
+        {"duration_minutes": 90},
+        {"duration_minutes": 60},
+        {"duration_minutes": 90},
+    ]
+    # 240 activity + 2 hops × 30 travel
+    assert scheduled_total_minutes(activities) == 300
+
+
+def test_pace_only_violations_ignores_budget_and_meals() -> None:
+    packed = ["Schedule too packed for moderate pace (690 minutes including travel; max 600)"]
+    assert pace_only_violations(packed) is True
+    assert pace_only_violations(["Over budget by $999"]) is False
+    assert pace_only_violations(["MISSING_MEALS: need Lunch and Dinner food slots"]) is False
+    assert pace_only_violations(packed + ["Over budget by $10"]) is False
+
+
+def test_pace_constraint_prompt_includes_caps_and_travel_buffer() -> None:
+    text = pace_constraint_prompt("moderate")
+    assert "7" in text
+    assert "600" in text
+    assert "30" in text
+

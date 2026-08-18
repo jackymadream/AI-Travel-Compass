@@ -1100,6 +1100,119 @@ def day_validated_reasoning(
     )
 
 
+def trip_user_summary(
+    city_name: str,
+    days: int,
+    pace: str,
+    preferences: list[str],
+    locale: Locale | str | None,
+    *,
+    missing_tags: list[str] | None = None,
+) -> str:
+    """Friendly 'what we optimized for' copy (not evaluator turn logs)."""
+    key = _locale_key(locale)
+    skip = {"popular", "unconventional"}
+    focus = [p.replace("-", " ") for p in preferences if p and p.lower() not in skip]
+    unconventional = any(p.lower() == "unconventional" for p in preferences)
+    if key == "zh-HK":
+        focus_txt = "、".join(focus) if focus else "均衡行程"
+        style = "偏門小店" if unconventional else "熱門地標"
+        extra = ""
+        if missing_tags:
+            extra = " 資料庫較少「" + "、".join(missing_tags) + "」景點，可用地圖自訂地點補上。"
+        return (
+            f"這次 {days} 天（{pace}）{city_name} 行程以{focus_txt}為主，並偏向{style}。"
+            f"{extra}"
+        ).strip()
+    if key == "ja":
+        focus_txt = "、".join(focus) if focus else "バランスの取れた見学"
+        style = "穴場" if unconventional else "定番スポット"
+        extra = ""
+        if missing_tags:
+            extra = (
+                " データ上「"
+                + "、".join(missing_tags)
+                + "」の候補が少ないので、地図からカスタム地点を追加してください。"
+            )
+        return (
+            f"{city_name}の{days}日間（{pace}）プランは{focus_txt}を優先し、{style}寄りです。"
+            f"{extra}"
+        ).strip()
+    focus_txt = ", ".join(focus) if focus else "a balanced mix of sights"
+    style = "lesser-known stops" if unconventional else "popular landmarks"
+    extra = ""
+    if missing_tags:
+        extra = (
+            f" Limited pool coverage for {', '.join(missing_tags)} — "
+            "add a custom map pin if you have a specific venue in mind."
+        )
+    return (
+        f"We focused this {days}-day {pace} plan in {city_name} on {focus_txt}, "
+        f"leaning toward {style}.{extra}"
+    )
+
+
+def trip_prep_tips(
+    city_name: str,
+    preferences: list[str],
+    locale: Locale | str | None,
+) -> list[str]:
+    key = _locale_key(locale)
+    prefs = {p.strip().lower() for p in preferences if p}
+    tips: list[tuple[str, dict[str, str]]] = [
+        (
+            "hours",
+            {
+                "en": f"Confirm opening hours the day before — {city_name} spots often close one weekday.",
+                "zh-HK": f"出發前確認開放時間——{city_name}景點常有固定休息日。",
+                "ja": f"前日に営業時間を確認。{city_name}は定休日がある施設が多いです。",
+            },
+        ),
+        (
+            "tickets",
+            {
+                "en": "Pre-book tickets for observation decks and popular museums when you can.",
+                "zh-HK": "觀景台與熱門博物館盡量提早網上預約。",
+                "ja": "展望台や人気ミュージアムは可能なら事前予約を。",
+            },
+        ),
+    ]
+    if "nightlife" in prefs:
+        tips.append(
+            (
+                "nightlife",
+                {
+                    "en": "Nightlife venues may have cover charges or ID checks — bring cash and a photo ID.",
+                    "zh-HK": "夜生活場所有時收入場費或查證件，帶現金與證件。",
+                    "ja": "ナイトスポットはチャージや身分証確認があることがあります。現金とIDを。",
+                },
+            )
+        )
+    if any(p in prefs for p in ("temples", "culture", "history")):
+        tips.append(
+            (
+                "dress",
+                {
+                    "en": "Cover shoulders and speak quietly at temples and shrines.",
+                    "zh-HK": "寺廟神社請遮肩、保持安靜。",
+                    "ja": "寺社では肩を出しすぎず、静かに見学を。",
+                },
+            )
+        )
+    if "food" in prefs or "street-food" in prefs:
+        tips.append(
+            (
+                "food",
+                {
+                    "en": "Popular food streets get long queues at dinner — go early or share stalls.",
+                    "zh-HK": "熱門美食街晚餐時段人多，提早去或分檔位。",
+                    "ja": "人気の食べ歩きは夜混むので、早めか時間をずらして。",
+                },
+            )
+        )
+    return [pick(key, table) for _, table in tips[:4]]
+
+
 def fallback_agent_reasoning(
     days: int,
     pace: str,

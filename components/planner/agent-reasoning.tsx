@@ -14,6 +14,9 @@ export function AgentReasoningPanel({
   response,
   className,
 }: AgentReasoningPanelProps) {
+  const summary = response.user_summary || response.agent_reasoning;
+  const tips = response.prep_tips || [];
+
   return (
     <aside
       className={cn(
@@ -24,12 +27,22 @@ export function AgentReasoningPanel({
       <div className="mb-3 flex items-center gap-2 text-[var(--primary)]">
         <Sparkles className="h-4 w-4" />
         <p className="text-xs font-semibold uppercase tracking-[0.18em]">
-          Agent reasoning
+          Trip insights
         </p>
       </div>
-      <p className="text-sm leading-relaxed text-[var(--foreground)]">
-        {response.agent_reasoning}
-      </p>
+      <p className="text-sm leading-relaxed text-[var(--foreground)]">{summary}</p>
+      {tips.length > 0 ? (
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+            Before you go
+          </p>
+          <ul className="mt-2 list-disc space-y-1.5 pl-4 text-sm text-[var(--muted-foreground)]">
+            {tips.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="mt-4 flex flex-wrap gap-3 text-xs text-[var(--muted-foreground)]">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1 text-[var(--secondary-foreground)]">
           <Wallet className="h-3.5 w-3.5" />

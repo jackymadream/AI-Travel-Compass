@@ -6,6 +6,8 @@ import { AiSearchBar } from "@/components/explore/ai-search-bar";
 import { CountryBrowseCard } from "@/components/explore/country-card";
 import { ExploreFilters } from "@/components/explore/explore-filters";
 import { SiteNav } from "@/components/site-nav";
+import { useLocale } from "@/components/locale-provider";
+import { useTranslations } from "next-intl";
 import {
   emptyReasonMessage,
   fetchCities,
@@ -14,21 +16,20 @@ import {
   searchDestinations,
   type CitySummary,
   type Country,
-  type Locale,
   type SearchHit,
 } from "@/lib/api";
 
 const DEFAULT_MAX_BUDGET = 200;
 const DEFAULT_MIN_SAFETY = 3;
-const DEFAULT_LOCALE: Locale = "en";
 
 type Mode = "browse" | "search";
 
 export function ExploreClient() {
+  const { locale, setLocale } = useLocale();
+  const t = useTranslations("explore");
   const [maxBudget, setMaxBudget] = useState(DEFAULT_MAX_BUDGET);
   const [debouncedBudget, setDebouncedBudget] = useState(DEFAULT_MAX_BUDGET);
   const [minSafety, setMinSafety] = useState(DEFAULT_MIN_SAFETY);
-  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE);
 
   const [mode, setMode] = useState<Mode>("browse");
   const [activeQuery, setActiveQuery] = useState("");
@@ -269,14 +270,13 @@ export function ExploreClient() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
-                Explore
+                {t("kicker")}
               </p>
               <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl tracking-tight text-[var(--foreground)] md:text-5xl">
-                Travel Compass
+                {t("title")}
               </h1>
               <p className="mt-2 max-w-2xl text-[var(--muted-foreground)]">
-                Describe your trip in natural language, or browse with hard filters.
-                Budget, safety, and locale always apply before ranking.
+                {t("subtitle")}
               </p>
             </div>
           </header>
@@ -284,6 +284,7 @@ export function ExploreClient() {
         <AiSearchBar
           initialQuery={activeQuery}
           loading={showLoading && mode === "search"}
+          placeholder={t("searchPlaceholder")}
           onSearch={handleSearch}
           onClear={handleClearSearch}
         />
@@ -292,15 +293,20 @@ export function ExploreClient() {
           <p>
             {showLoading
               ? mode === "search"
-                ? "Searching destinations…"
-                : "Loading destinations…"
+                ? t("searching")
+                : t("loading")
               : mode === "search"
-                ? `${resultCount} AI match${resultCount === 1 ? "" : "es"}`
-                : `${resultCount} destination${resultCount === 1 ? "" : "s"}`}
+                ? t(resultCount === 1 ? "matches" : "matchesPlural", {
+                    count: resultCount,
+                  })
+                : t(
+                    resultCount === 1 ? "destinations" : "destinationsPlural",
+                    { count: resultCount }
+                  )}
           </p>
           {showLoading && (
             <span className="animate-soft-pulse text-[var(--primary)]">
-              Updating
+              {t("updating")}
             </span>
           )}
         </div>

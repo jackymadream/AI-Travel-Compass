@@ -1,19 +1,39 @@
 /** Curated planner preference chips + searchable taxonomy (mirrors data/interest_taxonomy.json). */
 
+/** Visible primary chips — rare tags live in Search interests. */
 export const PRIMARY_PREFERENCE_CHIPS = [
   "food",
   "culture",
-  "museums",
   "nightlife",
-  "wellness",
-  "urban",
   "nature",
-  "beach",
+  "wellness",
   "adventure",
-  "history",
-  "street-food",
-  "architecture",
 ] as const;
+
+/** Mutually exclusive discovery mode. `popular` is on by default. */
+export const DISCOVERY_MODES = ["popular", "unconventional"] as const;
+export type DiscoveryMode = (typeof DISCOVERY_MODES)[number];
+
+export const DEFAULT_PLANNER_PREFERENCES = [
+  "food",
+  "culture",
+  "popular",
+] as const;
+
+export function withDiscoveryMode(
+  preferences: string[],
+  mode: DiscoveryMode
+): string[] {
+  const next = preferences.filter(
+    (p) => p !== "popular" && p !== "unconventional"
+  );
+  next.push(mode);
+  return next;
+}
+
+export function discoveryModeOf(preferences: string[]): DiscoveryMode {
+  return preferences.includes("unconventional") ? "unconventional" : "popular";
+}
 
 export const ALL_TAXONOMY_TAGS = [
   "culture",

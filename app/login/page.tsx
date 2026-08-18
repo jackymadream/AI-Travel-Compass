@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { SiteNav } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
@@ -16,6 +17,7 @@ function safeNextPath(raw: string | null): string {
 }
 
 function LoginForm() {
+  const t = useTranslations("login");
   const searchParams = useSearchParams();
   const nextPath = useMemo(
     () => safeNextPath(searchParams.get("next")),
@@ -76,10 +78,10 @@ function LoginForm() {
   return (
     <>
       <h1 className="mt-8 font-[family-name:var(--font-display)] text-4xl tracking-tight">
-        Sign in
+        {t("title")}
       </h1>
       <p className="mt-2 text-[var(--muted-foreground)]">
-        Google OAuth or magic link via Supabase Auth. Required to save itineraries.
+        {t("subtitle")}
       </p>
 
       {!configured ? (
@@ -98,12 +100,12 @@ function LoginForm() {
               void handleGoogle();
             }}
           >
-            Continue with Google
+            {t("google")}
           </Button>
 
           <form onSubmit={handleMagicLink} className="space-y-3">
             <label className="block text-sm font-medium" htmlFor="email">
-              Email magic link
+              {t("magic")}
             </label>
             <input
               id="email"
@@ -115,7 +117,7 @@ function LoginForm() {
               placeholder="you@example.com"
             />
             <Button type="submit" variant="secondary" className="w-full" disabled={loading}>
-              Send magic link
+              {t("send")}
             </Button>
           </form>
 
@@ -130,7 +132,7 @@ function LoginForm() {
 
       <p className="mt-8 text-sm text-[var(--muted-foreground)]">
         <Link href="/planner" className="underline underline-offset-2">
-          Back to planner
+          {t("back")}
         </Link>
       </p>
     </>
