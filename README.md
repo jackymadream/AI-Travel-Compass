@@ -132,10 +132,10 @@ Fill `.env` (see comments in `.env.example` and the [deployment checklist](./doc
 | Variable | Purpose |
 |----------|---------|
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Postgres API |
-| `GCP_PROJECT_ID` / `GOOGLE_APPLICATION_CREDENTIALS` | Vertex embeddings |
+| `GCP_PROJECT_ID` / `GCP_LOCATION` / `GOOGLE_APPLICATION_CREDENTIALS` | Vertex embeddings (`text-embedding-004`) |
+| `GEMINI_LOCATION` | Vertex Gemini region (`us-central1` when embeddings stay on `asia-southeast1`) |
 | `QDRANT_URL` / `QDRANT_API_KEY` | Vector store |
 | `REDIS_URL` | Optional Redis cache (falls back to in-memory TTL) |
-| `GEMINI_API_KEY` | Optional future LLM agent (heuristic planner works without it) |
 | `NEXT_PUBLIC_API_URL` | Frontend → API (local `http://127.0.0.1:8000`; prod `https://api.jackymadream.com`) |
 | `CORS_ORIGINS` | Allowed UI origins (prod `https://travel.jackymadream.com` + localhost) |
 | `GOOGLE_PLACES_API_KEY` | Optional Places enrichment for `ingest_real_pois.py` |

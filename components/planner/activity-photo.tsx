@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Activity } from "@/lib/api";
 import { activityBadgeStyle } from "@/lib/planner-styles";
@@ -16,6 +16,10 @@ export function ActivityPhoto({ activity, className }: ActivityPhotoProps) {
   const badge = activityBadgeStyle(activity);
   const src = activity.photo_url;
   const showPlaceholder = !src || failed;
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src, activity.poi_name]);
 
   if (showPlaceholder) {
     return (

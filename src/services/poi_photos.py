@@ -233,14 +233,21 @@ def _wikipedia_thumbnail(
         return None
     city_s = (city or "").strip()
     getter = fetch or _http_get_json
-    for query in (title, f"{title} {city_s}".strip() if city_s else ""):
-        if not query:
+    queries: list[str] = []
+    if city_s:
+        queries.append(f"{city_s} {title}")
+    queries.append(title)
+    for query in queries:
+        if not query.strip():
             continue
         thumb = _summary_thumbnail(query, getter, poi_name=title, lat=lat, lon=lon)
         if thumb:
             return thumb
     if city_s:
-        hit = _opensearch_title(f"{title} {city_s}", getter)
+        hit = _opensearch_title(f"{city_s} {title}", getter)
+        if hit:
+            return _summary_thumbnail(hit, getter, poi_name=title, lat=lat, lon=lon)
+        hit = _opensearch_title(title, getter)
         if hit:
             return _summary_thumbnail(hit, getter, poi_name=title, lat=lat, lon=lon)
     return None

@@ -38,6 +38,8 @@ async def test_plan_itinerary_multi_day_grounded_and_under_budget() -> None:
         sum(d.estimated_daily_cost for d in result.daily_plans)
     )
     assert result.agent_reasoning
+    assert result.user_summary
+    assert result.prep_tips
 
     for day in result.daily_plans:
         assert day.estimated_daily_cost <= request.daily_budget_usd
@@ -210,6 +212,319 @@ async def test_max_turns_exhausted_raises_planning_error() -> None:
     )
     with pytest.raises(AgentPlanningError, match="within 3 turns"):
         await service.plan_itinerary(request)
+
+
+@pytest.mark.asyncio
+async def test_max_turns_pace_only_returns_best_effort_with_warning() -> None:
+    def always_packed(
+        daily_plan: dict,
+        daily_budget_usd: float,
+        pace: str,
+    ) -> dict:
+        return {
+            "is_valid": False,
+            "violations": [
+                "Schedule too packed for moderate pace "
+                "(690 minutes including travel; max 600)"
+            ],
+            "suggested_adjustments": ["Drop attractions until under 600 minutes."],
+            "total_cost_usd": 40.0,
+            "total_duration_minutes": 690,
+            "activity_minutes": 540,
+            "travel_buffer_minutes": 150,
+        }
+
+    service = AgentService(max_turns=3, evaluate_schedule=always_packed)
+    request = ItineraryRequest(
+        city_id=TOKYO,
+        days=1,
+        pace=TripPace.MODERATE,
+        daily_budget_usd=100.0,
+    )
+    result = await service.plan_itinerary(request)
+    assert result.daily_plans
+    assert result.daily_plans[0].activities
+    assert result.daily_plans[0].warnings
+    assert any("packed" in w.lower() for w in result.daily_plans[0].warnings)
+
+
+def test_refine_drops_attractions_until_under_moderate_duration() -> None:
+    service = AgentService(max_turns=3)
+    activities = [
+        {
+            "time_slot": "09:00-11:30",
+            "poi_name": "Stop 0",
+            "category": "attraction",
+            "cost_usd": 0,
+            "duration_minutes": 150,
+            "description": "long stop",
+            "is_food_slot": False,
+        },
+        {
+            "time_slot": "11:45-13:15",
+            "poi_name": "Regional Lunch",
+            "category": "food",
+            "cost_usd": 15,
+            "duration_minutes": 90,
+            "description": "lunch",
+            "is_food_slot": True,
+            "meal_role": "lunch",
+        },
+        {
+            "time_slot": "13:30-16:00",
+            "poi_name": "Stop 1",
+            "category": "attraction",
+            "cost_usd": 0,
+            "duration_minutes": 150,
+            "description": "long stop",
+            "is_food_slot": False,
+        },
+        {
+            "time_slot": "16:15-18:45",
+            "poi_name": "Stop 2",
+            "category": "attraction",
+            "cost_usd": 0,
+            "duration_minutes": 150,
+            "description": "long stop",
+            "is_food_slot": False,
+        },
+        {
+            "time_slot": "19:00-21:30",
+            "poi_name": "Stop 3",
+            "category": "attraction",
+            "cost_usd": 0,
+            "duration_minutes": 150,
+            "description": "long stop",
+            "is_food_slot": False,
+        },
+        {
+            "time_slot": "21:45-23:15",
+            "poi_name": "Local Dinner",
+            "category": "food",
+            "cost_usd": 20,
+            "duration_minutes": 90,
+            "description": "dinner",
+            "is_food_slot": True,
+            "meal_role": "dinner",
+        },
+    ]
+    draft = {"day_number": 1, "theme": "Packed", "activities": activities}
+    refined = service._refine_draft_after_violation(
+        draft,
+        [
+            "Schedule too packed for moderate pace "
+            "(900 minutes including travel; max 600)"
+        ],
+        pace="moderate",
+    )
+    from src.services.agent_tools import evaluate_schedule_and_budget_tool
+
+    result = evaluate_schedule_and_budget_tool(
+        daily_plan=refined,
+        daily_budget_usd=200.0,
+        pace="moderate",
+    )
+    assert result["is_valid"] is True
+    meals = [a for a in refined["activities"] if a.get("is_food_slot")]
+    assert len(meals) == 2
+
+
+def _activity(
+    *,
+    time_slot: str,
+    poi_name: str,
+    category: str = "attraction",
+    duration_minutes: int = 90,
+    cost_usd: float = 0,
+    is_food_slot: bool = False,
+    meal_role: str | None = None,
+) -> dict:
+    return {
+        "time_slot": time_slot,
+        "poi_name": poi_name,
+        "category": category,
+        "cost_usd": cost_usd,
+        "duration_minutes": duration_minutes,
+        "description": poi_name,
+        "is_food_slot": is_food_slot,
+        "meal_role": meal_role,
+    }
+
+
+def test_refine_separates_sushi_chirashi_lunch_from_shrine() -> None:
+    """Gemini left lunch overlapping Karasumori Shrine; refine must unstick slots."""
+    from src.services.agent_tools import evaluate_schedule_and_budget_tool
+    from src.services.itinerary_eval import overlapping_activity_pairs
+
+    service = AgentService(max_turns=3)
+    draft = {
+        "day_number": 2,
+        "theme": "Day 2",
+        "activities": [
+            _activity(
+                time_slot="09:00-11:00",
+                poi_name="Senso-ji Temple",
+                duration_minutes=120,
+            ),
+            _activity(
+                time_slot="12:00-14:00",
+                poi_name="Sushi / Chirashi",
+                category="food",
+                duration_minutes=90,
+                cost_usd=12,
+                is_food_slot=True,
+                meal_role="lunch",
+            ),
+            _activity(
+                time_slot="13:00-14:30",
+                poi_name="Karasumori Shrine",
+                duration_minutes=90,
+            ),
+            _activity(
+                time_slot="18:30-20:00",
+                poi_name="Yakiniku / Shabu-shabu",
+                category="food",
+                duration_minutes=90,
+                cost_usd=20,
+                is_food_slot=True,
+                meal_role="dinner",
+            ),
+        ],
+    }
+    assert overlapping_activity_pairs(draft["activities"])
+
+    refined = service._refine_draft_after_violation(
+        draft,
+        ["OVERLAPPING_SLOTS: Sushi / Chirashi / Karasumori Shrine"],
+        pace="moderate",
+    )
+    result = evaluate_schedule_and_budget_tool(
+        daily_plan=refined,
+        daily_budget_usd=200.0,
+        pace="moderate",
+    )
+    assert overlapping_activity_pairs(refined["activities"]) == []
+    assert result["is_valid"] is True
+    names = {a["poi_name"] for a in refined["activities"]}
+    assert "Sushi / Chirashi" in names
+    assert "Karasumori Shrine" in names
+
+
+def test_refine_moves_morning_shrine_that_runs_into_lunch() -> None:
+    from src.services.agent_tools import evaluate_schedule_and_budget_tool
+    from src.services.itinerary_eval import overlapping_activity_pairs
+
+    service = AgentService(max_turns=3)
+    draft = {
+        "day_number": 2,
+        "theme": "Day 2",
+        "activities": [
+            _activity(
+                time_slot="11:00-13:00",
+                poi_name="Karasumori Shrine",
+                duration_minutes=120,
+            ),
+            _activity(
+                time_slot="12:00-13:30",
+                poi_name="Sushi / Chirashi",
+                category="food",
+                duration_minutes=90,
+                cost_usd=12,
+                is_food_slot=True,
+                meal_role="lunch",
+            ),
+            _activity(
+                time_slot="18:30-20:00",
+                poi_name="Yakiniku / Shabu-shabu",
+                category="food",
+                duration_minutes=90,
+                cost_usd=20,
+                is_food_slot=True,
+                meal_role="dinner",
+            ),
+        ],
+    }
+    refined = service._refine_draft_after_violation(
+        draft,
+        ["OVERLAPPING_SLOTS: Sushi / Chirashi / Karasumori Shrine"],
+        pace="moderate",
+    )
+    assert overlapping_activity_pairs(refined["activities"]) == []
+    result = evaluate_schedule_and_budget_tool(
+        daily_plan=refined,
+        daily_budget_usd=200.0,
+        pace="moderate",
+    )
+    assert result["is_valid"] is True
+
+
+@pytest.mark.asyncio
+async def test_plan_itinerary_resolves_persistent_lunch_shrine_overlap() -> None:
+    class OverlappingLunchLLM:
+        def propose_daily_plan(
+            self,
+            *,
+            request: ItineraryRequest,
+            day_number: int,
+            poi_pool: list[dict[str, Any]],
+            previous_violations: list[str],
+            turn: int,
+        ) -> dict[str, Any]:
+            shrine = next(
+                (p for p in poi_pool if "shrine" in str(p.get("name") or "").lower()),
+                next(p for p in poi_pool if p.get("category") == "attraction"),
+            )
+            return {
+                "day_number": day_number,
+                "theme": "Overlap day",
+                "activities": [
+                    {
+                        "time_slot": "12:00-14:00",
+                        "poi_name": "Sushi / Chirashi",
+                        "category": "food",
+                        "cost_usd": 12,
+                        "duration_minutes": 90,
+                        "description": "lunch",
+                        "is_food_slot": True,
+                        "meal_role": "lunch",
+                    },
+                    {
+                        "time_slot": "13:00-14:30",
+                        "poi_name": shrine["name"],
+                        "category": shrine["category"],
+                        "cost_usd": shrine["cost_usd"],
+                        "duration_minutes": shrine["duration_minutes"],
+                        "description": shrine["description"],
+                        "is_food_slot": False,
+                    },
+                    {
+                        "time_slot": "18:30-20:00",
+                        "poi_name": "Yakiniku / Shabu-shabu",
+                        "category": "food",
+                        "cost_usd": 20,
+                        "duration_minutes": 90,
+                        "description": "dinner",
+                        "is_food_slot": True,
+                        "meal_role": "dinner",
+                    },
+                ],
+            }
+
+    service = AgentService(max_turns=3, llm_client=OverlappingLunchLLM())
+    request = ItineraryRequest(
+        city_id=TOKYO,
+        days=1,
+        pace=TripPace.MODERATE,
+        daily_budget_usd=120.0,
+    )
+    result = await service.plan_itinerary(request)
+    assert result.daily_plans
+    assert result.daily_plans[0].activities
+    from src.services.itinerary_eval import overlapping_activity_pairs
+
+    acts = [a.model_dump() for a in result.daily_plans[0].activities]
+    assert overlapping_activity_pairs(acts) == []
+
 
 
 @pytest.fixture

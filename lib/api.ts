@@ -93,6 +93,7 @@ export type Activity = {
   poi_id?: string | null;
   address?: string | null;
   photo_url?: string | null;
+  display_name?: string | null;
   is_custom?: boolean;
 };
 
@@ -101,6 +102,7 @@ export type DailyItinerary = {
   theme: string;
   estimated_daily_cost: number;
   activities: Activity[];
+  warnings?: string[];
 };
 
 export type ItineraryResponse = {
@@ -108,6 +110,8 @@ export type ItineraryResponse = {
   total_cost_usd: number;
   daily_plans: DailyItinerary[];
   agent_reasoning: string;
+  user_summary?: string | null;
+  prep_tips?: string[];
 };
 
 /** Fallback cities if GET /cities is unavailable (mock POI IDs). */

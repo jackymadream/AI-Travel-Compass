@@ -8,4 +8,5 @@ export const metadata = {
 
 export default function PlannerPage() {
   return <PlannerClient />;
+
 }

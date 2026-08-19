@@ -11,6 +11,7 @@ import { PoiDetailDrawer } from "@/components/planner/poi-detail-drawer";
 import { PlannerControls } from "@/components/planner/planner-controls";
 import { SiteNav } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import {
   PLANNER_CITIES,
   fetchCities,
@@ -21,10 +22,18 @@ import {
   type CitySummary,
   type Country,
   type ItineraryResponse,
-  type Locale,
   type TripPace,
 } from "@/lib/api";
+import {
+  insertCustomSpot,
+  moveActivity,
+  scheduleWarnings,
+  tripTotal,
+  updateActivity,
+} from "@/lib/itinerary-edit";
+import { DEFAULT_PLANNER_PREFERENCES } from "@/lib/planner-preferences";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useLocale } from "@/components/locale-provider";
 
 const LOADING_MESSAGE =
   "Agent is querying POIs and optimizing budget…";
@@ -74,6 +83,7 @@ function resolveCityId(
 }
 
 function PlannerClientInner() {
+  const t = useTranslations("planner");
   const searchParams = useSearchParams();
   const [countries, setCountries] = useState<Country[]>([]);
   const [cities, setCities] = useState<CitySummary[]>([]);
@@ -82,8 +92,10 @@ function PlannerClientInner() {
   const [days, setDays] = useState(3);
   const [pace, setPace] = useState<TripPace>("moderate");
   const [dailyBudget, setDailyBudget] = useState(100);
-  const [preferences, setPreferences] = useState<string[]>(["food", "culture"]);
-  const [locale, setLocale] = useState<Locale>("en");
+  const [preferences, setPreferences] = useState<string[]>([
+    ...DEFAULT_PLANNER_PREFERENCES,
+  ]);
+  const { locale, setLocale } = useLocale();
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -181,30 +193,50 @@ function PlannerClientInner() {
   function addCustomSpot(dayNumber: number, spot: CustomSpotPayload) {
     setResult((prev) => {
       if (!prev) return prev;
-      const daily_plans = prev.daily_plans.map((day) => {
-        if (day.day_number !== dayNumber) return day;
-        const custom: Activity = {
-          time_slot: "Flexible",
-          poi_name: spot.name,
-          category: "attraction",
-          cost_usd: 0,
-          duration_minutes: 45,
-          description: spot.address
-            ? `Custom waypoint — ${spot.address}`
-            : "Custom waypoint added on the map.",
-          lat: spot.lat,
-          lon: spot.lon,
-          address: spot.address ?? null,
-          is_custom: true,
-          is_food_slot: false,
-          meal_role: null,
-        };
-        return { ...day, activities: [...day.activities, custom] };
-      });
-      return { ...prev, daily_plans };
+      const daily_plans = insertCustomSpot(prev.daily_plans, dayNumber, spot);
+      return { ...prev, daily_plans, total_cost_usd: tripTotal(daily_plans) };
     });
     setSavedId(null);
     setSaveMessage(null);
+  }
+
+  function handleMoveActivity(
+    dayNumber: number,
+    index: number,
+    direction: -1 | 1
+  ) {
+    setResult((prev) => {
+      if (!prev) return prev;
+      const daily_plans = moveActivity(
+        prev.daily_plans,
+        dayNumber,
+        index,
+        direction
+      );
+      return { ...prev, daily_plans, total_cost_usd: tripTotal(daily_plans) };
+    });
+    setSavedId(null);
+  }
+
+  function handleUpdateActivity(
+    dayNumber: number,
+    index: number,
+    patch: Partial<Activity>
+  ) {
+    setResult((prev) => {
+      if (!prev) return prev;
+      const daily_plans = updateActivity(
+        prev.daily_plans,
+        dayNumber,
+        index,
+        patch
+      );
+      return { ...prev, daily_plans, total_cost_usd: tripTotal(daily_plans) };
+    });
+    setSavedId(null);
+    setSelectedActivity((current) =>
+      current ? { ...current, ...patch } : current
+    );
   }
 
   async function handleGenerate() {
@@ -321,15 +353,13 @@ function PlannerClientInner() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
-                Itinerary planner
+                {t("kicker")}
               </p>
               <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl tracking-tight text-[var(--foreground)] md:text-5xl">
-                Day-by-day with the agent
+                {t("title")}
               </h1>
               <p className="mt-2 max-w-2xl text-[var(--muted-foreground)]">
-                Set days, pace, and budget. The agent retrieves grounded POIs,
-                evaluates the schedule, and returns a validated timeline with a
-                route map.
+                {t("subtitle")}
               </p>
             </div>
           </header>
@@ -362,7 +392,8 @@ function PlannerClientInner() {
                 <code className="rounded bg-red-100 px-1">
                   {process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}
                 </code>
-                , then try again with a higher budget or fewer days.
+                , then try again with a higher budget, fewer days, or a looser
+                pace.
               </p>
             </div>
           )}
@@ -441,12 +472,16 @@ function PlannerClientInner() {
                   onSelectActivity={selectActivity}
                   onAddCustomSpot={addCustomSpot}
                   cityCenter={cityCenter}
+                  cityHint={result.city_name}
                 />
 
                 <DayTimeline
                   days={result.daily_plans}
                   selectedKey={selectedKey}
                   onSelectActivity={selectActivity}
+                  editable
+                  warnings={scheduleWarnings(result.daily_plans, dailyBudget)}
+                  onMoveActivity={handleMoveActivity}
                 />
               </div>
               <AgentReasoningPanel
@@ -462,6 +497,15 @@ function PlannerClientInner() {
         activity={selectedActivity}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        onSave={(patch) => {
+          if (!selectedKey) return;
+          const [dayPart, indexPart] = selectedKey.split("-");
+          handleUpdateActivity(
+            Number(dayPart),
+            Number(indexPart),
+            patch
+          );
+        }}
       />
     </div>
   );

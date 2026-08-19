@@ -35,6 +35,57 @@ PACE_LIMITS: dict[str, dict[str, int]] = {
     "packed": {"max_activities": 10, "max_duration_minutes": 780},
 }
 
+
+def scheduled_total_minutes(activities: list[dict[str, Any]]) -> int:
+    """Activity minutes plus 30 min travel between consecutive stops."""
+    activity_minutes = sum(int(a.get("duration_minutes") or 0) for a in activities)
+    hops = max(0, len(activities) - 1)
+    return activity_minutes + hops * TRAVEL_BUFFER_MINUTES
+
+
+def is_pace_violation(violation: str) -> bool:
+    low = (violation or "").lower()
+    return "too packed" in low or "pace" in low
+
+
+def is_hard_schedule_violation(violation: str) -> bool:
+    low = (violation or "").lower()
+    if "missing_meals" in low:
+        return True
+    if "over budget" in low:
+        return True
+    if "overlapping" in low:
+        return True
+    if "unknown pace" in low:
+        return True
+    return False
+
+
+def pace_only_violations(violations: list[str]) -> bool:
+    """True when leftover issues are density/duration only (not meals/budget/overlap)."""
+    if not violations:
+        return False
+    return all(is_pace_violation(v) and not is_hard_schedule_violation(v) for v in violations)
+
+
+def pace_constraint_prompt(pace: str) -> str:
+    """Explicit caps for Gemini / heuristic drafts. Evaluator is the source of truth."""
+    key = (pace or "").strip().lower()
+    limits = PACE_LIMITS.get(key) or PACE_LIMITS["moderate"]
+    max_acts = limits["max_activities"]
+    max_mins = limits["max_duration_minutes"]
+    extra_stops = max(0, max_acts - 2)
+    return (
+        f"Hard pace caps for {key} — stay under BOTH (the evaluator will reject otherwise):\n"
+        f"- At most {max_acts} activities including lunch and dinner "
+        f"(so at most {extra_stops} non-meal stops).\n"
+        f"- At most {max_mins} minutes TOTAL. The evaluator adds "
+        f"{TRAVEL_BUFFER_MINUTES} minutes of travel between every consecutive pair of stops.\n"
+        f"  Example: 5 stops = activity minutes + 4×{TRAVEL_BUFFER_MINUTES} travel.\n"
+        f"- Keep lunch (~60-75 min) and dinner (~75-90 min). Prefer 60-90 min attractions.\n"
+        f"- If unsure, schedule fewer attractions rather than longer ones."
+    )
+
 _MOCK_POIS: list[dict[str, Any]] = [
     {
         "city_id": MOCK_CITY_TOKYO,
@@ -82,7 +133,7 @@ _MOCK_POIS: list[dict[str, Any]] = [
         "cost_usd": 0,
         "duration_minutes": 45,
         "description": "Iconic urban scramble crossing and skyline views.",
-        "tags": ["urban", "photo", "wikipedia"],
+        "tags": ["urban", "photo", "wikipedia", "popular"],
         "lat": 35.6595,
         "lon": 139.7004,
         "address": "Shibuya, Tokyo",
@@ -108,10 +159,36 @@ _MOCK_POIS: list[dict[str, Any]] = [
         "cost_usd": 25,
         "duration_minutes": 90,
         "description": "Broadcasting tower with observation decks.",
-        "tags": ["urban", "viewpoint", "wikipedia"],
+        "tags": ["urban", "viewpoint", "wikipedia", "popular"],
         "lat": 35.7101,
         "lon": 139.8107,
         "address": "Sumida, Tokyo",
+        "city": "Tokyo",
+    },
+    {
+        "city_id": MOCK_CITY_TOKYO,
+        "name": "Golden Gai Bar Hop",
+        "category": "food",
+        "cost_usd": 22,
+        "duration_minutes": 75,
+        "description": "Tiny alley bars in Shinjuku — classic Tokyo nightlife crawl.",
+        "tags": ["food", "nightlife", "bar"],
+        "lat": 35.6938,
+        "lon": 139.7041,
+        "address": "Shinjuku, Tokyo",
+        "city": "Tokyo",
+    },
+    {
+        "city_id": MOCK_CITY_TOKYO,
+        "name": "Nonbei Yokocho",
+        "category": "food",
+        "cost_usd": 18,
+        "duration_minutes": 60,
+        "description": "Shibuya drinking alley with counter bars and late hours.",
+        "tags": ["nightlife", "bar", "food"],
+        "lat": 35.6586,
+        "lon": 139.7019,
+        "address": "Shibuya, Tokyo",
         "city": "Tokyo",
     },
     {
@@ -374,7 +451,7 @@ def evaluate_schedule_and_budget_tool(
     activity_minutes = sum(int(a.get("duration_minutes") or 0) for a in activities)
     hops = max(0, len(activities) - 1)
     buffer_minutes = hops * TRAVEL_BUFFER_MINUTES
-    total_duration = activity_minutes + buffer_minutes
+    total_duration = scheduled_total_minutes(activities)
 
     violations: list[str] = []
     suggested_adjustments: list[str] = []
@@ -423,7 +500,8 @@ def evaluate_schedule_and_budget_tool(
                 f"({len(activities)} activities; max {max_acts})"
             )
             suggested_adjustments.append(
-                f"Remove {len(activities) - max_acts} activity(ies) or switch to a denser pace."
+                f"Drop {len(activities) - max_acts} non-meal stop(s). "
+                f"Keep lunch and dinner. Count and duration are both hard caps."
             )
         if total_duration > max_mins:
             violations.append(
@@ -431,7 +509,9 @@ def evaluate_schedule_and_budget_tool(
                 f"({total_duration} minutes including travel; max {max_mins})"
             )
             suggested_adjustments.append(
-                "Shorten activity durations or drop one stop to leave buffer time."
+                f"Drop attractions until activity minutes + "
+                f"{TRAVEL_BUFFER_MINUTES} min × hops ≤ {max_mins}. "
+                f"Current: {activity_minutes} activity + {buffer_minutes} travel."
             )
 
     is_valid = len(violations) == 0

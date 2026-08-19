@@ -21,10 +21,13 @@ import {
 } from "@/lib/api";
 import {
   PRIMARY_PREFERENCE_CHIPS,
+  discoveryModeOf,
   filterTaxonomyTags,
   parseFreeTextPreferences,
+  withDiscoveryMode,
 } from "@/lib/planner-preferences";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const PACES: { value: TripPace; label: string; hint: string }[] = [
   { value: "relaxed", label: "Relaxed", hint: "Fewer stops, more buffer" },
@@ -82,6 +85,7 @@ export function PlannerControls({
   onLocaleChange,
   onGenerate,
 }: PlannerControlsProps) {
+  const t = useTranslations("planner");
   const [tagSearch, setTagSearch] = useState("");
   const [freeText, setFreeText] = useState("");
 
@@ -128,8 +132,12 @@ export function PlannerControls({
   const searchHits = useMemo(() => filterTaxonomyTags(tagSearch), [tagSearch]);
 
   const extraSelected = preferences.filter(
-    (p) => !(PRIMARY_PREFERENCE_CHIPS as readonly string[]).includes(p)
+    (p) =>
+      !(PRIMARY_PREFERENCE_CHIPS as readonly string[]).includes(p) &&
+      p !== "popular" &&
+      p !== "unconventional"
   );
+  const discovery = discoveryModeOf(preferences);
 
   function togglePreference(pref: string) {
     if (preferences.includes(pref)) {
@@ -173,13 +181,13 @@ export function PlannerControls({
     <aside className="flex h-fit flex-col gap-7 rounded-2xl border border-[var(--border)] bg-[var(--card)]/90 p-6 shadow-sm backdrop-blur-sm lg:sticky lg:top-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-          Controls
+          {t("controls")}
         </p>
         <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl text-[var(--foreground)]">
-          Plan the trip
+          {t("planTrip")}
         </h2>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          The agent retrieves POIs, then validates budget and pace.
+          {t("agentHint")}
         </p>
       </div>
 
@@ -297,6 +305,40 @@ export function PlannerControls({
 
       <div className="space-y-2">
         <Label>Preferences</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              onPreferencesChange(withDiscoveryMode(preferences, "popular"))
+            }
+            className={cn(
+              "rounded-xl border px-3 py-2 text-left text-xs transition-colors",
+              discovery === "popular"
+                ? "border-[var(--primary)] bg-[var(--secondary)]"
+                : "border-[var(--border)] bg-[var(--background)]"
+            )}
+          >
+            <span className="block font-medium">Popular landmarks</span>
+            <span className="text-[var(--muted-foreground)]">Default mix</span>
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              onPreferencesChange(
+                withDiscoveryMode(preferences, "unconventional")
+              )
+            }
+            className={cn(
+              "rounded-xl border px-3 py-2 text-left text-xs transition-colors",
+              discovery === "unconventional"
+                ? "border-[var(--primary)] bg-[var(--secondary)]"
+                : "border-[var(--border)] bg-[var(--background)]"
+            )}
+          >
+            <span className="block font-medium">Unconventional</span>
+            <span className="text-[var(--muted-foreground)]">Lesser-known</span>
+          </button>
+        </div>
         <div className="flex flex-wrap gap-2">
           {PRIMARY_PREFERENCE_CHIPS.map((pref) => {
             const active = preferences.includes(pref);
@@ -422,7 +464,7 @@ export function PlannerControls({
         disabled={loading}
         onClick={onGenerate}
       >
-        {loading ? "Planning…" : "Generate itinerary"}
+        {loading ? t("planning") : t("generate")}
       </Button>
     </aside>
   );

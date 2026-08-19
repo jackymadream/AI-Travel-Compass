@@ -25,7 +25,11 @@ from src.schemas.itinerary import (
     TripPace,
 )
 from src.services.agent_tools import (
+    PACE_LIMITS,
+    TRAVEL_BUFFER_MINUTES,
     evaluate_schedule_and_budget_tool,
+    pace_only_violations,
+    scheduled_total_minutes,
     search_pois_tool,
 )
 from src.services import itinerary_i18n as i18n
@@ -159,6 +163,7 @@ class AgentService:
                 reasoning_parts: list[str] = []
                 used_names: set[str] = set()
                 used_urls: set[str] = set()
+                uncovered = _coverage_tags(list(request.preferences or []))
 
                 for day_number in range(1, request.days + 1):
                     day, day_reasoning = self._plan_one_day_with_retries(
@@ -167,6 +172,7 @@ class AgentService:
                         poi_pool=poi_pool,
                         used_names=used_names,
                         used_urls=used_urls,
+                        uncovered_tags=uncovered,
                     )
                     daily_plans.append(day)
                     reasoning_parts.append(day_reasoning)
@@ -176,10 +182,27 @@ class AgentService:
                             used_names.add(act.poi_id)
                         if act.photo_url:
                             used_urls.add(act.photo_url)
+                        uncovered -= _activity_matched_tags(
+                            act, list(request.preferences or [])
+                        )
 
                 total_cost = sum(d.estimated_daily_cost for d in daily_plans)
-                agent_reasoning = " ".join(reasoning_parts).strip() or (
-                    i18n.fallback_agent_reasoning(
+                user_summary = i18n.trip_user_summary(
+                    city_name,
+                    request.days,
+                    request.pace.value,
+                    list(request.preferences or []),
+                    request.locale,
+                    missing_tags=sorted(uncovered),
+                )
+                prep_tips = i18n.trip_prep_tips(
+                    city_name,
+                    list(request.preferences or []),
+                    request.locale,
+                )
+                agent_reasoning = user_summary or (
+                    " ".join(reasoning_parts).strip()
+                    or i18n.fallback_agent_reasoning(
                         request.days,
                         request.pace.value,
                         city_name,
@@ -193,6 +216,8 @@ class AgentService:
                     total_cost_usd=float(total_cost),
                     daily_plans=daily_plans,
                     agent_reasoning=agent_reasoning,
+                    user_summary=user_summary,
+                    prep_tips=prep_tips,
                 )
             except AgentPlanningError as exc:
                 log_event(
@@ -260,6 +285,7 @@ class AgentService:
         poi_pool: list[dict[str, Any]],
         used_names: set[str],
         used_urls: set[str],
+        uncovered_tags: set[str] | None = None,
     ) -> tuple[DailyItinerary, str]:
         previous_violations: list[str] = []
         last_eval: dict[str, Any] | None = None
@@ -271,6 +297,7 @@ class AgentService:
             used_urls=used_urls,
             previous_violations=previous_violations,
             turn=1,
+            uncovered_tags=uncovered_tags,
         )
 
         for turn in range(1, self.max_turns + 1):
@@ -303,7 +330,9 @@ class AgentService:
                 )
                 return daily, reasoning
 
-            previous_violations = violations
+            previous_violations = violations + [
+                str(s) for s in (last_eval.get("suggested_adjustments") or []) if s
+            ]
             if any("budget" in v.lower() for v in violations):
                 log_event(
                     logger,
@@ -314,9 +343,37 @@ class AgentService:
                     daily_budget_usd=request.daily_budget_usd,
                 )
             if turn >= self.max_turns:
+                if pace_only_violations(violations) and (draft.get("activities") or []):
+                    daily = self._parse_daily_itinerary(
+                        draft,
+                        last_eval or {},
+                        warnings=list(violations),
+                    )
+                    log_event(
+                        logger,
+                        "agent_pace_best_effort",
+                        day_number=day_number,
+                        turn=turn,
+                        violations=violations,
+                        total_duration_minutes=last_eval.get("total_duration_minutes")
+                        if last_eval
+                        else None,
+                    )
+                    mins = (last_eval or {}).get("total_duration_minutes")
+                    reasoning = (
+                        f"Day {day_number}: kept a best-effort plan after {turn} turns "
+                        f"(pace target missed"
+                        + (f", {mins} minutes" if mins is not None else "")
+                        + ")."
+                    )
+                    return daily, reasoning
                 break
 
-            refined = self._refine_draft_after_violation(draft, previous_violations)
+            refined = self._refine_draft_after_violation(
+                draft,
+                previous_violations,
+                pace=request.pace.value,
+            )
             if refined.get("activities"):
                 draft = refined
             else:
@@ -328,6 +385,7 @@ class AgentService:
                     used_urls=used_urls,
                     previous_violations=previous_violations,
                     turn=turn + 1,
+                    uncovered_tags=uncovered_tags,
                 )
 
         violations = list((last_eval or {}).get("violations") or previous_violations)
@@ -346,6 +404,7 @@ class AgentService:
         used_urls: set[str],
         previous_violations: list[str],
         turn: int,
+        uncovered_tags: set[str] | None = None,
     ) -> dict[str, Any]:
         if self._llm is not None:
             try:
@@ -381,6 +440,7 @@ class AgentService:
             used_urls=used_urls,
             previous_violations=previous_violations,
             turn=turn,
+            uncovered_tags=uncovered_tags,
         )
 
     def _heuristic_propose_daily_plan(
@@ -393,6 +453,7 @@ class AgentService:
         used_urls: set[str],
         previous_violations: list[str],
         turn: int,
+        uncovered_tags: set[str] | None = None,
     ) -> dict[str, Any]:
         counts = dict(_PACE_DRAFT_COUNTS[request.pace.value])
         # Later turns: prefer fewer / cheaper stops (never drop required meals).
@@ -410,6 +471,8 @@ class AgentService:
             day_number=day_number,
             prefer_cheap=bool(previous_violations) or turn > 1,
             budget=request.daily_budget_usd,
+            preferences=list(request.preferences or []),
+            uncovered_tags=uncovered_tags,
         )
         # Always keep at least one non-meal activity if pool non-empty.
         if not selected and poi_pool:
@@ -535,6 +598,8 @@ class AgentService:
         day_number: int,
         prefer_cheap: bool,
         budget: float,
+        preferences: list[str] | None = None,
+        uncovered_tags: set[str] | None = None,
     ) -> list[dict[str, Any]]:
         by_cat: dict[str, list[dict[str, Any]]] = {
             "attraction": [],
@@ -546,15 +611,28 @@ class AgentService:
             if cat in by_cat:
                 by_cat[cat].append(poi)
 
+        prefs = [p.strip().lower() for p in (preferences or []) if p and str(p).strip()]
+        uncovered = {t.lower() for t in (uncovered_tags or set())}
+        unconventional = "unconventional" in prefs
+        scoring_prefs = [
+            p for p in prefs if p not in {"popular", "unconventional"}
+        ]
+
         def sort_key(p: dict[str, Any]) -> tuple:
             used = p["name"] in used_names or (
                 str(p.get("id") or "") in used_names
             )
             cost = float(p["cost_usd"])
             rotate = hash(p["name"]) % 7
+            pref = _preference_match_score(p, scoring_prefs)
+            covers = 1 if uncovered and not _preference_match_score(p, list(uncovered)) else 0
+            notable = _poi_notability_penalty(p)
+            discovery = -notable if unconventional else notable
             return (
                 1 if used else 0,
-                _poi_notability_penalty(p),
+                covers,
+                -pref,
+                discovery,
                 cost if prefer_cheap else rotate,
                 cost,
             )
@@ -565,6 +643,15 @@ class AgentService:
             if want <= 0:
                 continue
             raw = list(by_cat.get(category, []))
+            if category == "attraction" and any(
+                p in scoring_prefs for p in ("nightlife", "bar")
+            ):
+                extra = [
+                    p
+                    for p in by_cat.get("food", [])
+                    if _preference_match_score(p, ["nightlife", "bar"]) > 0
+                ]
+                raw = raw + extra
             unused = [
                 p
                 for p in raw
@@ -573,7 +660,7 @@ class AgentService:
             ]
             candidates = unused if unused else raw
             candidates = sorted(candidates, key=sort_key)
-            if not prefer_cheap and candidates:
+            if not prefer_cheap and candidates and not scoring_prefs:
                 offset = (day_number - 1) % len(candidates)
                 candidates = candidates[offset:] + candidates[:offset]
             taken = 0
@@ -594,6 +681,8 @@ class AgentService:
         self,
         draft: dict[str, Any],
         violations: list[str],
+        *,
+        pace: str,
     ) -> dict[str, Any]:
         activities = list(draft.get("activities") or [])
         if not activities:
@@ -603,8 +692,6 @@ class AgentService:
         if "missing_meals" in text:
             # Ensure meals exist; do not strip them further.
             return draft
-        if "overlapping" in text or "overlap" in text:
-            activities = _retarget_afternoon_after_lunch(activities)
         if "budget" in text:
             # Drop the most expensive non-meal, non-rest activity first.
             droppable = [
@@ -616,21 +703,10 @@ class AgentService:
                 expensive = max(droppable, key=lambda a: float(a.get("cost_usd") or 0))
                 activities = [a for a in activities if a is not expensive]
         if "packed" in text or "pace" in text:
-            drop_idx = None
-            for i in range(len(activities) - 1, -1, -1):
-                act = activities[i]
-                if act.get("is_food_slot"):
-                    continue
-                if act.get("category") == "attraction":
-                    drop_idx = i
-                    break
-            if drop_idx is None:
-                for i in range(len(activities) - 1, -1, -1):
-                    if not activities[i].get("is_food_slot"):
-                        drop_idx = i
-                        break
-            if drop_idx is not None:
-                activities = [a for i, a in enumerate(activities) if i != drop_idx]
+            activities = _drop_until_under_pace(activities, pace)
+        if "overlapping" in text or "overlap" in text or "packed" in text or "budget" in text:
+            # Rebuild slots after drops so afternoon stops do not collide with dinner.
+            activities = _retarget_afternoon_after_lunch(activities)
 
         refined = dict(draft)
         refined["activities"] = activities
@@ -673,10 +749,12 @@ class AgentService:
                 category=str(poi.get("category") or "attraction"),
                 locale=locale,
             )
+            display = _poi_display_name(poi, locale)
             activities.append(
                 {
                     "time_slot": f"{_fmt_hhmm(start)}-{_fmt_hhmm(end)}",
                     "poi_name": poi["name"],
+                    "display_name": display,
                     "category": poi["category"],
                     "cost_usd": float(poi["cost_usd"]),
                     "duration_minutes": duration,
@@ -767,6 +845,8 @@ class AgentService:
         self,
         draft: dict[str, Any],
         evaluation: dict[str, Any],
+        *,
+        warnings: list[str] | None = None,
     ) -> DailyItinerary:
         activities = [
             Activity(
@@ -783,6 +863,7 @@ class AgentService:
                 poi_id=str(a["poi_id"]) if a.get("poi_id") else None,
                 address=str(a["address"]) if a.get("address") else None,
                 photo_url=str(a["photo_url"]) if a.get("photo_url") else None,
+                display_name=str(a["display_name"]) if a.get("display_name") else None,
                 is_custom=bool(a.get("is_custom") or False),
             )
             for a in draft.get("activities") or []
@@ -791,8 +872,49 @@ class AgentService:
             day_number=int(draft["day_number"]),
             theme=str(draft.get("theme") or f"Day {draft['day_number']}"),
             estimated_daily_cost=float(evaluation.get("total_cost_usd", 0)),
+            warnings=list(warnings or []),
             activities=activities,
         )
+
+
+def _drop_last_non_meal(activities: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
+    drop_idx = None
+    for i in range(len(activities) - 1, -1, -1):
+        act = activities[i]
+        if act.get("is_food_slot"):
+            continue
+        if act.get("category") == "attraction":
+            drop_idx = i
+            break
+    if drop_idx is None:
+        for i in range(len(activities) - 1, -1, -1):
+            if not activities[i].get("is_food_slot"):
+                drop_idx = i
+                break
+    if drop_idx is None:
+        return None
+    return [a for i, a in enumerate(activities) if i != drop_idx]
+
+
+def _drop_until_under_pace(
+    activities: list[dict[str, Any]],
+    pace: str,
+) -> list[dict[str, Any]]:
+    """Drop attractions until both activity-count and duration caps pass, or meals-only."""
+    limits = PACE_LIMITS.get((pace or "").strip().lower())
+    if not limits:
+        return activities
+    current = list(activities)
+    while True:
+        over_count = len(current) > limits["max_activities"]
+        over_mins = scheduled_total_minutes(current) > limits["max_duration_minutes"]
+        if not over_count and not over_mins:
+            break
+        dropped = _drop_last_non_meal(current)
+        if dropped is None:
+            break
+        current = dropped
+    return current
 
 
 def _fmt_hhmm(total_minutes: int) -> str:
@@ -814,21 +936,139 @@ def _slot_start_minutes(activity: dict[str, Any]) -> int:
 
 
 def _retarget_afternoon_after_lunch(activities: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Keep lunch at 12:00; shift later non-meal stops to 13:45+ so slots do not overlap."""
-    cursor = 13 * 60 + 45
-    out: list[dict[str, Any]] = []
+    """Pin lunch at noon, then lay out other stops so no slot overlaps."""
+    lunches: list[dict[str, Any]] = []
+    dinners: list[dict[str, Any]] = []
+    others: list[dict[str, Any]] = []
     for act in activities:
-        start = _slot_start_minutes(act)
-        if act.get("is_food_slot") or start < 12 * 60:
-            out.append(act)
-            continue
+        role = str(act.get("meal_role") or "").strip().lower()
+        if role == "dinner":
+            dinners.append(act)
+        elif role == "lunch":
+            lunches.append(act)
+        elif act.get("is_food_slot"):
+            if _slot_start_minutes(act) >= 16 * 60:
+                dinners.append(act)
+            else:
+                lunches.append(act)
+        else:
+            others.append(act)
+
+    lunch_start = 12 * 60
+    placed_lunch: list[dict[str, Any]] = []
+    lunch_end = lunch_start
+    for lunch in lunches[:1]:
+        duration = int(lunch.get("duration_minutes") or 90)
+        lunch_end = lunch_start + duration
+        updated = dict(lunch)
+        updated["time_slot"] = f"{_fmt_hhmm(lunch_start)}-{_fmt_hhmm(lunch_end)}"
+        placed_lunch.append(updated)
+
+    morning_src = [a for a in others if _slot_start_minutes(a) < 12 * 60]
+    afternoon_src = [a for a in others if _slot_start_minutes(a) >= 12 * 60]
+
+    cursor = 9 * 60
+    placed_morning: list[dict[str, Any]] = []
+    overflow: list[dict[str, Any]] = []
+    for act in morning_src:
         duration = int(act.get("duration_minutes") or 60)
+        if placed_lunch and cursor + duration > lunch_start:
+            overflow.append(act)
+            continue
         end = cursor + duration
         updated = dict(act)
         updated["time_slot"] = f"{_fmt_hhmm(cursor)}-{_fmt_hhmm(end)}"
-        out.append(updated)
-        cursor = end + 30
-    return out
+        placed_morning.append(updated)
+        cursor = end + TRAVEL_BUFFER_MINUTES
+
+    after_lunch = (
+        lunch_end + TRAVEL_BUFFER_MINUTES if placed_lunch else max(cursor, 13 * 60 + 45)
+    )
+    acursor = after_lunch
+    placed_afternoon: list[dict[str, Any]] = []
+    for act in overflow + afternoon_src + lunches[1:]:
+        duration = int(act.get("duration_minutes") or 60)
+        end = acursor + duration
+        updated = dict(act)
+        updated["time_slot"] = f"{_fmt_hhmm(acursor)}-{_fmt_hhmm(end)}"
+        placed_afternoon.append(updated)
+        acursor = end + TRAVEL_BUFFER_MINUTES
+
+    dinner_start = max(18 * 60 + 30, acursor)
+    placed_dinners: list[dict[str, Any]] = []
+    for act in dinners:
+        duration = int(act.get("duration_minutes") or 90)
+        end = dinner_start + duration
+        updated = dict(act)
+        updated["time_slot"] = f"{_fmt_hhmm(dinner_start)}-{_fmt_hhmm(end)}"
+        placed_dinners.append(updated)
+        dinner_start = end + TRAVEL_BUFFER_MINUTES
+
+    return placed_morning + placed_lunch + placed_afternoon + placed_dinners
+
+
+def _preference_match_score(poi: dict[str, Any], preferences: list[str]) -> int:
+    if not preferences:
+        return 0
+    haystack = " ".join(
+        [
+            str(poi.get("name") or ""),
+            str(poi.get("description") or ""),
+            " ".join(str(t) for t in (poi.get("tags") or [])),
+        ]
+    ).lower()
+    score = 0
+    for pref in preferences:
+        token = pref.strip().lower()
+        if not token:
+            continue
+        if token in haystack:
+            score += 2
+        elif token.replace("-", " ") in haystack:
+            score += 2
+        elif token.replace("-", "") in haystack.replace("-", ""):
+            score += 1
+    return score
+
+
+def _coverage_tags(preferences: list[str]) -> set[str]:
+    skip = {"popular", "unconventional"}
+    return {
+        p.strip().lower()
+        for p in preferences
+        if p and str(p).strip() and p.strip().lower() not in skip
+    }
+
+
+def _activity_matched_tags(act: Activity, preferences: list[str]) -> set[str]:
+    hay = " ".join(
+        [
+            act.poi_name,
+            act.display_name or "",
+            act.description,
+            act.category.value,
+        ]
+    ).lower()
+    matched: set[str] = set()
+    for pref in _coverage_tags(preferences):
+        if pref in hay or pref.replace("-", " ") in hay:
+            matched.add(pref)
+    return matched
+
+
+def _poi_display_name(poi: dict[str, Any], locale: Locale | str | None) -> str:
+    name = str(poi.get("name") or "")
+    tagged_en = str(poi.get("display_name") or "").strip()
+    if not tagged_en:
+        for tag in poi.get("tags") or []:
+            text = str(tag)
+            if text.startswith("name_en:") and text.split(":", 1)[1].strip():
+                tagged_en = text.split(":", 1)[1].strip()
+                break
+    key = locale.value if isinstance(locale, Locale) else str(locale or "en")
+    if key == "en" and tagged_en:
+        return tagged_en
+    return name
 
 
 def _poi_notability_penalty(poi: dict[str, Any]) -> int:

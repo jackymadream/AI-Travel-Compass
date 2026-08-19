@@ -171,9 +171,9 @@ export function CountryBrowseCard({
                     return (
                       <li
                         key={city.slug}
-                        className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)]/80"
+                        className="flex h-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)]/80"
                       >
-                        <div className="relative h-28 w-full bg-[var(--muted)]">
+                        <div className="relative h-28 w-full shrink-0 bg-[var(--muted)]">
                           {city.photo_url ? (
                             <img
                               src={city.photo_url}
@@ -182,7 +182,7 @@ export function CountryBrowseCard({
                             />
                           ) : null}
                         </div>
-                        <div className="flex flex-col gap-3 p-4">
+                        <div className="flex flex-1 flex-col p-4">
                           <div className="flex items-start gap-2">
                             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
                             <div className="min-w-0">
@@ -196,23 +196,27 @@ export function CountryBrowseCard({
                               ) : null}
                             </div>
                           </div>
-                          {cityTags.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                              {cityTags.slice(0, 4).map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          ) : null}
-                          <Button asChild size="sm" className="w-full">
-                            <Link href={href} onClick={(e) => e.stopPropagation()}>
-                              Plan Trip to {city.name}
-                            </Link>
-                          </Button>
+                          <div className="mt-auto flex flex-col gap-3 pt-3">
+                            {cityTags.length > 0 ? (
+                              <div className="flex min-h-[2.75rem] flex-wrap content-start gap-1.5">
+                                {cityTags.slice(0, 4).map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--muted-foreground)]"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="min-h-[2.75rem]" aria-hidden />
+                            )}
+                            <Button asChild size="sm" className="w-full">
+                              <Link href={href} onClick={(e) => e.stopPropagation()}>
+                                Plan Trip to {city.name}
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </li>
                     );

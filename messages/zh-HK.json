@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "explore": "探索",
+    "planner": "行程",
+    "itineraries": "我的行程"
+  },
+  "auth": {
+    "signIn": "登入",
+    "signOut": "登出",
+    "notConfigured": "尚未設定登入"
+  },
+  "explore": {
+    "kicker": "探索",
+    "title": "Travel Compass",
+    "subtitle": "用自然語言描述行程，或用硬性篩選瀏覽。預算、安全與語系會在排序前套用。",
+    "filters": "篩選",
+    "refine": "收窄目的地",
+    "hardConstraints": "硬性條件會在排序前套用。",
+    "maxBudget": "每日最高預算",
+    "minSafety": "最低安全評級",
+    "locale": "語系",
+    "loading": "載入目的地…",
+    "searching": "搜尋目的地…",
+    "matches": "{count} 個 AI 配對",
+    "matchesPlural": "{count} 個 AI 配對",
+    "destinations": "{count} 個目的地",
+    "destinationsPlural": "{count} 個目的地",
+    "updating": "更新中",
+    "searchPlaceholder": "描述你想要的旅程…"
+  },
+  "planner": {
+    "kicker": "行程規劃",
+    "title": "由代理人產出每日行程",
+    "subtitle": "設定天數、節奏與預算。代理人會檢索有根據的景點、驗證時間表，並回傳地圖時間線。",
+    "controls": "設定",
+    "planTrip": "規劃行程",
+    "agentHint": "代理人會檢索景點，再驗證預算與節奏。",
+    "generate": "產生行程",
+    "planning": "規劃中…"
+  },
+  "login": {
+    "title": "登入",
+    "subtitle": "以 Google 或電郵魔法連結登入（Supabase Auth），儲存行程時需要。",
+    "google": "使用 Google 繼續",
+    "magic": "電郵魔法連結",
+    "send": "發送連結",
+    "back": "返回規劃"
+  }
+}

@@ -84,7 +84,7 @@ gcloud run deploy ai-travel-backend \
   --region asia-east1 \
   --allow-unauthenticated \
   --port 8080 \
-  --env-vars-file run-env.yaml
+  --update-env-vars GEMINI_LOCATION=us-central1,GEMINI_FLASH_MODEL=gemini-2.5-flash,GEMINI_PRO_MODEL=gemini-2.5-flash
 ```
 
 Default Cloud Run URL (also works without custom domain):  
@@ -141,7 +141,9 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 | `QDRANT_URL` | Backend | Cluster URL |
 | `QDRANT_API_KEY` | Backend | Cluster API key |
 | `GCP_PROJECT_ID` | Backend | Vertex AI project |
-| `GCP_LOCATION` | Backend | e.g. `us-central1` or `asia-southeast1` |
+| `GCP_LOCATION` | Backend | Embedding region, e.g. `asia-southeast1` |
+| `GEMINI_LOCATION` | Backend | Gemini region, typically `us-central1` (do not reuse embedding region if Flash/Pro 404) |
+| `GEMINI_FLASH_MODEL` / `GEMINI_PRO_MODEL` | Backend | Default `gemini-2.5-flash` |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Backend | Path to service-account JSON (or cloud IAM) |
 | `CORS_ORIGINS` | Backend | `https://travel.jackymadream.com` + localhost |
 | `NEXT_PUBLIC_API_URL` | Frontend | Prod: `https://api.jackymadream.com` |
@@ -154,14 +156,14 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 | `VERTEX_EMBEDDING_TIMEOUT_SEC` | Backend | Default `30` |
 | `EMBEDDING_DIMENSIONS` | Backend | `256` / `512` / `768` (default 768) |
 | `LOG_LEVEL` | Backend | `INFO` / `DEBUG` |
-| `GEMINI_API_KEY` | Backend (future LLM) | Optional; heuristic planner works without it |
 | `SMOKE_BASE_URL` | Smoke script | Override API URL for `scripts/smoke_test.py` |
 | `SMOKE_ALLOW_DEGRADED` | Smoke script | `true` to accept `/health` degraded |
 
 ### Vertex / Gemini naming
 
 - Embeddings use **Vertex AI** (`text-embedding-004`) via `GCP_*` + credentials/IAM.
-- `GEMINI_API_KEY` is reserved for an optional generative itinerary LLM seam.
+- Itinerary drafts use **Vertex Gemini** via the same credentials. Set `GEMINI_LOCATION=us-central1` on Cloud Run when `GCP_LOCATION` is an embedding-only region (e.g. `asia-southeast1`); otherwise generate falls back to the heuristic planner.
+- `GEMINI_API_KEY` is unused for the current Vertex path.
 
 ---
 

@@ -33,6 +33,7 @@ type ItineraryMapProps = {
   ) => void;
   onAddCustomSpot: (dayNumber: number, spot: CustomSpotPayload) => void;
   cityCenter?: { lat: number; lon: number } | null;
+  cityHint?: string | null;
 };
 
 function numberedIcon(order: number, color: string, selected: boolean) {
@@ -87,10 +88,15 @@ export function ItineraryMap({
   onSelectActivity,
   onAddCustomSpot,
   cityCenter,
+  cityHint,
 }: ItineraryMapProps) {
   const [showMeals, setShowMeals] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [placingOnMap, setPlacingOnMap] = useState(false);
+  const [pendingMapPin, setPendingMapPin] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
 
   const dayPlan = days.find((d) => d.day_number === selectedDay) ?? days[0];
 
@@ -164,6 +170,7 @@ export function ItineraryMap({
             onClick={() => {
               setCustomOpen(true);
               setPlacingOnMap(false);
+              setPendingMapPin(null);
             }}
           >
             Custom Spot
@@ -186,13 +193,9 @@ export function ItineraryMap({
           <MapClickCapture
             enabled={placingOnMap}
             onClick={(lat, lon) => {
-              onAddCustomSpot(selectedDay, {
-                name: "Custom spot",
-                lat,
-                lon,
-              });
+              setPendingMapPin({ lat, lon });
               setPlacingOnMap(false);
-              setCustomOpen(false);
+              setCustomOpen(true);
             }}
           />
           {visible.map((activity, orderIdx) => {
@@ -219,13 +222,17 @@ export function ItineraryMap({
         <CustomSpotDialog
           open={customOpen}
           placingOnMap={placingOnMap}
+          cityHint={cityHint}
+          initialCoords={pendingMapPin}
           onClose={() => {
             setCustomOpen(false);
             setPlacingOnMap(false);
+            setPendingMapPin(null);
           }}
           onStartMapPlace={() => setPlacingOnMap(true)}
           onSubmit={(spot) => {
             onAddCustomSpot(selectedDay, spot);
+            setPendingMapPin(null);
           }}
         />
       </div>

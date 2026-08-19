@@ -55,6 +55,11 @@ class Activity(BaseModel):
     poi_id: str | None = Field(default=None, max_length=64)
     address: str | None = Field(default=None, max_length=500)
     photo_url: str | None = Field(default=None, max_length=2000)
+    display_name: str | None = Field(
+        default=None,
+        max_length=200,
+        description="Localized label for UI; poi_name stays the grounded pool name.",
+    )
     is_custom: bool = Field(
         default=False,
         description="User-inserted custom waypoint.",
@@ -69,6 +74,10 @@ class DailyItinerary(BaseModel):
     day_number: int = Field(..., ge=1, le=7)
     theme: str = Field(..., min_length=1, max_length=200)
     estimated_daily_cost: float = Field(..., ge=0)
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Soft schedule notes (e.g. pace over target after retries).",
+    )
     activities: list[Activity] = Field(default_factory=list)
 
 
@@ -117,4 +126,13 @@ class ItineraryResponse(BaseModel):
         min_length=1,
         max_length=4000,
         description="Short explanation of pacing and preference trade-offs.",
+    )
+    user_summary: str | None = Field(
+        default=None,
+        max_length=2000,
+        description="User-facing trip focus summary (not evaluator logs).",
+    )
+    prep_tips: list[str] = Field(
+        default_factory=list,
+        description="Actionable reminders (tickets, dress code, hours).",
     )

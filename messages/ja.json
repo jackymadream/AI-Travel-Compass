@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "explore": "探す",
+    "planner": "プランナー",
+    "itineraries": "保存した旅程"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signOut": "ログアウト",
+    "notConfigured": "認証未設定"
+  },
+  "explore": {
+    "kicker": "探す",
+    "title": "Travel Compass",
+    "subtitle": "自然文で旅を指定するか、条件で閲覧。予算・安全・言語は順位付けの前に適用されます。",
+    "filters": "フィルタ",
+    "refine": "行き先を絞る",
+    "hardConstraints": "ハード制約はランキング前に適用されます。",
+    "maxBudget": "1日の上限予算",
+    "minSafety": "最低安全レベル",
+    "locale": "言語",
+    "loading": "行き先を読み込み中…",
+    "searching": "行き先を検索中…",
+    "matches": "AI一致 {count} 件",
+    "matchesPlural": "AI一致 {count} 件",
+    "destinations": "{count} 件の行き先",
+    "destinationsPlural": "{count} 件の行き先",
+    "updating": "更新中",
+    "searchPlaceholder": "行きたい旅を書いてください…"
+  },
+  "planner": {
+    "kicker": "旅程プランナー",
+    "title": "エージェントで日別プラン",
+    "subtitle": "日数・ペース・予算を指定。エージェントが根拠あるPOIを取得し、日程を検証して地図付きタイムラインを返します。",
+    "controls": "操作",
+    "planTrip": "旅を計画",
+    "agentHint": "POIを取得したあと、予算とペースを検証します。",
+    "generate": "旅程を作成",
+    "planning": "作成中…"
+  },
+  "login": {
+    "title": "ログイン",
+    "subtitle": "Google またはマジックリンク（Supabase Auth）。旅程の保存に必要です。",
+    "google": "Google で続ける",
+    "magic": "メールのマジックリンク",
+    "send": "リンクを送る",
+    "back": "プランナーに戻る"
+  }
+}

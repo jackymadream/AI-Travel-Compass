@@ -37,6 +37,7 @@ from src.services.itinerary_eval import (  # noqa: E402
     unique_non_meal_photos,
     unique_non_meal_poi_names,
 )
+from src.services.agent_tools import PACE_LIMITS, scheduled_total_minutes  # noqa: E402
 
 REPORT_DIR = ROOT / ".scratch" / "eval-itinerary"
 
@@ -98,6 +99,35 @@ CASES: list[dict[str, Any]] = [
         "forbid_denied_photos": True,
         "require_meals": True,
     },
+    {
+        "id": "tokyo_nightlife_only",
+        "slug": "tokyo",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 120,
+        "preferences": ["nightlife"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": False,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["nightlife"],
+    },
+    {
+        "id": "tokyo_moderate_4day",
+        "slug": "tokyo",
+        "days": 4,
+        "pace": "moderate",
+        "daily_budget_usd": 120,
+        "preferences": ["culture", "food"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+    },
 ]
 
 
@@ -107,7 +137,7 @@ def http_json(method: str, url: str, payload: dict | None = None) -> dict:
     if data is not None:
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=120) as resp:
+    with urllib.request.urlopen(req, timeout=180) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
@@ -172,6 +202,14 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
     checks.append({"name": "city_name", "ok": city_ok, "detail": city_name})
 
     plans = data.get("daily_plans") or []
+    days_ok = len(plans) == case["days"]
+    checks.append(
+        {
+            "name": "all_days_returned",
+            "ok": days_ok,
+            "detail": f"{len(plans)}/{case['days']}",
+        }
+    )
     meals_ok = True
     synth_hits: list[str] = []
     denied_photos: list[str] = []
@@ -281,6 +319,31 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
             "detail": overlap_hits[:5],
         }
     )
+
+    limits = PACE_LIMITS.get(str(case.get("pace") or "moderate").lower())
+    pace_issues: list[str] = []
+    if limits:
+        for day in plans:
+            acts = day.get("activities") or []
+            total = scheduled_total_minutes(acts)
+            over = (
+                len(acts) > limits["max_activities"]
+                or total > limits["max_duration_minutes"]
+            )
+            day_warnings = day.get("warnings") or []
+            if over and not day_warnings:
+                pace_issues.append(
+                    f"day {day.get('day_number')}: {len(acts)} stops / "
+                    f"{total} min (max {limits['max_activities']} / "
+                    f"{limits['max_duration_minutes']}) without warnings"
+                )
+    checks.append(
+        {
+            "name": "pace_caps_or_day_warnings",
+            "ok": len(pace_issues) == 0,
+            "detail": pace_issues[:5] or "within caps or warned",
+        }
+    )
     checks.append(
         {
             "name": "unique_meal_families_per_day",
@@ -288,6 +351,28 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
             "detail": family_clash[:5],
         }
     )
+
+    required_tags = [str(t).lower() for t in case.get("require_preference_coverage") or []]
+    if required_tags:
+        hay = " ".join(
+            [
+                str(data.get("user_summary") or ""),
+                str(data.get("agent_reasoning") or ""),
+                *[
+                    f"{a.get('poi_name')} {a.get('description')} {a.get('category')}"
+                    for d in plans
+                    for a in (d.get("activities") or [])
+                ],
+            ]
+        ).lower()
+        missing = [tag for tag in required_tags if tag not in hay and tag.replace("-", " ") not in hay]
+        checks.append(
+            {
+                "name": "preference_coverage",
+                "ok": len(missing) == 0,
+                "detail": missing or required_tags,
+            }
+        )
 
     result["checks"] = checks
     result["ok"] = all(c["ok"] for c in checks)

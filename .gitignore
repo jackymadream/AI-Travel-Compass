@@ -14,4 +14,7 @@ gcp-key.json
 credentials/
 .scratch/
 data/tmp_*
-
+docs/Error-Changes.docx
+.vercel
+.cursor/
+*.tsbuildinfo

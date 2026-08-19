@@ -1,8 +1,8 @@
 """
 Dual-model Gemini orchestration via Vertex AI (Phase 5.2).
 
-- Gemini 1.5 Flash — fast POI extraction / ranking / routing
-- Gemini 1.5 Pro — multi-day itinerary drafting & constraint solving
+- Gemini Flash — fast POI extraction / ranking / routing
+- Gemini (Pro-class) — multi-day itinerary drafting & constraint solving
 
 Implements ``ItineraryLLMClient.propose_daily_plan`` for ``AgentService``.
 """
@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 
 from src.schemas.itinerary import ItineraryRequest
 from src.services import itinerary_i18n as i18n
+from src.services.agent_tools import TRAVEL_BUFFER_MINUTES, pace_constraint_prompt
 from src.services.poi_photos import resolve_poi_photo
 from src.utils.logger import get_logger
 
@@ -28,17 +29,26 @@ logger = get_logger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCATION = "us-central1"
-# Generative models are often unavailable in asia-* embedding regions.
-FLASH_MODEL = os.getenv("GEMINI_FLASH_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
-PRO_MODEL = os.getenv("GEMINI_PRO_MODEL", "gemini-1.5-pro").strip() or "gemini-1.5-pro"
-
-
-class LlmServiceError(Exception):
-    """Vertex Gemini call failed."""
+DEFAULT_FLASH_MODEL = "gemini-2.5-flash"
+DEFAULT_PRO_MODEL = "gemini-2.5-flash"
 
 
 def _load_env() -> None:
     load_dotenv(ROOT_DIR / ".env")
+
+
+def _flash_model() -> str:
+    _load_env()
+    return os.getenv("GEMINI_FLASH_MODEL", DEFAULT_FLASH_MODEL).strip() or DEFAULT_FLASH_MODEL
+
+
+def _pro_model() -> str:
+    _load_env()
+    return os.getenv("GEMINI_PRO_MODEL", DEFAULT_PRO_MODEL).strip() or DEFAULT_PRO_MODEL
+
+
+class LlmServiceError(Exception):
+    """Vertex Gemini call failed."""
 
 
 def _resolve_credentials() -> tuple[str, str]:
@@ -75,7 +85,14 @@ def _init_vertex() -> tuple[str, str]:
     return project_id, location
 
 
-def _generate(model_name: str, prompt: str, *, temperature: float = 0.2) -> str:
+def _generate(
+    model_name: str,
+    prompt: str,
+    *,
+    temperature: float = 0.2,
+    json_mode: bool = False,
+    max_output_tokens: int = 2048,
+) -> str:
     """
     Call Vertex Gemini with lightweight retries for transient errors.
 
@@ -91,22 +108,38 @@ def _generate(model_name: str, prompt: str, *, temperature: float = 0.2) -> str:
     attempts = max(1, int(os.getenv("GEMINI_RETRY_ATTEMPTS", "3")))
     base_delay = float(os.getenv("GEMINI_RETRY_BASE_DELAY_SEC", "0.6"))
     last_exc: BaseException | None = None
+    gen_config: dict[str, Any] = {
+        "temperature": temperature,
+        "max_output_tokens": max_output_tokens,
+    }
+    if json_mode:
+        gen_config["response_mime_type"] = "application/json"
 
     for attempt in range(1, attempts + 1):
         try:
             model = GenerativeModel(model_name)
-            response = model.generate_content(
-                prompt,
-                generation_config={
-                    "temperature": temperature,
-                    "max_output_tokens": 2048,
-                },
-            )
-            text = getattr(response, "text", None) or ""
+            response = model.generate_content(prompt, generation_config=gen_config)
+            text = ""
+            try:
+                text = getattr(response, "text", None) or ""
+            except Exception:  # noqa: BLE001 — blocked / empty candidates
+                text = ""
             if not text and getattr(response, "candidates", None):
-                parts = response.candidates[0].content.parts
+                parts = getattr(response.candidates[0].content, "parts", None) or []
                 text = "".join(getattr(p, "text", "") or "" for p in parts)
-            return (text or "").strip()
+            text = (text or "").strip()
+            if not text:
+                finish = None
+                try:
+                    finish = response.candidates[0].finish_reason
+                except Exception:  # noqa: BLE001
+                    finish = None
+                raise LlmServiceError(
+                    f"{model_name} returned empty text (finish_reason={finish})"
+                )
+            return text
+        except LlmServiceError:
+            raise
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
             if attempt >= attempts or not _is_transient_llm_error(exc):
@@ -158,14 +191,21 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 class LlmService:
     """Flash (routing/rank) + Pro (itinerary) dual-model client."""
 
-    flash_model: str = FLASH_MODEL
-    pro_model: str = PRO_MODEL
+    def __init__(self) -> None:
+        self.flash_model = _flash_model()
+        self.pro_model = _pro_model()
 
     def generate_flash(self, prompt: str) -> str:
         return _generate(self.flash_model, prompt, temperature=0.1)
 
     def generate_pro(self, prompt: str) -> str:
-        return _generate(self.pro_model, prompt, temperature=0.3)
+        return _generate(
+            self.pro_model,
+            prompt,
+            temperature=0.3,
+            json_mode=True,
+            max_output_tokens=8192,
+        )
 
     def rank_pois(
         self,
@@ -225,14 +265,17 @@ class LlmService:
             for p in poi_pool
             if p.get("category") != "food"
         ]
+        pace = request.pace.value if hasattr(request.pace, "value") else request.pace
         prompt = f"""
 You are a travel itinerary agent. Draft day {day_number} of {request.days}.
-Pace: {request.pace.value if hasattr(request.pace, 'value') else request.pace}
+Pace: {pace}
 Daily budget USD: {request.daily_budget_usd}
 Preferences: {list(request.preferences or [])}
 Locale: {request.locale}
-Previous violations (fix these): {previous_violations}
+Previous violations / evaluator hints (fix these): {previous_violations}
 Retry turn: {turn}
+
+{pace_constraint_prompt(str(pace))}
 
 Ground attraction and rest stops in this POI pool (use exact names):
 {json.dumps(pool_brief, ensure_ascii=False)}
@@ -263,6 +306,8 @@ Hard meal rules:
   yesterday's lunch or dinner labels.
 - Attraction/rest activities must use exact pool names; do not invent those POIs.
 - Stay under daily budget; match pool cost/duration when grounding pool POIs.
+- Do not overlap time slots. Leave the {TRAVEL_BUFFER_MINUTES} minute travel buffer implicit in the
+  evaluator; still avoid stacking 3+ hour attractions back-to-back.
 {i18n.locale_language_instruction(request.locale)}
 """.strip()
         try:

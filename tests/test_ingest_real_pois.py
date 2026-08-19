@@ -5,6 +5,7 @@ from __future__ import annotations
 from scripts.ingest_real_pois import (
     classify_osm_tags,
     elements_to_pois,
+    enrich_poi_description,
     poi_id_from_osm,
     validate_structural,
 )
@@ -147,3 +148,15 @@ def test_elements_skip_obscure_worship_when_attractions_exist() -> None:
     senso = next(p for p in pois if p.name == "Senso-ji")
     assert senso.wikidata == "Q235130"
     assert any(t.startswith("wikidata:") for t in senso.tags)
+
+
+def test_enrich_poi_description_uses_category_template() -> None:
+    text = enrich_poi_description(
+        name="Ueno Museum",
+        city="Tokyo",
+        tags={"tourism": "museum"},
+        category="attraction",
+    )
+    assert "Tokyo" in text
+    assert "museum" in text.lower()
+    assert " · " not in text or len(text) > 20

@@ -92,8 +92,9 @@ OSM_CATEGORY_RULES: list[tuple[str, str, str, list[str], float, int]] = [
     ("amenity", "restaurant", "food", ["food", "restaurant"], 25, 75),
     ("amenity", "cafe", "food", ["food", "cafe"], 10, 45),
     ("amenity", "fast_food", "food", ["food", "fast-food"], 8, 30),
-    ("amenity", "bar", "food", ["food", "nightlife"], 18, 60),
-    ("amenity", "pub", "food", ["food", "pub"], 16, 60),
+    ("amenity", "bar", "food", ["food", "nightlife", "bar"], 18, 60),
+    ("amenity", "pub", "food", ["food", "pub", "nightlife"], 16, 60),
+    ("amenity", "nightclub", "food", ["nightlife", "club"], 25, 90),
     ("leisure", "park", "rest", ["rest", "park"], 0, 60),
     ("leisure", "garden", "rest", ["rest", "garden"], 0, 60),
     ("amenity", "spa", "rest", ["rest", "wellness"], 35, 120),
@@ -110,6 +111,56 @@ PLACES_PRICE_MAP = {
 
 # Keep obscure neighborhood churches out unless the city would miss this floor.
 MIN_ATTRACTION = 6
+
+CATEGORY_BLURBS: dict[str, str] = {
+    "museum": "A notable museum in {city}. Budget 1–2 hours for the main galleries.",
+    "gallery": "An art gallery stop in {city} — short visit, good for a cultural pause.",
+    "attraction": "A signature sightseeing stop in {city} worth adding to your walking day.",
+    "viewpoint": "An observation or viewpoint in {city}. Go early or near sunset for clearer views.",
+    "place_of_worship": (
+        "A local place of worship in {city}. Dress modestly, keep voices low, and check visiting hours."
+    ),
+    "restaurant": "A sit-down food stop in {city}. Expect a short wait at peak meal times.",
+    "cafe": "A cafe break in {city} — useful as a rest between walking segments.",
+    "bar": "An evening nightlife stop in {city}. Some venues have cover charges or ID checks.",
+    "pub": "A casual pub stop in {city} for drinks and a slower evening pace.",
+    "nightclub": "A late-night music venue in {city}. Check door policy and last-entry times.",
+    "park": "A green rest stop in {city} to reset between attractions.",
+    "garden": "A garden stroll in {city} — quieter than the main sightseeing spine.",
+    "spa": "A wellness / spa pause in {city}. Book ahead when you can.",
+    "castle": "A historic castle or fortification in {city}. Allow extra time for queues.",
+    "monument": "A landmark monument in {city} — usually a short photo stop.",
+}
+
+
+def enrich_poi_description(
+    *,
+    name: str,
+    city: str,
+    tags: dict[str, Any],
+    category: str,
+) -> str:
+    raw = str(tags.get("description") or "").strip()
+    if len(raw) >= 40:
+        return raw[:2000]
+    kind = str(
+        tags.get("tourism")
+        or tags.get("amenity")
+        or tags.get("historic")
+        or tags.get("leisure")
+        or category
+    )
+    template = CATEGORY_BLURBS.get(kind) or (
+        "A {category} stop in {city} that fits a walking itinerary."
+    )
+    blurb = template.format(city=city, category=category, name=name)
+    extras = [
+        str(tags.get("cuisine") or "").strip(),
+        f"Also known as {tags['name:en']}" if tags.get("name:en") and tags.get("name:en") != name else "",
+    ]
+    suffix = " ".join(bit for bit in extras if bit)
+    text = f"{blurb} {suffix}".strip()
+    return text[:2000]
 
 
 def load_env() -> None:
@@ -197,13 +248,14 @@ def _poi_record_from_element(
     osm_id = int(el["id"])
     lat = el.get("lat")
     lon = el.get("lon")
-    desc_bits = [
-        tags.get("description"),
-        tags.get("tourism"),
-        tags.get("amenity"),
-        tags.get("cuisine"),
-    ]
-    description = " · ".join(str(b) for b in desc_bits if b) or f"{name} in {display}"
+    description = enrich_poi_description(
+        name=name, city=display, tags=tags, category=category
+    )
+    en_name = str(tags.get("name:en") or "").strip()
+    if en_name and en_name not in soft_tags:
+        soft_tags = list(dict.fromkeys([*soft_tags, f"name_en:{en_name}"]))
+    if "wikipedia" in tags or tags.get("wikidata"):
+        soft_tags = list(dict.fromkeys([*soft_tags, "popular", "wikipedia"]))
     return PoiRecord(
         id=poi_id_from_osm("node", osm_id),
         name=name,

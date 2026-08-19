@@ -17,6 +17,12 @@ import {
   type DailyItinerary,
   type SavedItinerary,
 } from "@/lib/api";
+import {
+  insertCustomSpot,
+  moveActivity,
+  scheduleWarnings,
+  updateActivity,
+} from "@/lib/itinerary-edit";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type ItineraryDetailClientProps = {
@@ -104,27 +110,25 @@ export function ItineraryDetailClient({
   }
 
   function addCustomSpot(dayNumber: number, spot: CustomSpotPayload) {
-    setDays((prev) =>
-      prev.map((day) => {
-        if (day.day_number !== dayNumber) return day;
-        const custom: Activity = {
-          time_slot: "Flexible",
-          poi_name: spot.name,
-          category: "attraction",
-          cost_usd: 0,
-          duration_minutes: 45,
-          description: spot.address
-            ? `Custom waypoint — ${spot.address}`
-            : "Custom waypoint added on the map.",
-          lat: spot.lat,
-          lon: spot.lon,
-          address: spot.address ?? null,
-          is_custom: true,
-          is_food_slot: false,
-          meal_role: null,
-        };
-        return { ...day, activities: [...day.activities, custom] };
-      })
+    setDays((prev) => insertCustomSpot(prev, dayNumber, spot));
+  }
+
+  function handleMoveActivity(
+    dayNumber: number,
+    index: number,
+    direction: -1 | 1
+  ) {
+    setDays((prev) => moveActivity(prev, dayNumber, index, direction));
+  }
+
+  function handleUpdateActivity(
+    dayNumber: number,
+    index: number,
+    patch: Partial<Activity>
+  ) {
+    setDays((prev) => updateActivity(prev, dayNumber, index, patch));
+    setSelectedActivity((current) =>
+      current ? { ...current, ...patch } : current
     );
   }
 
@@ -182,7 +186,7 @@ export function ItineraryDetailClient({
           {item.agent_reasoning && (
             <aside className="rounded-2xl border border-[var(--border)] bg-[var(--card)]/80 px-5 py-4 text-sm text-[var(--muted-foreground)]">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground)]">
-                Agent notes
+                Trip insights
               </p>
               <p className="mt-2 whitespace-pre-wrap">{item.agent_reasoning}</p>
             </aside>
@@ -197,11 +201,15 @@ export function ItineraryDetailClient({
                 onSelectActivity={selectActivity}
                 onAddCustomSpot={addCustomSpot}
                 cityCenter={cityCenter}
+                cityHint={item.destination}
               />
               <DayTimeline
                 days={days}
                 selectedKey={selectedKey}
                 onSelectActivity={selectActivity}
+                editable
+                warnings={scheduleWarnings(days)}
+                onMoveActivity={handleMoveActivity}
               />
             </>
           ) : (
@@ -219,6 +227,11 @@ export function ItineraryDetailClient({
         activity={selectedActivity}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        onSave={(patch) => {
+          if (!selectedKey) return;
+          const [dayPart, indexPart] = selectedKey.split("-");
+          handleUpdateActivity(Number(dayPart), Number(indexPart), patch);
+        }}
       />
     </div>
   );

@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { AuthStatus } from "@/components/auth-status";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/explore", label: "Explore", active: "explore" },
-  { href: "/planner", label: "Planner", active: "planner" },
-  { href: "/itineraries", label: "My itineraries", active: "itineraries" },
+  { href: "/explore", key: "explore", active: "explore" },
+  { href: "/planner", key: "planner", active: "planner" },
+  { href: "/itineraries", key: "itineraries", active: "itineraries" },
 ] as const;
 
 type SiteNavProps = {
@@ -17,6 +18,7 @@ type SiteNavProps = {
 };
 
 export function SiteNav({ active, className }: SiteNavProps) {
+  const t = useTranslations("nav");
   return (
     <nav
       className={cn(
@@ -39,7 +41,7 @@ export function SiteNav({ active, className }: SiteNavProps) {
                   : "border border-[var(--border)] bg-[var(--card)]/80 text-[var(--muted-foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
               )}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           );
         })}
