@@ -3,8 +3,10 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+import { ItineraryProgress } from "@/components/planner/itinerary-progress";
 import { AgentReasoningPanel } from "@/components/planner/agent-reasoning";
 import type { CustomSpotPayload } from "@/components/planner/custom-spot-dialog";
+import { CustomSpotDialog } from "@/components/planner/custom-spot-dialog";
 import { DayTimeline } from "@/components/planner/day-timeline";
 import { ItineraryMapDynamic } from "@/components/planner/itinerary-map-dynamic";
 import { PoiDetailDrawer } from "@/components/planner/poi-detail-drawer";
@@ -16,18 +18,22 @@ import {
   PLANNER_CITIES,
   fetchCities,
   fetchCountries,
-  generateItinerary,
+  generateItineraryWithProgress,
   saveItinerary,
   type Activity,
   type CitySummary,
   type Country,
+  type ItineraryProgressEvent,
   type ItineraryResponse,
   type TripPace,
 } from "@/lib/api";
 import {
+  appendCustomSpot,
+  clearCuisineMealPhotos,
   insertCustomSpot,
   moveActivity,
   scheduleWarnings,
+  suggestedSlotAfterLast,
   tripTotal,
   updateActivity,
 } from "@/lib/itinerary-edit";
@@ -35,11 +41,35 @@ import { DEFAULT_PLANNER_PREFERENCES } from "@/lib/planner-preferences";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useLocale } from "@/components/locale-provider";
 
-const LOADING_MESSAGE =
-  "Agent is querying POIs and optimizing budget…";
-
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function progressStepLabel(
+  t: ReturnType<typeof useTranslations>,
+  event: ItineraryProgressEvent
+): string {
+  const day = event.day_number ?? 1;
+  const total = event.total_days ?? 1;
+  const turn = event.turn ?? 1;
+  switch (event.step) {
+    case "starting":
+      return t("progress.starting");
+    case "poi_retrieval":
+      return t("progress.poi_retrieval");
+    case "plan_day":
+      return t("progress.plan_day", { day, total });
+    case "draft_day":
+      return t("progress.draft_day", { day, total });
+    case "validate_day":
+      return t("progress.validate_day", { day, turn });
+    case "finalize":
+      return t("progress.finalize");
+    case "complete":
+      return t("progress.complete");
+    default:
+      return t("progress.poi_retrieval");
+  }
+}
 
 function resolveCountryId(
   raw: string | null,
@@ -98,6 +128,7 @@ function PlannerClientInner() {
   const { locale, setLocale } = useLocale();
 
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<ItineraryProgressEvent | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -109,6 +140,7 @@ function PlannerClientInner() {
     null
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [appendStopDay, setAppendStopDay] = useState<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const queryAppliedRef = useRef(false);
 
@@ -123,6 +155,18 @@ function PlannerClientInner() {
     }
     return null;
   }, [result]);
+
+  const appendDayPlan = useMemo(() => {
+    if (!result || appendStopDay == null) return null;
+    return (
+      result.daily_plans.find((d) => d.day_number === appendStopDay) ?? null
+    );
+  }, [result, appendStopDay]);
+
+  const appendDefaultSlot = useMemo(() => {
+    if (!appendDayPlan) return "15:00-16:00";
+    return suggestedSlotAfterLast(appendDayPlan.activities, 45);
+  }, [appendDayPlan]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -200,6 +244,17 @@ function PlannerClientInner() {
     setSaveMessage(null);
   }
 
+  function appendStop(dayNumber: number, spot: CustomSpotPayload) {
+    setResult((prev) => {
+      if (!prev) return prev;
+      const daily_plans = appendCustomSpot(prev.daily_plans, dayNumber, spot);
+      return { ...prev, daily_plans, total_cost_usd: tripTotal(daily_plans) };
+    });
+    setSavedId(null);
+    setSaveMessage(null);
+    setSelectedDay(dayNumber);
+  }
+
   function handleMoveActivity(
     dayNumber: number,
     index: number,
@@ -216,6 +271,9 @@ function PlannerClientInner() {
       return { ...prev, daily_plans, total_cost_usd: tripTotal(daily_plans) };
     });
     setSavedId(null);
+    setSelectedKey(null);
+    setSelectedActivity(null);
+    setDrawerOpen(false);
   }
 
   function handleUpdateActivity(
@@ -245,6 +303,7 @@ function PlannerClientInner() {
     abortRef.current = controller;
 
     setLoading(true);
+    setProgress({ step: "starting", percent: 5 });
     setError(null);
     setSaveMessage(null);
     setSavedId(null);
@@ -253,7 +312,7 @@ function PlannerClientInner() {
     setSelectedKey(null);
 
     try {
-      const data = await generateItinerary(
+      const data = await generateItineraryWithProgress(
         {
           city_id: cityId,
           days,
@@ -262,11 +321,21 @@ function PlannerClientInner() {
           preferences,
           locale,
         },
+        (event) => {
+          if (!controller.signal.aborted) {
+            setProgress(event);
+          }
+        },
         controller.signal
       );
       if (!controller.signal.aborted) {
-        setResult(data);
-        setSelectedDay(data.daily_plans[0]?.day_number ?? 1);
+        const daily_plans = clearCuisineMealPhotos(data.daily_plans);
+        setResult({
+          ...data,
+          daily_plans,
+          total_cost_usd: tripTotal(daily_plans),
+        });
+        setSelectedDay(daily_plans[0]?.day_number ?? 1);
       }
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -279,6 +348,7 @@ function PlannerClientInner() {
     } finally {
       if (!controller.signal.aborted) {
         setLoading(false);
+        setProgress(null);
       }
     }
   }
@@ -364,20 +434,15 @@ function PlannerClientInner() {
             </div>
           </header>
 
-          {loading && (
-            <div
-              className="animate-fade-up rounded-2xl border border-[var(--border)] bg-[var(--card)]/90 px-5 py-6"
-              role="status"
-              aria-live="polite"
-            >
-              <p className="animate-soft-pulse font-medium text-[var(--primary)]">
-                {LOADING_MESSAGE}
-              </p>
-              <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                Retrieving attractions, food, and rest stops, then checking pace
-                and daily spend.
-              </p>
-            </div>
+          {loading && progress && (
+            <ItineraryProgress
+              percent={progress.percent}
+              step={progress.step}
+              stepLabel={progressStepLabel(t, progress)}
+              dayNumber={progress.day_number}
+              totalDays={progress.total_days ?? days}
+              detail={t("progress.detail")}
+            />
           )}
 
           {error && !loading && (
@@ -482,6 +547,10 @@ function PlannerClientInner() {
                   editable
                   warnings={scheduleWarnings(result.daily_plans, dailyBudget)}
                   onMoveActivity={handleMoveActivity}
+                  onAddStop={(dayNumber) => {
+                    setSelectedDay(dayNumber);
+                    setAppendStopDay(dayNumber);
+                  }}
                 />
               </div>
               <AgentReasoningPanel
@@ -492,6 +561,38 @@ function PlannerClientInner() {
           )}
         </section>
       </div>
+
+      {appendStopDay != null ? (
+        <div className="fixed inset-0 z-[1150] flex items-start justify-center bg-black/40 p-4 pt-[8vh]">
+          <div className="w-full max-w-md">
+            <CustomSpotDialog
+              open
+              variant="modal"
+              title={`Add stop · Day ${appendStopDay}`}
+              placingOnMap={false}
+              cityHint={result?.city_name}
+              initialCoords={
+                cityCenter
+                  ? {
+                      lat: cityCenter.lat,
+                      lon: cityCenter.lon,
+                      address: result?.city_name
+                        ? `${result.city_name} (city center)`
+                        : "City center",
+                    }
+                  : null
+              }
+              defaultTimeSlot={appendDefaultSlot}
+              onClose={() => setAppendStopDay(null)}
+              onStartMapPlace={() => setAppendStopDay(null)}
+              onSubmit={(spot) => {
+                appendStop(appendStopDay, spot);
+                setAppendStopDay(null);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <PoiDetailDrawer
         activity={selectedActivity}

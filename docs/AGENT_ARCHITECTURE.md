@@ -74,20 +74,23 @@ The agent may call tools **multiple times** (retrieve → draft → evaluate →
 1. Retrieval is **scoped to `city_id`** (SQL and/or RAG over city-local corpus only). Limit is ~24 per category so multi-day plans can skip already-used stops.
 2. Names and cost/duration claims come from tool results — the LLM must not fabricate attraction/rest POIs.
 3. Prefer notable POIs (wikipedia/wikidata, museum/castle/attraction tags) over bare `place_of_worship` neighborhood churches.
-4. **Hard-skip** `poi_name` / `poi_id` already used on earlier days until that category’s unused pool is empty.
-5. Meal slots are **food types** (ramen, monjayaki, …), not restaurant brands. They are injected after retrieval, not taken from the food POI pool.
+4. **Hard-skip** `poi_name` / `poi_id` already used on earlier days until that category’s unused pool is empty. Gemini receives the unused pool (not the full city list) and reused names are dropped after grounding.
+5. Meal slots are **catalog food POIs** (`source=cuisine_catalog` in Supabase) — local dish types with seeded photos, not OSM restaurants and not runtime keyword labels. Lunch/dinner names must come from the food pool (same grounding rule as attractions).
 
 ### 3.1 Itinerary photos
 
-[`src/services/poi_photos.py`](../src/services/poi_photos.py) resolves `photo_url`:
+Photos are **ingested data**, not searched on every plan request.
 
-1. Wikidata **P18** (Commons file) when the POI has a `wikidata` id or `wikidata:Q…` tag.
-2. Wikipedia REST summary thumbnail only if the page **title tokens overlap** the POI name and, when both have coordinates, they are within ~25 km.
-3. Otherwise category-shaped Unsplash stock from [`data/poi_category_photos.json`](../data/poi_category_photos.json) (shrine vs park vs sports — not one Japan postcard list).
+**Ingest** ([`scripts/enrich_poi_photos.py`](../scripts/enrich_poi_photos.py), run after Overpass seed):
 
-Only `upload.wikimedia.org` / Commons FilePath URLs and **allowlisted** Unsplash photo IDs are emitted. The planner UI swaps a 404 image to a category placeholder (`onError`).
+1. Wikidata **P18** only when entity **P625** is within ~25 km of the POI (when coords exist).
+2. Wikipedia REST thumbnail only with strict title overlap **and** page coordinates within ~25 km (fail closed if the page has no coords).
+3. Google **Places** photo when the matched venue is within ~500 m of OSM coords (optional `GOOGLE_PLACES_API_KEY`).
+4. If none match: `photo_source=none`, `photo_url` null — no generic Unsplash “Japan postcard” stored as that POI.
 
-Meals use cuisine-keyword Unsplash URLs from the same allowlist (`monjayaki` before generic `sushi`; yakiniku is grilled meat, not Korean BBQ stock).
+**Cuisine catalog** ([`data/city_cuisines.json`](../data/city_cuisines.json) → `source=cuisine_catalog` rows) carries verified meal photos (`photo_source=cuisine_seed`).
+
+**Planner** copies `photo_url` from the selected POI row ([`persistable_photo_url`](../src/services/poi_photos.py) only). Missing/broken URLs show a category placeholder in the UI (`ActivityPhoto`).
 
 ---
 
@@ -149,12 +152,15 @@ Live path:
 4. Run the Schedule Evaluator; refine until valid or `max_turns`. Pace-only leftovers become day `warnings`; budget / meals / overlaps still fail the request.
 5. Emit `ItineraryResponse`. HTTP: `POST /api/v1/itineraries/generate`. Persist via `user_itineraries` when the user is signed in.
 
-Gemini drafts use Vertex (`GEMINI_LOCATION`, usually `us-central1`) even when embeddings stay on `GCP_LOCATION` (`asia-southeast1`). Quality eval (running API): `python scripts/eval_itinerary_flow.py`. The eval checks meals, uniqueness, overlaps, and that a day over the pace cap either fits or carries warnings.
+Gemini drafts use Vertex (`GEMINI_LOCATION`, usually `us-central1`) even when embeddings stay on `GCP_LOCATION` (`asia-southeast1`). Quality eval (running API): `python scripts/eval_itinerary_flow.py`. The eval checks meals, uniqueness, overlaps, and that a day over the pace cap either fits or carries warnings. Filter cities with `--slug`.
 
-Re-seed Overpass POIs (filters obscure worship; replaces prior overpass rows for that city):
+**Approach A ingest:** curated signature POIs in [`data/city_signature_pois.json`](../data/city_signature_pois.json) merge ahead of Overpass for theme diversity (nightlife, museum, art, family, park, viewpoint). Signature coverage today: **tokyo, osaka, kyoto, seoul, paris, rome, barcelona, bangkok, london, marrakech, reykjavik**. After merge, cuisine catalog rows and attraction/rest photo enrich run automatically. Meal slots use cuisine types with UI lunch/dinner icons (optional manual Image URL in stop details).
+
+Re-seed a city (filters obscure worship; replaces prior overpass rows; keeps signatures first under the limit):
 
 ```bash
-python scripts/seed_city_pois.py --city tokyo --skip-places --limit 60
+python scripts/seed_city_pois.py --city tokyo --skip-places --limit 120
+python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000 --slug tokyo
 ```
 
 ---

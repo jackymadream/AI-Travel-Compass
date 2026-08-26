@@ -1,0 +1,6771 @@
+{
+  "tokyo": {
+    "pois": [
+      {
+        "name": "Senso-ji Temple",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "shrine",
+          "popular",
+          "sightseeing"
+        ],
+        "neighborhood": "Asakusa",
+        "lat": 35.7148,
+        "lon": 139.7967,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Tokyo's oldest Buddhist temple and Asakusa landmark.",
+        "external": {
+          "wikidata": "Q235130",
+          "osm": null
+        }
+      },
+      {
+        "name": "Meiji Jingu",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "nature",
+          "popular"
+        ],
+        "neighborhood": "Shibuya",
+        "lat": 35.6764,
+        "lon": 139.6993,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Forest shrine dedicated to Emperor Meiji near Harajuku.",
+        "external": {
+          "wikidata": "Q215859",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tokyo National Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "culture",
+          "art",
+          "history",
+          "popular"
+        ],
+        "neighborhood": "Ueno",
+        "lat": 35.7188,
+        "lon": 139.7765,
+        "cost_usd": 12,
+        "duration_minutes": 150,
+        "description": "Japan's premier collection of art and antiquities in Ueno Park.",
+        "external": {
+          "wikidata": "Q653433",
+          "osm": null
+        }
+      },
+      {
+        "name": "teamLab Planets",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "family",
+          "modern",
+          "museum"
+        ],
+        "neighborhood": "Toyosu",
+        "lat": 35.6491,
+        "lon": 139.7898,
+        "cost_usd": 40,
+        "duration_minutes": 120,
+        "description": "Immersive digital art museum where you walk through water and light.",
+        "external": {
+          "wikidata": "Q105271583",
+          "osm": null
+        }
+      },
+      {
+        "name": "Mori Art Museum",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "museum",
+          "modern",
+          "viewpoint"
+        ],
+        "neighborhood": "Roppongi",
+        "lat": 35.6605,
+        "lon": 139.7292,
+        "cost_usd": 22,
+        "duration_minutes": 100,
+        "description": "Contemporary art museum atop Roppongi Hills Mori Tower.",
+        "external": {
+          "wikidata": "Q3329594",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tokyo Skytree",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "family",
+          "popular",
+          "sightseeing"
+        ],
+        "neighborhood": "Sumida",
+        "lat": 35.7101,
+        "lon": 139.8107,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Iconic observation tower with panoramic Tokyo views.",
+        "external": {
+          "wikidata": "Q847662",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shibuya Crossing",
+        "category": "attraction",
+        "tags": [
+          "urban",
+          "photo",
+          "sightseeing",
+          "popular"
+        ],
+        "neighborhood": "Shibuya",
+        "lat": 35.6595,
+        "lon": 139.7005,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "The world's busiest pedestrian scramble and neon skyline view.",
+        "external": {
+          "wikidata": "Q1141540",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shinjuku Gyoen National Garden",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "park",
+          "scenic"
+        ],
+        "neighborhood": "Shinjuku",
+        "lat": 35.6852,
+        "lon": 139.71,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Vast imperial garden with Japanese, English, and French landscapes.",
+        "external": {
+          "wikidata": "Q1060930",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ueno Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family",
+          "museum"
+        ],
+        "neighborhood": "Ueno",
+        "lat": 35.7147,
+        "lon": 139.7714,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Central park linking museums, zoo approaches, and cherry trees.",
+        "external": {
+          "wikidata": "Q696346",
+          "osm": null
+        }
+      },
+      {
+        "name": "Yoyogi Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family"
+        ],
+        "neighborhood": "Shibuya",
+        "lat": 35.6712,
+        "lon": 139.6949,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Spacious park beside Meiji Jingu for picnics and people-watching.",
+        "external": {
+          "wikidata": "Q1069859",
+          "osm": null
+        }
+      },
+      {
+        "name": "Imperial Palace East Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "history",
+          "culture",
+          "nature",
+          "architecture",
+          "heritage",
+          "palace"
+        ],
+        "neighborhood": "Chiyoda",
+        "lat": 35.6867,
+        "lon": 139.755,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Free gardens on the former Edo Castle grounds.",
+        "external": {
+          "wikidata": "Q11408634",
+          "osm": null
+        }
+      },
+      {
+        "name": "Odaiba Seaside Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "scenic",
+          "family",
+          "photo"
+        ],
+        "neighborhood": "Odaiba",
+        "lat": 35.63,
+        "lon": 139.7755,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Waterfront park with Rainbow Bridge views and open lawns.",
+        "external": {
+          "wikidata": "Q11464521",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tsukiji Outer Market",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "sightseeing"
+        ],
+        "neighborhood": "Tsukiji",
+        "lat": 35.6654,
+        "lon": 139.7707,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Outer market lanes for fresh seafood snacks and kitchenware.",
+        "external": {
+          "wikidata": "Q1194554",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ameyoko Market",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "street-food",
+          "shopping",
+          "urban"
+        ],
+        "neighborhood": "Ueno",
+        "lat": 35.7095,
+        "lon": 139.7745,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Bustling Ueno shopping street for snacks and bargains.",
+        "external": {
+          "wikidata": "Q406282",
+          "osm": null
+        }
+      },
+      {
+        "name": "Takeshita Street",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "family",
+          "photo"
+        ],
+        "neighborhood": "Harajuku",
+        "lat": 35.6715,
+        "lon": 139.7031,
+        "cost_usd": 5,
+        "duration_minutes": 60,
+        "description": "Harajuku youth fashion street packed with crepes and boutiques.",
+        "external": {
+          "wikidata": "Q1193886",
+          "osm": null
+        }
+      },
+      {
+        "name": "Akihabara Electric Town",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "anime",
+          "urban",
+          "family"
+        ],
+        "neighborhood": "Akihabara",
+        "lat": 35.6984,
+        "lon": 139.7731,
+        "cost_usd": 10,
+        "duration_minutes": 90,
+        "description": "Electronics and otaku culture district for anime and games.",
+        "external": {
+          "wikidata": "Q227871",
+          "osm": null
+        }
+      },
+      {
+        "name": "teamLab Borderless",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "modern",
+          "family",
+          "museum"
+        ],
+        "neighborhood": "Azabudai",
+        "lat": 35.6606,
+        "lon": 139.7298,
+        "cost_usd": 40,
+        "duration_minutes": 120,
+        "description": "Borderless digital art museum experience in Azabudai Hills.",
+        "external": {
+          "wikidata": "Q55635254",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tokyo Tower",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "popular",
+          "sightseeing"
+        ],
+        "neighborhood": "Minato",
+        "lat": 35.6586,
+        "lon": 139.7454,
+        "cost_usd": 18,
+        "duration_minutes": 75,
+        "description": "Classic red-and-white communications tower with observation decks.",
+        "external": {
+          "wikidata": "Q183518",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ghibli Museum",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "anime",
+          "museum",
+          "art"
+        ],
+        "neighborhood": "Mitaka",
+        "lat": 35.6962,
+        "lon": 139.5704,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Studio Ghibli museum in Mitaka — advance tickets required.",
+        "external": {
+          "wikidata": "Q1061619",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shimokitazawa Indie Streets",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "shopping",
+          "urban",
+          "cafe"
+        ],
+        "neighborhood": "Shimokitazawa",
+        "lat": 35.6614,
+        "lon": 139.6678,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Indie boutiques, cafes, and live-house vibe west of Shibuya.",
+        "external": {
+          "wikidata": "Q1140871",
+          "osm": null
+        }
+      },
+      {
+        "name": "Golden Gai",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "Shinjuku",
+        "lat": 35.6938,
+        "lon": 139.7048,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Tiny alley bars in Shinjuku for intimate evening drinks.",
+        "external": {
+          "wikidata": "Q1534968",
+          "osm": null
+        }
+      },
+      {
+        "name": "Omoide Yokocho",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "bar",
+          "food"
+        ],
+        "neighborhood": "Shinjuku",
+        "lat": 35.6933,
+        "lon": 139.6995,
+        "cost_usd": 20,
+        "duration_minutes": 75,
+        "description": "Nostalgic yakitori alleys by Shinjuku West Exit.",
+        "external": {
+          "wikidata": "Q11465201",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nonbei Yokocho",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks"
+        ],
+        "neighborhood": "Shibuya",
+        "lat": 35.6591,
+        "lon": 139.7015,
+        "cost_usd": 22,
+        "duration_minutes": 75,
+        "description": "Shibuya drinking alley with micro bars under the railway.",
+        "external": {
+          "wikidata": "Q11646981",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kabukicho Night Walk",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "urban",
+          "entertainment"
+        ],
+        "neighborhood": "Shinjuku",
+        "lat": 35.694,
+        "lon": 139.7026,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Neon entertainment district stroll — keep valuables secure.",
+        "external": {
+          "wikidata": "Q1193674",
+          "osm": null
+        }
+      },
+      {
+        "name": "Roppongi Hills Night View",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "viewpoint",
+          "photo",
+          "urban"
+        ],
+        "neighborhood": "Roppongi",
+        "lat": 35.6604,
+        "lon": 139.7292,
+        "cost_usd": 20,
+        "duration_minutes": 75,
+        "description": "Evening skyline views and plaza energy in Roppongi Hills.",
+        "external": {
+          "wikidata": "Q1066963",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tokyo Disneyland",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "theme-park",
+          "entertainment"
+        ],
+        "neighborhood": "Maihama",
+        "lat": 35.6329,
+        "lon": 139.8804,
+        "cost_usd": 80,
+        "duration_minutes": 360,
+        "description": "Classic Disney park east of central Tokyo — full-day outing.",
+        "external": {
+          "wikidata": "Q53291",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sumida Aquarium",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "aquarium",
+          "sightseeing"
+        ],
+        "neighborhood": "Sumida",
+        "lat": 35.7101,
+        "lon": 139.8098,
+        "cost_usd": 22,
+        "duration_minutes": 90,
+        "description": "Aquarium under Tokyo Skytree Town with penguin and jellyfish exhibits.",
+        "external": {
+          "wikidata": "Q11369159",
+          "osm": null
+        }
+      },
+      {
+        "name": "Koishikawa Korakuen",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "history",
+          "scenic",
+          "culture",
+          "traditional",
+          "heritage"
+        ],
+        "neighborhood": "Bunkyo",
+        "lat": 35.7055,
+        "lon": 139.7519,
+        "cost_usd": 3,
+        "duration_minutes": 75,
+        "description": "Edo-period stroll garden beside Tokyo Dome.",
+        "external": {
+          "wikidata": "Q1144426",
+          "osm": null
+        }
+      },
+      {
+        "name": "Edo-Tokyo Open Air Architectural Museum",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "history",
+          "culture",
+          "heritage",
+          "traditional",
+          "museum",
+          "family"
+        ],
+        "neighborhood": "Koganei",
+        "lat": 35.7156,
+        "lon": 139.5128,
+        "cost_usd": 8,
+        "duration_minutes": 120,
+        "description": "Relocated historic Tokyo buildings in Koganei Park — traditional streets and houses.",
+        "external": {
+          "wikidata": "Q1149396",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nihonbashi Bridge",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "history",
+          "culture",
+          "heritage",
+          "monument",
+          "sightseeing"
+        ],
+        "neighborhood": "Nihonbashi",
+        "lat": 35.6838,
+        "lon": 139.7745,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Historic zero-mile marker bridge and classic Tokyo commercial district landmark.",
+        "external": {
+          "wikidata": "Q1154791",
+          "osm": null
+        }
+      },
+      {
+        "name": "Yanaka Ginza Shotengai",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "traditional",
+          "culture",
+          "shopping",
+          "urban",
+          "heritage"
+        ],
+        "neighborhood": "Yanaka",
+        "lat": 35.728,
+        "lon": 139.7695,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Shitamachi shopping street with low-rise wooden shopfronts and local snacks.",
+        "external": {
+          "wikidata": "Q11472394",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nakameguro Canal",
+        "category": "attraction",
+        "tags": [
+          "scenic",
+          "photo",
+          "cafe",
+          "nature"
+        ],
+        "neighborhood": "Nakameguro",
+        "lat": 35.6441,
+        "lon": 139.6988,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Meguro River canal lined with cafes — famous for cherry blossoms.",
+        "external": {
+          "wikidata": "Q1136685",
+          "osm": null
+        }
+      },
+      {
+        "name": "Daikanyama T-Site",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "cafe",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Daikanyama",
+        "lat": 35.6486,
+        "lon": 139.7016,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Design-forward bookstore cafe complex in Daikanyama.",
+        "external": {
+          "wikidata": "Q11276485",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tokyo Metropolitan Government Building Observatory",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "sightseeing"
+        ],
+        "neighborhood": "Shinjuku",
+        "lat": 35.6896,
+        "lon": 139.6917,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Free observatory decks over western Tokyo skyscrapers.",
+        "external": {
+          "wikidata": "Q1141640",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kichijoji Harmonica Yokocho",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "bar",
+          "food"
+        ],
+        "neighborhood": "Kichijoji",
+        "lat": 35.7033,
+        "lon": 139.5797,
+        "cost_usd": 18,
+        "duration_minutes": 75,
+        "description": "Compact izakaya alleys near Kichijoji Station.",
+        "external": {
+          "wikidata": "Q11639278",
+          "osm": null
+        }
+      }
+    ]
+  },
+  "osaka": {
+    "pois": [
+      {
+        "name": "Osaka Castle",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "popular",
+          "viewpoint"
+        ],
+        "neighborhood": "Chuo",
+        "lat": 34.6873,
+        "lon": 135.5262,
+        "cost_usd": 8,
+        "duration_minutes": 90,
+        "description": "Landmark castle keep and park in central Osaka.",
+        "external": {
+          "wikidata": "Q242883",
+          "osm": null
+        }
+      },
+      {
+        "name": "Dotonbori",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "urban",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "Namba",
+        "lat": 34.6687,
+        "lon": 135.5013,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Neon canal district with street food and nightlife.",
+        "external": {
+          "wikidata": "Q1072859",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shinsaibashi Shopping Arcade",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "popular"
+        ],
+        "neighborhood": "Chuo",
+        "lat": 34.6714,
+        "lon": 135.5019,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Covered shopping street linking Namba and Honmachi.",
+        "external": {
+          "wikidata": "Q1141584",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kuromon Market",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "sightseeing"
+        ],
+        "neighborhood": "Namba",
+        "lat": 34.665,
+        "lon": 135.5064,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Fresh seafood and snack market near Namba.",
+        "external": {
+          "wikidata": "Q1136935",
+          "osm": null
+        }
+      },
+      {
+        "name": "Universal Studios Japan",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "theme-park",
+          "entertainment"
+        ],
+        "neighborhood": "Konohana",
+        "lat": 34.6654,
+        "lon": 135.4323,
+        "cost_usd": 85,
+        "duration_minutes": 360,
+        "description": "Major theme park with movie-based attractions.",
+        "external": {
+          "wikidata": "Q1142132",
+          "osm": null
+        }
+      },
+      {
+        "name": "Osaka Aquarium Kaiyukan",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "aquarium",
+          "sightseeing"
+        ],
+        "neighborhood": "Minato",
+        "lat": 34.6545,
+        "lon": 135.4289,
+        "cost_usd": 28,
+        "duration_minutes": 120,
+        "description": "Large aquarium famous for whale sharks.",
+        "external": {
+          "wikidata": "Q1142131",
+          "osm": null
+        }
+      },
+      {
+        "name": "Umeda Sky Building",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "architecture",
+          "popular"
+        ],
+        "neighborhood": "Kita",
+        "lat": 34.7055,
+        "lon": 135.4897,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Twin towers with Floating Garden Observatory.",
+        "external": {
+          "wikidata": "Q1142140",
+          "osm": null
+        }
+      },
+      {
+        "name": "Abeno Harukas",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "shopping",
+          "popular"
+        ],
+        "neighborhood": "Abeno",
+        "lat": 34.6459,
+        "lon": 135.5139,
+        "cost_usd": 18,
+        "duration_minutes": 90,
+        "description": "Japan's tallest building with observatory and mall.",
+        "external": {
+          "wikidata": "Q1142148",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sumiyoshi Taisha",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "heritage",
+          "architecture"
+        ],
+        "neighborhood": "Sumiyoshi",
+        "lat": 34.6127,
+        "lon": 135.4932,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Historic Shinto shrine with arched bridge.",
+        "external": {
+          "wikidata": "Q1142144",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shitennō-ji",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "heritage",
+          "history"
+        ],
+        "neighborhood": "Tennoji",
+        "lat": 34.6544,
+        "lon": 135.5164,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "One of Japan's oldest Buddhist temples.",
+        "external": {
+          "wikidata": "Q1142143",
+          "osm": null
+        }
+      },
+      {
+        "name": "National Museum of Art Osaka",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "culture"
+        ],
+        "neighborhood": "Nakanoshima",
+        "lat": 34.6937,
+        "lon": 135.4915,
+        "cost_usd": 12,
+        "duration_minutes": 100,
+        "description": "Underground contemporary art museum on Nakanoshima.",
+        "external": {
+          "wikidata": "Q1142138",
+          "osm": null
+        }
+      },
+      {
+        "name": "Osaka Museum of History",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "culture",
+          "architecture"
+        ],
+        "neighborhood": "Chuo",
+        "lat": 34.6823,
+        "lon": 135.5205,
+        "cost_usd": 8,
+        "duration_minutes": 100,
+        "description": "City history museum overlooking Osaka Castle.",
+        "external": {
+          "wikidata": "Q1142137",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nakanoshima Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "scenic"
+        ],
+        "neighborhood": "Kita",
+        "lat": 34.693,
+        "lon": 135.503,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "River island park between Dojima and Tosabori.",
+        "external": {
+          "wikidata": "Q1142136",
+          "osm": null
+        }
+      },
+      {
+        "name": "Osaka Castle Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Chuo",
+        "lat": 34.687,
+        "lon": 135.526,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Broad lawns and moats around Osaka Castle.",
+        "external": {
+          "wikidata": "Q1142135",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tennoji Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "family"
+        ],
+        "neighborhood": "Tennoji",
+        "lat": 34.6508,
+        "lon": 135.5113,
+        "cost_usd": 3,
+        "duration_minutes": 75,
+        "description": "Park with greenhouse, zoo approaches, and plaza.",
+        "external": {
+          "wikidata": "Q1142142",
+          "osm": null
+        }
+      },
+      {
+        "name": "Amerikamura",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "shopping",
+          "urban",
+          "cafe"
+        ],
+        "neighborhood": "Chuo",
+        "lat": 34.6725,
+        "lon": 135.4985,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Youth fashion and cafe district west of Shinsaibashi.",
+        "external": {
+          "wikidata": "Q1141585",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hozenji Yokocho",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "culture",
+          "street-food",
+          "urban"
+        ],
+        "neighborhood": "Namba",
+        "lat": 34.6678,
+        "lon": 135.5036,
+        "cost_usd": 12,
+        "duration_minutes": 60,
+        "description": "Lantern alley with moss-covered Fudo statue.",
+        "external": {
+          "wikidata": "Q1142146",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shinsekai",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "urban",
+          "photo"
+        ],
+        "neighborhood": "Naniwa",
+        "lat": 34.6523,
+        "lon": 135.5062,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Retro district around Tsutenkaku tower.",
+        "external": {
+          "wikidata": "Q1142145",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tsutenkaku",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "popular",
+          "sightseeing"
+        ],
+        "neighborhood": "Naniwa",
+        "lat": 34.6525,
+        "lon": 135.5064,
+        "cost_usd": 8,
+        "duration_minutes": 45,
+        "description": "Iconic observation tower of Shinsekai.",
+        "external": {
+          "wikidata": "Q1142147",
+          "osm": null
+        }
+      },
+      {
+        "name": "TeamLab Botanical Garden Osaka",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "family",
+          "modern",
+          "museum"
+        ],
+        "neighborhood": "Nagai",
+        "lat": 34.612,
+        "lon": 135.523,
+        "cost_usd": 28,
+        "duration_minutes": 100,
+        "description": "Immersive digital art in a botanical setting.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Osaka Science Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science"
+        ],
+        "neighborhood": "Nakanoshima",
+        "lat": 34.6915,
+        "lon": 135.491,
+        "cost_usd": 8,
+        "duration_minutes": 100,
+        "description": "Hands-on science museum with planetarium.",
+        "external": {
+          "wikidata": "Q1142139",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tempozan Ferris Wheel",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "family",
+          "photo"
+        ],
+        "neighborhood": "Minato",
+        "lat": 34.656,
+        "lon": 135.4305,
+        "cost_usd": 10,
+        "duration_minutes": 45,
+        "description": "Harbor Ferris wheel beside Kaiyukan.",
+        "external": {
+          "wikidata": "Q1142150",
+          "osm": null
+        }
+      },
+      {
+        "name": "Minoo Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "scenic",
+          "hiking"
+        ],
+        "neighborhood": "Minoo",
+        "lat": 34.843,
+        "lon": 135.47,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Forest gorge and waterfall north of Osaka.",
+        "external": {
+          "wikidata": "Q1142151",
+          "osm": null
+        }
+      },
+      {
+        "name": "CupNoodles Museum Osaka Ikeda",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "food",
+          "art"
+        ],
+        "neighborhood": "Ikeda",
+        "lat": 34.8205,
+        "lon": 135.426,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Interactive instant-noodle museum in Ikeda.",
+        "external": {
+          "wikidata": "Q1142152",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hep Five Ferris Wheel",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "family",
+          "photo",
+          "shopping"
+        ],
+        "neighborhood": "Umeda",
+        "lat": 34.7042,
+        "lon": 135.4995,
+        "cost_usd": 8,
+        "duration_minutes": 40,
+        "description": "Red Ferris wheel atop HEP FIVE shopping complex.",
+        "external": {
+          "wikidata": "Q1142153",
+          "osm": null
+        }
+      },
+      {
+        "name": "Namba Yasaka Shrine",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "photo",
+          "architecture"
+        ],
+        "neighborhood": "Namba",
+        "lat": 34.6618,
+        "lon": 135.4958,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Shrine famous for its giant lion-head stage.",
+        "external": {
+          "wikidata": "Q1142154",
+          "osm": null
+        }
+      },
+      {
+        "name": "Grand Front Osaka",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "architecture",
+          "cafe"
+        ],
+        "neighborhood": "Umeda",
+        "lat": 34.7048,
+        "lon": 135.4955,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Modern retail and plaza complex by Osaka Station.",
+        "external": {
+          "wikidata": "Q1142155",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sakai Alphonse Mucha Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "Sakai",
+        "lat": 34.573,
+        "lon": 135.483,
+        "cost_usd": 10,
+        "duration_minutes": 90,
+        "description": "Art-nouveau collection in nearby Sakai.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Orange Street",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "cafe",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Shinsaibashi",
+        "lat": 34.6738,
+        "lon": 135.501,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Boutique and cafe lane near Amerikamura.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Bar Area Namba",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "Namba",
+        "lat": 34.6665,
+        "lon": 135.5025,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Dense izakaya and bar streets around Namba.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "kyoto": {
+    "pois": [
+      {
+        "name": "Fushimi Inari Taisha",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "popular",
+          "photo",
+          "hiking"
+        ],
+        "neighborhood": "Fushimi",
+        "lat": 34.9671,
+        "lon": 135.7727,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Thousands of vermilion torii gates on Inari mountain.",
+        "external": {
+          "wikidata": "Q714524",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kiyomizu-dera",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "viewpoint",
+          "architecture",
+          "popular"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 34.9949,
+        "lon": 135.785,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Wooden stage temple overlooking Kyoto.",
+        "external": {
+          "wikidata": "Q714531",
+          "osm": null
+        }
+      },
+      {
+        "name": "Arashiyama Bamboo Grove",
+        "category": "attraction",
+        "tags": [
+          "nature",
+          "photo",
+          "scenic",
+          "popular"
+        ],
+        "neighborhood": "Arashiyama",
+        "lat": 35.017,
+        "lon": 135.672,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Iconic bamboo path west of central Kyoto.",
+        "external": {
+          "wikidata": "Q11603953",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kinkaku-ji",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "architecture",
+          "heritage",
+          "popular"
+        ],
+        "neighborhood": "Kita",
+        "lat": 35.0394,
+        "lon": 135.7292,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Golden Pavilion reflected in a mirror pond.",
+        "external": {
+          "wikidata": "Q269884",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ginkaku-ji",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "garden",
+          "heritage"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.027,
+        "lon": 135.7982,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Silver Pavilion with sand garden and moss paths.",
+        "external": {
+          "wikidata": "Q269921",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nijo Castle",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "palace"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.0142,
+        "lon": 135.7482,
+        "cost_usd": 8,
+        "duration_minutes": 100,
+        "description": "Tokugawa castle with nightingale floors.",
+        "external": {
+          "wikidata": "Q268687",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto Imperial Palace",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "palace"
+        ],
+        "neighborhood": "Kamigyo",
+        "lat": 35.0254,
+        "lon": 135.7621,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Former imperial residence in Kyoto Gyoen.",
+        "external": {
+          "wikidata": "Q1070889",
+          "osm": null
+        }
+      },
+      {
+        "name": "Philosopher's Path",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "nature",
+          "cafe",
+          "walking"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.0265,
+        "lon": 135.7955,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Canal walk lined with cherry trees.",
+        "external": {
+          "wikidata": "Q1140824",
+          "osm": null
+        }
+      },
+      {
+        "name": "Gion District",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "nightlife",
+          "shopping",
+          "traditional",
+          "urban"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 35.0037,
+        "lon": 135.775,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Historic geisha district of teahouses and lanes.",
+        "external": {
+          "wikidata": "Q841301",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nishiki Market",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "sightseeing"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.005,
+        "lon": 135.7648,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Kyoto's kitchen — narrow food market street.",
+        "external": {
+          "wikidata": "Q1140828",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto National Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "history"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 34.9901,
+        "lon": 135.773,
+        "cost_usd": 8,
+        "duration_minutes": 120,
+        "description": "National collection of Japanese art and crafts.",
+        "external": {
+          "wikidata": "Q1477463",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto Railway Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "history"
+        ],
+        "neighborhood": "Shimogyo",
+        "lat": 34.9865,
+        "lon": 135.743,
+        "cost_usd": 12,
+        "duration_minutes": 120,
+        "description": "Large railway museum with steam locomotives.",
+        "external": {
+          "wikidata": "Q1136981",
+          "osm": null
+        }
+      },
+      {
+        "name": "Toei Kyoto Studio Park",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "entertainment",
+          "culture"
+        ],
+        "neighborhood": "Ukyo",
+        "lat": 35.0155,
+        "lon": 135.705,
+        "cost_usd": 22,
+        "duration_minutes": 150,
+        "description": "Period-drama theme park with samurai streets.",
+        "external": {
+          "wikidata": "Q1140829",
+          "osm": null
+        }
+      },
+      {
+        "name": "Maruyama Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "scenic",
+          "family"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 35.0035,
+        "lon": 135.7805,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Central park famous for cherry blossoms.",
+        "external": {
+          "wikidata": "Q1140830",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto Botanical Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "family"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.047,
+        "lon": 135.76,
+        "cost_usd": 3,
+        "duration_minutes": 90,
+        "description": "Extensive gardens and conservatory by the Kamo.",
+        "external": {
+          "wikidata": "Q1140831",
+          "osm": null
+        }
+      },
+      {
+        "name": "Pontocho Alley",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "food",
+          "urban",
+          "traditional"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.0065,
+        "lon": 135.7715,
+        "cost_usd": 20,
+        "duration_minutes": 75,
+        "description": "Narrow riverside alley of restaurants and bars.",
+        "external": {
+          "wikidata": "Q1140832",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kamo River Banks",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "nature",
+          "walking"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.01,
+        "lon": 135.771,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Open riverside paths for evening walks.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Sanjusangendo",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "heritage",
+          "art"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 34.9879,
+        "lon": 135.7718,
+        "cost_usd": 6,
+        "duration_minutes": 75,
+        "description": "Long hall with 1001 Kannon statues.",
+        "external": {
+          "wikidata": "Q696870",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nanzen-ji",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "architecture",
+          "heritage"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.0114,
+        "lon": 135.7945,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Zen temple complex with brick aqueduct.",
+        "external": {
+          "wikidata": "Q1071818",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ryoan-ji",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "garden",
+          "heritage"
+        ],
+        "neighborhood": "Ukyo",
+        "lat": 35.0345,
+        "lon": 135.7183,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Famous dry rock garden of Zen Buddhism.",
+        "external": {
+          "wikidata": "Q696992",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto Tower",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "Shimogyo",
+        "lat": 34.9875,
+        "lon": 135.759,
+        "cost_usd": 10,
+        "duration_minutes": 45,
+        "description": "Observation deck above Kyoto Station.",
+        "external": {
+          "wikidata": "Q1140833",
+          "osm": null
+        }
+      },
+      {
+        "name": "Okazaki Museum District",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "architecture"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.013,
+        "lon": 135.783,
+        "cost_usd": 12,
+        "duration_minutes": 120,
+        "description": "Cluster of museums around Heian Shrine.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Heian Shrine",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "architecture",
+          "garden"
+        ],
+        "neighborhood": "Sakyo",
+        "lat": 35.016,
+        "lon": 135.7825,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Large shrine with vermilion torii and gardens.",
+        "external": {
+          "wikidata": "Q1070935",
+          "osm": null
+        }
+      },
+      {
+        "name": "Arashiyama Monkey Park Iwatayama",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "nature",
+          "viewpoint"
+        ],
+        "neighborhood": "Arashiyama",
+        "lat": 35.0095,
+        "lon": 135.6685,
+        "cost_usd": 8,
+        "duration_minutes": 75,
+        "description": "Hilltop monkey park with city views.",
+        "external": {
+          "wikidata": "Q1140834",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto International Manga Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "family",
+          "culture"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.0115,
+        "lon": 135.7595,
+        "cost_usd": 8,
+        "duration_minutes": 90,
+        "description": "Manga library and exhibition space.",
+        "external": {
+          "wikidata": "Q1140835",
+          "osm": null
+        }
+      },
+      {
+        "name": "Togetsukyo Bridge",
+        "category": "attraction",
+        "tags": [
+          "scenic",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "Arashiyama",
+        "lat": 35.0138,
+        "lon": 135.6775,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Classic bridge views of Arashiyama mountains.",
+        "external": {
+          "wikidata": "Q1140836",
+          "osm": null
+        }
+      },
+      {
+        "name": "Nishiki / Teramachi Shopping",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "cafe"
+        ],
+        "neighborhood": "Nakagyo",
+        "lat": 35.0045,
+        "lon": 135.7655,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Covered shopping arcades near downtown.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Kodai-ji Night Illumination Area",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "temple",
+          "photo",
+          "culture"
+        ],
+        "neighborhood": "Higashiyama",
+        "lat": 35.0005,
+        "lon": 135.7815,
+        "cost_usd": 8,
+        "duration_minutes": 60,
+        "description": "Evening-lit temple precinct in Higashiyama.",
+        "external": {
+          "wikidata": "Q1071825",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kyoto Station Building",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "viewpoint",
+          "shopping",
+          "modern"
+        ],
+        "neighborhood": "Shimogyo",
+        "lat": 34.9858,
+        "lon": 135.7588,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Vast modern station with sky garden stairs.",
+        "external": {
+          "wikidata": "Q1140837",
+          "osm": null
+        }
+      },
+      {
+        "name": "Gion Corner / Yasaka",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "nightlife",
+          "traditional",
+          "family"
+        ],
+        "neighborhood": "Gion",
+        "lat": 35.0035,
+        "lon": 135.7785,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Cultural shows and Yasaka Shrine approaches.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "seoul": {
+    "pois": [
+      {
+        "name": "Gyeongbokgung Palace",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "palace",
+          "popular"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.5796,
+        "lon": 126.977,
+        "cost_usd": 3,
+        "duration_minutes": 120,
+        "description": "Joseon main palace with changing-of-the-guard.",
+        "external": {
+          "wikidata": "Q482485",
+          "osm": null
+        }
+      },
+      {
+        "name": "Changdeokgung Palace",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "garden"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.5794,
+        "lon": 126.991,
+        "cost_usd": 3,
+        "duration_minutes": 100,
+        "description": "UNESCO palace with Secret Garden.",
+        "external": {
+          "wikidata": "Q482495",
+          "osm": null
+        }
+      },
+      {
+        "name": "Bukchon Hanok Village",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "photo",
+          "heritage",
+          "traditional"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.5825,
+        "lon": 126.983,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Traditional hanok neighborhood overlooks.",
+        "external": {
+          "wikidata": "Q498299",
+          "osm": null
+        }
+      },
+      {
+        "name": "Insadong",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "culture",
+          "cafe",
+          "street-food"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.574,
+        "lon": 126.9855,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Crafts, tea houses, and souvenir streets.",
+        "external": {
+          "wikidata": "Q490586",
+          "osm": null
+        }
+      },
+      {
+        "name": "Myeongdong",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "nightlife",
+          "street-food",
+          "popular"
+        ],
+        "neighborhood": "Jung",
+        "lat": 37.5636,
+        "lon": 126.9869,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Major retail and street-food district.",
+        "external": {
+          "wikidata": "Q490612",
+          "osm": null
+        }
+      },
+      {
+        "name": "N Seoul Tower",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "popular",
+          "nightlife"
+        ],
+        "neighborhood": "Yongsan",
+        "lat": 37.5512,
+        "lon": 126.9882,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Hilltop tower with city panorama.",
+        "external": {
+          "wikidata": "Q494097",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hongdae",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "shopping",
+          "urban",
+          "art",
+          "cafe"
+        ],
+        "neighborhood": "Mapo",
+        "lat": 37.5563,
+        "lon": 126.9236,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Youth arts, clubs, and indie street culture.",
+        "external": {
+          "wikidata": "Q490648",
+          "osm": null
+        }
+      },
+      {
+        "name": "Gangnam / COEX Area",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "architecture",
+          "nightlife"
+        ],
+        "neighborhood": "Gangnam",
+        "lat": 37.5126,
+        "lon": 127.059,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Modern malls and nightlife around COEX.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Lotte World Tower Seoul Sky",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "family",
+          "popular"
+        ],
+        "neighborhood": "Songpa",
+        "lat": 37.5125,
+        "lon": 127.1025,
+        "cost_usd": 28,
+        "duration_minutes": 90,
+        "description": "Observatory in one of the world's tallest towers.",
+        "external": {
+          "wikidata": "Q18647981",
+          "osm": null
+        }
+      },
+      {
+        "name": "Lotte World Adventure",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "theme-park",
+          "entertainment"
+        ],
+        "neighborhood": "Songpa",
+        "lat": 37.511,
+        "lon": 127.098,
+        "cost_usd": 55,
+        "duration_minutes": 240,
+        "description": "Indoor/outdoor amusement park.",
+        "external": {
+          "wikidata": "Q490690",
+          "osm": null
+        }
+      },
+      {
+        "name": "National Museum of Korea",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "culture",
+          "history",
+          "art"
+        ],
+        "neighborhood": "Yongsan",
+        "lat": 37.5238,
+        "lon": 126.9803,
+        "cost_usd": 0,
+        "duration_minutes": 150,
+        "description": "Korea's flagship history and art museum.",
+        "external": {
+          "wikidata": "Q489356",
+          "osm": null
+        }
+      },
+      {
+        "name": "Leeum Museum of Art",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "culture"
+        ],
+        "neighborhood": "Yongsan",
+        "lat": 37.5383,
+        "lon": 126.9995,
+        "cost_usd": 15,
+        "duration_minutes": 100,
+        "description": "Samsung museum of traditional and contemporary art.",
+        "external": {
+          "wikidata": "Q490720",
+          "osm": null
+        }
+      },
+      {
+        "name": "Dongdaemun Design Plaza",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "art",
+          "shopping",
+          "modern",
+          "nightlife"
+        ],
+        "neighborhood": "Jung",
+        "lat": 37.5668,
+        "lon": 127.0094,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Zaha Hadid design hub and night markets.",
+        "external": {
+          "wikidata": "Q493753",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hangang Park Yeouido",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Yeongdeungpo",
+        "lat": 37.5285,
+        "lon": 126.933,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "River park with bike paths and picnic lawns.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Seoul Forest",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family"
+        ],
+        "neighborhood": "Seongdong",
+        "lat": 37.5445,
+        "lon": 127.0375,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Large urban park with deer enclosure.",
+        "external": {
+          "wikidata": "Q624588",
+          "osm": null
+        }
+      },
+      {
+        "name": "Olympic Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "art",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Songpa",
+        "lat": 37.521,
+        "lon": 127.1225,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Park with sculptures and Olympic venues.",
+        "external": {
+          "wikidata": "Q490735",
+          "osm": null
+        }
+      },
+      {
+        "name": "Itaewon",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "food",
+          "urban",
+          "shopping"
+        ],
+        "neighborhood": "Yongsan",
+        "lat": 37.5345,
+        "lon": 126.9945,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "International dining and nightlife strip.",
+        "external": {
+          "wikidata": "Q490652",
+          "osm": null
+        }
+      },
+      {
+        "name": "Gwangjang Market",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "nightlife"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.57,
+        "lon": 126.9995,
+        "cost_usd": 12,
+        "duration_minutes": 75,
+        "description": "Historic market famous for bindaetteok and mayo.",
+        "external": {
+          "wikidata": "Q490580",
+          "osm": null
+        }
+      },
+      {
+        "name": "Namdaemun Market",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "shopping",
+          "street-food",
+          "urban"
+        ],
+        "neighborhood": "Jung",
+        "lat": 37.5595,
+        "lon": 126.9775,
+        "cost_usd": 8,
+        "duration_minutes": 75,
+        "description": "Korea's oldest and largest traditional market.",
+        "external": {
+          "wikidata": "Q490575",
+          "osm": null
+        }
+      },
+      {
+        "name": "Starfield Library COEX",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "photo",
+          "family",
+          "shopping"
+        ],
+        "neighborhood": "Gangnam",
+        "lat": 37.513,
+        "lon": 127.0595,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Dramatic atrium library inside COEX mall.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Trickeye Museum Seoul",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "family",
+          "photo"
+        ],
+        "neighborhood": "Hongdae",
+        "lat": 37.5545,
+        "lon": 126.9225,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Interactive 3D illusion museum.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "War Memorial of Korea",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "culture"
+        ],
+        "neighborhood": "Yongsan",
+        "lat": 37.5365,
+        "lon": 126.9775,
+        "cost_usd": 0,
+        "duration_minutes": 100,
+        "description": "Military history museum and outdoor exhibits.",
+        "external": {
+          "wikidata": "Q490745",
+          "osm": null
+        }
+      },
+      {
+        "name": "Namsan Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "viewpoint",
+          "scenic"
+        ],
+        "neighborhood": "Jung",
+        "lat": 37.551,
+        "lon": 126.99,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Forested hill park leading to N Seoul Tower.",
+        "external": {
+          "wikidata": "Q490750",
+          "osm": null
+        }
+      },
+      {
+        "name": "Cheonggyecheon Stream",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "urban",
+          "walking"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.5695,
+        "lon": 126.9785,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Restored urban stream walk through downtown.",
+        "external": {
+          "wikidata": "Q490755",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ikseon-dong Hanok Streets",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "cafe",
+          "traditional",
+          "shopping"
+        ],
+        "neighborhood": "Jongno",
+        "lat": 37.5735,
+        "lon": 126.99,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Renovated hanok cafes and bars.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Bongeunsa Temple",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "heritage"
+        ],
+        "neighborhood": "Gangnam",
+        "lat": 37.515,
+        "lon": 127.0575,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Buddhist temple amid Gangnam skyscrapers.",
+        "external": {
+          "wikidata": "Q490760",
+          "osm": null
+        }
+      },
+      {
+        "name": "Seoul Museum of Art",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "Jung",
+        "lat": 37.564,
+        "lon": 126.9735,
+        "cost_usd": 2,
+        "duration_minutes": 90,
+        "description": "City art museum in a former court building.",
+        "external": {
+          "wikidata": "Q490765",
+          "osm": null
+        }
+      },
+      {
+        "name": "Jamsil Baseball Stadium Area",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "entertainment",
+          "urban"
+        ],
+        "neighborhood": "Songpa",
+        "lat": 37.5122,
+        "lon": 127.0719,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Sports and entertainment around Jamsil.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Garosu-gil",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "cafe",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Gangnam",
+        "lat": 37.521,
+        "lon": 127.0225,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Tree-lined boutique street in Sinsa.",
+        "external": {
+          "wikidata": "Q490770",
+          "osm": null
+        }
+      },
+      {
+        "name": "Mapo / Congdu Nightlife",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "food"
+        ],
+        "neighborhood": "Mapo",
+        "lat": 37.55,
+        "lon": 126.935,
+        "cost_usd": 22,
+        "duration_minutes": 90,
+        "description": "Bar and dining streets west of Hongdae.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "paris": {
+    "pois": [
+      {
+        "name": "Eiffel Tower",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "popular",
+          "architecture",
+          "family"
+        ],
+        "neighborhood": "7th",
+        "lat": 48.8584,
+        "lon": 2.2945,
+        "cost_usd": 30,
+        "duration_minutes": 120,
+        "description": "Iron lattice tower and Paris icon.",
+        "external": {
+          "wikidata": "Q243",
+          "osm": null
+        }
+      },
+      {
+        "name": "Louvre Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "popular",
+          "history"
+        ],
+        "neighborhood": "1st",
+        "lat": 48.8606,
+        "lon": 2.3376,
+        "cost_usd": 20,
+        "duration_minutes": 180,
+        "description": "World's largest art museum in a former palace.",
+        "external": {
+          "wikidata": "Q19675",
+          "osm": null
+        }
+      },
+      {
+        "name": "Notre-Dame Cathedral",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "history"
+        ],
+        "neighborhood": "4th",
+        "lat": 48.853,
+        "lon": 2.3499,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Gothic cathedral on Île de la Cité.",
+        "external": {
+          "wikidata": "Q2981",
+          "osm": null
+        }
+      },
+      {
+        "name": "Musée d'Orsay",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "7th",
+        "lat": 48.86,
+        "lon": 2.3266,
+        "cost_usd": 16,
+        "duration_minutes": 150,
+        "description": "Impressionist masterpieces in a Beaux-Arts station.",
+        "external": {
+          "wikidata": "Q23402",
+          "osm": null
+        }
+      },
+      {
+        "name": "Arc de Triomphe",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "history",
+          "viewpoint",
+          "popular"
+        ],
+        "neighborhood": "8th",
+        "lat": 48.8738,
+        "lon": 2.295,
+        "cost_usd": 14,
+        "duration_minutes": 60,
+        "description": "Monument at the top of the Champs-Élysées.",
+        "external": {
+          "wikidata": "Q64436",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sacré-Cœur Basilica",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "viewpoint",
+          "photo"
+        ],
+        "neighborhood": "Montmartre",
+        "lat": 48.8867,
+        "lon": 2.3431,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "White domed basilica above Montmartre.",
+        "external": {
+          "wikidata": "Q180893",
+          "osm": null
+        }
+      },
+      {
+        "name": "Centre Pompidou",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "architecture"
+        ],
+        "neighborhood": "4th",
+        "lat": 48.8606,
+        "lon": 2.3522,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Modern art museum with inside-out architecture.",
+        "external": {
+          "wikidata": "Q180955",
+          "osm": null
+        }
+      },
+      {
+        "name": "Musée Rodin",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "garden",
+          "culture"
+        ],
+        "neighborhood": "7th",
+        "lat": 48.8553,
+        "lon": 2.3158,
+        "cost_usd": 13,
+        "duration_minutes": 90,
+        "description": "Rodin sculptures in a mansion garden.",
+        "external": {
+          "wikidata": "Q650134",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sainte-Chapelle",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "art"
+        ],
+        "neighborhood": "1st",
+        "lat": 48.8554,
+        "lon": 2.345,
+        "cost_usd": 12,
+        "duration_minutes": 60,
+        "description": "Gothic chapel famed for stained glass.",
+        "external": {
+          "wikidata": "Q214567",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palais Garnier",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "heritage",
+          "art"
+        ],
+        "neighborhood": "9th",
+        "lat": 48.872,
+        "lon": 2.3316,
+        "cost_usd": 14,
+        "duration_minutes": 75,
+        "description": "Opulent 19th-century opera house.",
+        "external": {
+          "wikidata": "Q188223",
+          "osm": null
+        }
+      },
+      {
+        "name": "Luxembourg Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "6th",
+        "lat": 48.8462,
+        "lon": 2.3372,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Formal gardens around the Luxembourg Palace.",
+        "external": {
+          "wikidata": "Q746842",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tuileries Garden",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "art",
+          "scenic"
+        ],
+        "neighborhood": "1st",
+        "lat": 48.8634,
+        "lon": 2.3275,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Historic garden between Louvre and Concorde.",
+        "external": {
+          "wikidata": "Q746838",
+          "osm": null
+        }
+      },
+      {
+        "name": "Jardin des Plantes",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "family",
+          "museum"
+        ],
+        "neighborhood": "5th",
+        "lat": 48.8437,
+        "lon": 2.3594,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Botanical garden with natural-history museums.",
+        "external": {
+          "wikidata": "Q746845",
+          "osm": null
+        }
+      },
+      {
+        "name": "Champ de Mars",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "family",
+          "photo",
+          "scenic"
+        ],
+        "neighborhood": "7th",
+        "lat": 48.8565,
+        "lon": 2.298,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Lawn park at the foot of the Eiffel Tower.",
+        "external": {
+          "wikidata": "Q746850",
+          "osm": null
+        }
+      },
+      {
+        "name": "Montmartre Streets",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "art",
+          "shopping",
+          "photo",
+          "urban"
+        ],
+        "neighborhood": "18th",
+        "lat": 48.886,
+        "lon": 2.34,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Hill village of artists, cafes, and nightlife.",
+        "external": {
+          "wikidata": "Q169923",
+          "osm": null
+        }
+      },
+      {
+        "name": "Le Marais",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "nightlife",
+          "architecture",
+          "cafe",
+          "urban"
+        ],
+        "neighborhood": "4th",
+        "lat": 48.8575,
+        "lon": 2.3595,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Historic quarter of boutiques and bars.",
+        "external": {
+          "wikidata": "Q169930",
+          "osm": null
+        }
+      },
+      {
+        "name": "Latin Quarter",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "culture",
+          "cafe",
+          "urban"
+        ],
+        "neighborhood": "5th",
+        "lat": 48.8495,
+        "lon": 2.3455,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Student quarter of bookshops and bistros.",
+        "external": {
+          "wikidata": "Q169940",
+          "osm": null
+        }
+      },
+      {
+        "name": "Champs-Élysées",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "popular",
+          "photo"
+        ],
+        "neighborhood": "8th",
+        "lat": 48.8698,
+        "lon": 2.3075,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Grand avenue of shops and theaters.",
+        "external": {
+          "wikidata": "Q169950",
+          "osm": null
+        }
+      },
+      {
+        "name": "Père Lachaise Cemetery",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "scenic",
+          "heritage"
+        ],
+        "neighborhood": "20th",
+        "lat": 48.861,
+        "lon": 2.3933,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Famous cemetery of writers and artists.",
+        "external": {
+          "wikidata": "Q311",
+          "osm": null
+        }
+      },
+      {
+        "name": "Musée de l'Orangerie",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "1st",
+        "lat": 48.8638,
+        "lon": 2.3226,
+        "cost_usd": 12,
+        "duration_minutes": 75,
+        "description": "Monet Water Lilies in oval rooms.",
+        "external": {
+          "wikidata": "Q726781",
+          "osm": null
+        }
+      },
+      {
+        "name": "Seine Riverbanks",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "walking",
+          "photo"
+        ],
+        "neighborhood": "1st",
+        "lat": 48.856,
+        "lon": 2.34,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "UNESCO riverbanks for strolling and picnics.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Catacombs of Paris",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "museum",
+          "culture"
+        ],
+        "neighborhood": "14th",
+        "lat": 48.8338,
+        "lon": 2.3324,
+        "cost_usd": 32,
+        "duration_minutes": 90,
+        "description": "Underground ossuary tunnels.",
+        "external": {
+          "wikidata": "Q152439",
+          "osm": null
+        }
+      },
+      {
+        "name": "Galeries Lafayette Coupole",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "architecture",
+          "photo",
+          "viewpoint"
+        ],
+        "neighborhood": "9th",
+        "lat": 48.8735,
+        "lon": 2.3322,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Department store with Art Nouveau dome.",
+        "external": {
+          "wikidata": "Q1479166",
+          "osm": null
+        }
+      },
+      {
+        "name": "Place des Vosges",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "architecture",
+          "park",
+          "heritage"
+        ],
+        "neighborhood": "4th",
+        "lat": 48.8555,
+        "lon": 2.3655,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Elegant square and arcades in the Marais.",
+        "external": {
+          "wikidata": "Q746860",
+          "osm": null
+        }
+      },
+      {
+        "name": "Cité des Sciences",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science"
+        ],
+        "neighborhood": "19th",
+        "lat": 48.8955,
+        "lon": 2.388,
+        "cost_usd": 12,
+        "duration_minutes": 150,
+        "description": "Science museum and Géode at La Villette.",
+        "external": {
+          "wikidata": "Q1479474",
+          "osm": null
+        }
+      },
+      {
+        "name": "Parc des Buttes-Chaumont",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "viewpoint",
+          "scenic"
+        ],
+        "neighborhood": "19th",
+        "lat": 48.88,
+        "lon": 2.383,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Dramatic park with cliffs and temple folly.",
+        "external": {
+          "wikidata": "Q746865",
+          "osm": null
+        }
+      },
+      {
+        "name": "Canal Saint-Martin",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "cafe",
+          "scenic",
+          "urban"
+        ],
+        "neighborhood": "10th",
+        "lat": 48.8715,
+        "lon": 2.366,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Canal banks lined with bars and cafes.",
+        "external": {
+          "wikidata": "Q169970",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palais de Tokyo",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "nightlife"
+        ],
+        "neighborhood": "16th",
+        "lat": 48.864,
+        "lon": 2.297,
+        "cost_usd": 12,
+        "duration_minutes": 100,
+        "description": "Contemporary art center open late.",
+        "external": {
+          "wikidata": "Q1479500",
+          "osm": null
+        }
+      },
+      {
+        "name": "Oberkampf Bars",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "11th",
+        "lat": 48.8645,
+        "lon": 2.3765,
+        "cost_usd": 20,
+        "duration_minutes": 90,
+        "description": "Bar-hopping streets of eastern Paris.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Shakespeare and Company",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shopping",
+          "cafe",
+          "heritage"
+        ],
+        "neighborhood": "5th",
+        "lat": 48.8525,
+        "lon": 2.347,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Legendary English bookshop by the Seine.",
+        "external": {
+          "wikidata": "Q1479550",
+          "osm": null
+        }
+      }
+    ]
+  },
+  "rome": {
+    "pois": [
+      {
+        "name": "Colosseum",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage",
+          "popular"
+        ],
+        "neighborhood": "Monti",
+        "lat": 41.8902,
+        "lon": 12.4922,
+        "cost_usd": 20,
+        "duration_minutes": 120,
+        "description": "Iconic ancient amphitheatre of Rome.",
+        "external": {
+          "wikidata": "Q10285",
+          "osm": null
+        }
+      },
+      {
+        "name": "Roman Forum",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "architecture",
+          "heritage"
+        ],
+        "neighborhood": "Monti",
+        "lat": 41.8925,
+        "lon": 12.4853,
+        "cost_usd": 18,
+        "duration_minutes": 100,
+        "description": "Ruins of ancient civic heart of Rome.",
+        "external": {
+          "wikidata": "Q180978",
+          "osm": null
+        }
+      },
+      {
+        "name": "Pantheon",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "history",
+          "popular"
+        ],
+        "neighborhood": "Centro",
+        "lat": 41.8986,
+        "lon": 12.4769,
+        "cost_usd": 5,
+        "duration_minutes": 45,
+        "description": "Best-preserved Roman temple with oculus dome.",
+        "external": {
+          "wikidata": "Q99309",
+          "osm": null
+        }
+      },
+      {
+        "name": "Trevi Fountain",
+        "category": "attraction",
+        "tags": [
+          "photo",
+          "popular",
+          "architecture",
+          "sightseeing"
+        ],
+        "neighborhood": "Trevi",
+        "lat": 41.9009,
+        "lon": 12.4833,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Baroque fountain of coin-toss fame.",
+        "external": {
+          "wikidata": "Q185379",
+          "osm": null
+        }
+      },
+      {
+        "name": "Vatican Museums",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "heritage",
+          "popular"
+        ],
+        "neighborhood": "Vatican",
+        "lat": 41.9065,
+        "lon": 12.4536,
+        "cost_usd": 25,
+        "duration_minutes": 180,
+        "description": "Papal collections including the Sistine Chapel route.",
+        "external": {
+          "wikidata": "Q182881",
+          "osm": null
+        }
+      },
+      {
+        "name": "St. Peter's Basilica",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "viewpoint"
+        ],
+        "neighborhood": "Vatican",
+        "lat": 41.9022,
+        "lon": 12.4539,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Renaissance basilica and dome views.",
+        "external": {
+          "wikidata": "Q12512",
+          "osm": null
+        }
+      },
+      {
+        "name": "Galleria Borghese",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "Villa Borghese",
+        "lat": 41.9142,
+        "lon": 12.4921,
+        "cost_usd": 18,
+        "duration_minutes": 100,
+        "description": "Bernini and Caravaggio in a villa museum.",
+        "external": {
+          "wikidata": "Q841731",
+          "osm": null
+        }
+      },
+      {
+        "name": "Villa Borghese Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Villa Borghese",
+        "lat": 41.9145,
+        "lon": 12.485,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Large park with museums and lake.",
+        "external": {
+          "wikidata": "Q841740",
+          "osm": null
+        }
+      },
+      {
+        "name": "Trastevere",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "food",
+          "urban",
+          "culture"
+        ],
+        "neighborhood": "Trastevere",
+        "lat": 41.8895,
+        "lon": 12.4695,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Cobblestone nightlife and trattoria district.",
+        "external": {
+          "wikidata": "Q841750",
+          "osm": null
+        }
+      },
+      {
+        "name": "Campo de' Fiori",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "nightlife",
+          "food",
+          "urban"
+        ],
+        "neighborhood": "Centro",
+        "lat": 41.8955,
+        "lon": 12.4722,
+        "cost_usd": 10,
+        "duration_minutes": 60,
+        "description": "Morning market and evening square.",
+        "external": {
+          "wikidata": "Q841760",
+          "osm": null
+        }
+      },
+      {
+        "name": "Castel Sant'Angelo",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "viewpoint",
+          "museum"
+        ],
+        "neighborhood": "Prati",
+        "lat": 41.9031,
+        "lon": 12.4663,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Hadrian's mausoleum turned papal fortress.",
+        "external": {
+          "wikidata": "Q186276",
+          "osm": null
+        }
+      },
+      {
+        "name": "Spanish Steps",
+        "category": "attraction",
+        "tags": [
+          "photo",
+          "popular",
+          "architecture",
+          "shopping"
+        ],
+        "neighborhood": "Campo Marzio",
+        "lat": 41.9059,
+        "lon": 12.4823,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Monumental stairway to Trinità dei Monti.",
+        "external": {
+          "wikidata": "Q841770",
+          "osm": null
+        }
+      },
+      {
+        "name": "Piazza Navona",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "photo",
+          "art",
+          "popular"
+        ],
+        "neighborhood": "Centro",
+        "lat": 41.8992,
+        "lon": 12.4731,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Baroque square with Bernini fountains.",
+        "external": {
+          "wikidata": "Q841780",
+          "osm": null
+        }
+      },
+      {
+        "name": "Capitoline Museums",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "history",
+          "culture"
+        ],
+        "neighborhood": "Campidoglio",
+        "lat": 41.8933,
+        "lon": 12.4825,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Oldest public museums on Capitoline Hill.",
+        "external": {
+          "wikidata": "Q333906",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ostiense / Testaccio Nightlife",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "food",
+          "urban"
+        ],
+        "neighborhood": "Testaccio",
+        "lat": 41.8765,
+        "lon": 12.4755,
+        "cost_usd": 20,
+        "duration_minutes": 90,
+        "description": "Club and street-food scene south of the center.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Appian Way Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "history",
+          "nature",
+          "scenic"
+        ],
+        "neighborhood": "Appia",
+        "lat": 41.855,
+        "lon": 12.52,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Ancient road and parkland for cycling walks.",
+        "external": {
+          "wikidata": "Q841790",
+          "osm": null
+        }
+      },
+      {
+        "name": "Orange Garden (Giardino degli Aranci)",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "viewpoint",
+          "scenic"
+        ],
+        "neighborhood": "Aventine",
+        "lat": 41.8835,
+        "lon": 12.4805,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Aventine terrace with orange trees and views.",
+        "external": {
+          "wikidata": "Q841800",
+          "osm": null
+        }
+      },
+      {
+        "name": "MAXXI Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "architecture"
+        ],
+        "neighborhood": "Flaminio",
+        "lat": 41.9285,
+        "lon": 12.467,
+        "cost_usd": 14,
+        "duration_minutes": 100,
+        "description": "Zaha Hadid contemporary art and architecture museum.",
+        "external": {
+          "wikidata": "Q841810",
+          "osm": null
+        }
+      },
+      {
+        "name": "EUR District Architecture",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "history",
+          "photo"
+        ],
+        "neighborhood": "EUR",
+        "lat": 41.8335,
+        "lon": 12.4665,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Rationalist 20th-century planned district.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Jewish Ghetto & Tiber Island",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "history",
+          "food",
+          "heritage"
+        ],
+        "neighborhood": "Centro",
+        "lat": 41.892,
+        "lon": 12.4775,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Historic quarter and island bridges.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "San Giovanni in Laterano",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage"
+        ],
+        "neighborhood": "Laterano",
+        "lat": 41.8858,
+        "lon": 12.5057,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Cathedral of Rome with baptistery.",
+        "external": {
+          "wikidata": "Q188604",
+          "osm": null
+        }
+      },
+      {
+        "name": "Baths of Caracalla",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "heritage"
+        ],
+        "neighborhood": "South",
+        "lat": 41.879,
+        "lon": 12.4925,
+        "cost_usd": 12,
+        "duration_minutes": 75,
+        "description": "Vast ruins of imperial baths.",
+        "external": {
+          "wikidata": "Q190432",
+          "osm": null
+        }
+      },
+      {
+        "name": "Piazza del Popolo",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "Campo Marzio",
+        "lat": 41.9106,
+        "lon": 12.4764,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Grand northern gateway square.",
+        "external": {
+          "wikidata": "Q841820",
+          "osm": null
+        }
+      },
+      {
+        "name": "Villa Celimontana",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "family"
+        ],
+        "neighborhood": "Celio",
+        "lat": 41.885,
+        "lon": 12.495,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Quiet park near the Colosseum.",
+        "external": {
+          "wikidata": "Q841830",
+          "osm": null
+        }
+      },
+      {
+        "name": "Trastevere Night Market Lanes",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "shopping"
+        ],
+        "neighborhood": "Trastevere",
+        "lat": 41.889,
+        "lon": 12.4705,
+        "cost_usd": 12,
+        "duration_minutes": 60,
+        "description": "Evening craft stalls and aperitivo lanes.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Palatine Hill",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "viewpoint",
+          "heritage"
+        ],
+        "neighborhood": "Monti",
+        "lat": 41.8894,
+        "lon": 12.4875,
+        "cost_usd": 18,
+        "duration_minutes": 90,
+        "description": "Imperial palace ruins above the Forum.",
+        "external": {
+          "wikidata": "Q180972",
+          "osm": null
+        }
+      },
+      {
+        "name": "Bioparco di Roma",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "nature",
+          "zoo"
+        ],
+        "neighborhood": "Villa Borghese",
+        "lat": 41.9185,
+        "lon": 12.4855,
+        "cost_usd": 18,
+        "duration_minutes": 120,
+        "description": "City zoo inside Villa Borghese.",
+        "external": {
+          "wikidata": "Q841840",
+          "osm": null
+        }
+      },
+      {
+        "name": "Explora Children's Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science"
+        ],
+        "neighborhood": "Flaminio",
+        "lat": 41.926,
+        "lon": 12.4685,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Hands-on museum for kids.",
+        "external": {
+          "wikidata": "Q841850",
+          "osm": null
+        }
+      },
+      {
+        "name": "Via del Corso Shopping",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "popular"
+        ],
+        "neighborhood": "Centro",
+        "lat": 41.902,
+        "lon": 12.4805,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Main shopping spine of central Rome.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Pincio Terrazza",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "scenic",
+          "park"
+        ],
+        "neighborhood": "Villa Borghese",
+        "lat": 41.9115,
+        "lon": 12.4795,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Classic sunset overlook over Piazza del Popolo.",
+        "external": {
+          "wikidata": "Q841860",
+          "osm": null
+        }
+      }
+    ]
+  },
+  "barcelona": {
+    "pois": [
+      {
+        "name": "Sagrada Família",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "heritage",
+          "popular",
+          "art"
+        ],
+        "neighborhood": "Eixample",
+        "lat": 41.4036,
+        "lon": 2.1744,
+        "cost_usd": 30,
+        "duration_minutes": 120,
+        "description": "Gaudí's unfinished basilica masterpiece.",
+        "external": {
+          "wikidata": "Q16917",
+          "osm": null
+        }
+      },
+      {
+        "name": "Park Güell",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "art",
+          "park",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "Gràcia",
+        "lat": 41.4145,
+        "lon": 2.1527,
+        "cost_usd": 12,
+        "duration_minutes": 100,
+        "description": "Gaudí park of mosaics and city views.",
+        "external": {
+          "wikidata": "Q623446",
+          "osm": null
+        }
+      },
+      {
+        "name": "Casa Batlló",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "art",
+          "museum",
+          "heritage"
+        ],
+        "neighborhood": "Eixample",
+        "lat": 41.3916,
+        "lon": 2.1649,
+        "cost_usd": 35,
+        "duration_minutes": 75,
+        "description": "Gaudí house museum on Passeig de Gràcia.",
+        "external": {
+          "wikidata": "Q623450",
+          "osm": null
+        }
+      },
+      {
+        "name": "La Rambla",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "popular",
+          "street-food"
+        ],
+        "neighborhood": "Ciutat Vella",
+        "lat": 41.381,
+        "lon": 2.1734,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Famous tree-lined pedestrian boulevard.",
+        "external": {
+          "wikidata": "Q623460",
+          "osm": null
+        }
+      },
+      {
+        "name": "Gothic Quarter",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "history",
+          "culture",
+          "nightlife",
+          "heritage"
+        ],
+        "neighborhood": "Ciutat Vella",
+        "lat": 41.3833,
+        "lon": 2.1765,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Medieval lanes, plazas, and cathedral.",
+        "external": {
+          "wikidata": "Q623470",
+          "osm": null
+        }
+      },
+      {
+        "name": "Camp Nou Experience",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "sports",
+          "popular"
+        ],
+        "neighborhood": "Les Corts",
+        "lat": 41.3809,
+        "lon": 2.1228,
+        "cost_usd": 35,
+        "duration_minutes": 120,
+        "description": "FC Barcelona stadium museum tour.",
+        "external": {
+          "wikidata": "Q623480",
+          "osm": null
+        }
+      },
+      {
+        "name": "Magic Fountain of Montjuïc",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "family",
+          "photo",
+          "entertainment"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.3712,
+        "lon": 2.1516,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Evening light-and-music fountain shows.",
+        "external": {
+          "wikidata": "Q623490",
+          "osm": null
+        }
+      },
+      {
+        "name": "Montjuïc Castle & Views",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "history",
+          "park",
+          "photo"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.3633,
+        "lon": 2.166,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Hilltop fortress with harbor panoramas.",
+        "external": {
+          "wikidata": "Q623500",
+          "osm": null
+        }
+      },
+      {
+        "name": "MNAC Catalan Art Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "architecture"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.3685,
+        "lon": 2.1535,
+        "cost_usd": 12,
+        "duration_minutes": 120,
+        "description": "Catalan art in the National Palace.",
+        "external": {
+          "wikidata": "Q623510",
+          "osm": null
+        }
+      },
+      {
+        "name": "Picasso Museum Barcelona",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture"
+        ],
+        "neighborhood": "Born",
+        "lat": 41.3852,
+        "lon": 2.1809,
+        "cost_usd": 14,
+        "duration_minutes": 90,
+        "description": "Picasso's early works in gothic palaces.",
+        "external": {
+          "wikidata": "Q623520",
+          "osm": null
+        }
+      },
+      {
+        "name": "Barceloneta Beach",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "family",
+          "nightlife"
+        ],
+        "neighborhood": "Barceloneta",
+        "lat": 41.3785,
+        "lon": 2.1925,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "City beach with promenade and chiringuitos.",
+        "external": {
+          "wikidata": "Q623530",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ciutadella Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "family",
+          "nature",
+          "scenic"
+        ],
+        "neighborhood": "Born",
+        "lat": 41.388,
+        "lon": 2.1865,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Central park with fountain and zoo approaches.",
+        "external": {
+          "wikidata": "Q623540",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tibidabo Amusement Park",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "theme-park",
+          "viewpoint"
+        ],
+        "neighborhood": "Tibidabo",
+        "lat": 41.4225,
+        "lon": 2.1185,
+        "cost_usd": 30,
+        "duration_minutes": 180,
+        "description": "Hilltop amusement park overlooking Barcelona.",
+        "external": {
+          "wikidata": "Q623550",
+          "osm": null
+        }
+      },
+      {
+        "name": "Mercat de la Boqueria",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "popular"
+        ],
+        "neighborhood": "Ciutat Vella",
+        "lat": 41.3817,
+        "lon": 2.1717,
+        "cost_usd": 12,
+        "duration_minutes": 60,
+        "description": "Colorful food market off La Rambla.",
+        "external": {
+          "wikidata": "Q623560",
+          "osm": null
+        }
+      },
+      {
+        "name": "El Born Nightlife",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "bar",
+          "shopping",
+          "urban"
+        ],
+        "neighborhood": "Born",
+        "lat": 41.3845,
+        "lon": 2.1825,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Bars and boutiques around Santa Maria del Mar.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Gràcia Squares",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "cafe",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Gràcia",
+        "lat": 41.403,
+        "lon": 2.157,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Village-like plazas with terrace nightlife.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Casa Milà (La Pedrera)",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "museum",
+          "art",
+          "viewpoint"
+        ],
+        "neighborhood": "Eixample",
+        "lat": 41.3954,
+        "lon": 2.1619,
+        "cost_usd": 28,
+        "duration_minutes": 75,
+        "description": "Gaudí apartment block with rooftop chimneys.",
+        "external": {
+          "wikidata": "Q623570",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palau de la Música Catalana",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "art",
+          "heritage"
+        ],
+        "neighborhood": "Born",
+        "lat": 41.3875,
+        "lon": 2.1752,
+        "cost_usd": 20,
+        "duration_minutes": 60,
+        "description": "UNESCO modernist concert hall.",
+        "external": {
+          "wikidata": "Q623580",
+          "osm": null
+        }
+      },
+      {
+        "name": "Bunkers del Carmel",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "scenic",
+          "popular"
+        ],
+        "neighborhood": "Horta",
+        "lat": 41.4185,
+        "lon": 2.1605,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Civil-war bunkers with 360° skyline views.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "MACBA Contemporary Art",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern"
+        ],
+        "neighborhood": "Raval",
+        "lat": 41.3833,
+        "lon": 2.1668,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Contemporary art museum by Richard Meier.",
+        "external": {
+          "wikidata": "Q623590",
+          "osm": null
+        }
+      },
+      {
+        "name": "Port Vell Boardwalk",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "scenic",
+          "family",
+          "shopping"
+        ],
+        "neighborhood": "Port Vell",
+        "lat": 41.3755,
+        "lon": 2.1775,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Harbor promenade and Maremagnum area.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Montjuïc Botanical Garden",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "scenic"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.3625,
+        "lon": 2.1585,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Mediterranean plant collections on the hill.",
+        "external": {
+          "wikidata": "Q623600",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hospital de Sant Pau",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "heritage",
+          "museum",
+          "art"
+        ],
+        "neighborhood": "Eixample",
+        "lat": 41.4135,
+        "lon": 2.1745,
+        "cost_usd": 16,
+        "duration_minutes": 90,
+        "description": "Modernista hospital complex by Domènech.",
+        "external": {
+          "wikidata": "Q623610",
+          "osm": null
+        }
+      },
+      {
+        "name": "Poble Espanyol",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "family",
+          "shopping"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.3688,
+        "lon": 2.1485,
+        "cost_usd": 16,
+        "duration_minutes": 100,
+        "description": "Open-air museum of Spanish architecture.",
+        "external": {
+          "wikidata": "Q623620",
+          "osm": null
+        }
+      },
+      {
+        "name": "Barceloneta Seafood Strip",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "food",
+          "scenic"
+        ],
+        "neighborhood": "Barceloneta",
+        "lat": 41.3775,
+        "lon": 2.1895,
+        "cost_usd": 30,
+        "duration_minutes": 90,
+        "description": "Seafood restaurants along the beachfront.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Raval Street Art Walk",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "urban",
+          "culture",
+          "nightlife"
+        ],
+        "neighborhood": "Raval",
+        "lat": 41.3805,
+        "lon": 2.1685,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Murals and indie venues in El Raval.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Parc de la Creueta del Coll",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "family",
+          "nature"
+        ],
+        "neighborhood": "Gràcia",
+        "lat": 41.418,
+        "lon": 2.148,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Park with public pool and sculpture in summer.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Telefèric de Montjuïc",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "family",
+          "photo"
+        ],
+        "neighborhood": "Montjuïc",
+        "lat": 41.368,
+        "lon": 2.1625,
+        "cost_usd": 12,
+        "duration_minutes": 45,
+        "description": "Cable car up Montjuïc hillside.",
+        "external": {
+          "wikidata": "Q623630",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sant Antoni Market",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "food",
+          "architecture",
+          "shopping"
+        ],
+        "neighborhood": "Eixample",
+        "lat": 41.3785,
+        "lon": 2.1625,
+        "cost_usd": 8,
+        "duration_minutes": 60,
+        "description": "Restored market hall and Sunday book market.",
+        "external": {
+          "wikidata": "Q623640",
+          "osm": null
+        }
+      },
+      {
+        "name": "Parallel / Poble-sec Bars",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "Poble-sec",
+        "lat": 41.3745,
+        "lon": 2.1635,
+        "cost_usd": 18,
+        "duration_minutes": 90,
+        "description": "Tapas and cocktail bars below Montjuïc.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "bangkok": {
+    "pois": [
+      {
+        "name": "Grand Palace",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "popular",
+          "temple"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.75,
+        "lon": 100.4913,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Royal compound with Wat Phra Kaew.",
+        "external": {
+          "wikidata": "Q868861",
+          "osm": null
+        }
+      },
+      {
+        "name": "Wat Arun",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "architecture",
+          "photo",
+          "viewpoint"
+        ],
+        "neighborhood": "Thonburi",
+        "lat": 13.7437,
+        "lon": 100.4888,
+        "cost_usd": 3,
+        "duration_minutes": 75,
+        "description": "Riverfront Temple of Dawn with steep prang.",
+        "external": {
+          "wikidata": "Q868870",
+          "osm": null
+        }
+      },
+      {
+        "name": "Wat Pho",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "temple",
+          "heritage",
+          "art"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.7465,
+        "lon": 100.4927,
+        "cost_usd": 3,
+        "duration_minutes": 75,
+        "description": "Reclining Buddha and traditional massage school.",
+        "external": {
+          "wikidata": "Q868875",
+          "osm": null
+        }
+      },
+      {
+        "name": "Chatuchak Weekend Market",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "shopping",
+          "street-food",
+          "popular"
+        ],
+        "neighborhood": "Chatuchak",
+        "lat": 13.7999,
+        "lon": 100.5503,
+        "cost_usd": 10,
+        "duration_minutes": 150,
+        "description": "Vast weekend market of crafts and food.",
+        "external": {
+          "wikidata": "Q868880",
+          "osm": null
+        }
+      },
+      {
+        "name": "Jim Thompson House",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "culture",
+          "architecture",
+          "art"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7492,
+        "lon": 100.5285,
+        "cost_usd": 8,
+        "duration_minutes": 75,
+        "description": "Teak house museum of Thai silk heritage.",
+        "external": {
+          "wikidata": "Q868885",
+          "osm": null
+        }
+      },
+      {
+        "name": "MBK / Siam Shopping Cluster",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "family",
+          "popular"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7445,
+        "lon": 100.53,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Mall corridor from MBK to Siam Paragon.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Iconsiam",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "architecture",
+          "food",
+          "viewpoint"
+        ],
+        "neighborhood": "Khlong San",
+        "lat": 13.7265,
+        "lon": 100.5105,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Riverside megamall with floating market hall.",
+        "external": {
+          "wikidata": "Q868890",
+          "osm": null
+        }
+      },
+      {
+        "name": "Asiatique The Riverfront",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "shopping",
+          "street-food",
+          "family"
+        ],
+        "neighborhood": "Bang Kho Laem",
+        "lat": 13.7045,
+        "lon": 100.5035,
+        "cost_usd": 5,
+        "duration_minutes": 120,
+        "description": "Night bazaar with Ferris wheel by the river.",
+        "external": {
+          "wikidata": "Q868895",
+          "osm": null
+        }
+      },
+      {
+        "name": "Khao San Road",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "urban",
+          "popular"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.7588,
+        "lon": 100.4972,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "Backpacker nightlife and street snacks.",
+        "external": {
+          "wikidata": "Q868900",
+          "osm": null
+        }
+      },
+      {
+        "name": "Chinatown Yaowarat",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "food",
+          "urban"
+        ],
+        "neighborhood": "Samphanthawong",
+        "lat": 13.7395,
+        "lon": 100.51,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Gold shops by day, street food by night.",
+        "external": {
+          "wikidata": "Q868905",
+          "osm": null
+        }
+      },
+      {
+        "name": "Lumphini Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7308,
+        "lon": 100.5415,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Central park with lakes and monitor lizards.",
+        "external": {
+          "wikidata": "Q868910",
+          "osm": null
+        }
+      },
+      {
+        "name": "Benjakitti Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "scenic",
+          "family"
+        ],
+        "neighborhood": "Khlong Toei",
+        "lat": 13.7295,
+        "lon": 100.56,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Skywalk park over former tobacco factory wetlands.",
+        "external": {
+          "wikidata": "Q868915",
+          "osm": null
+        }
+      },
+      {
+        "name": "Museum of Contemporary Art Bangkok",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "culture"
+        ],
+        "neighborhood": "Chatuchak",
+        "lat": 13.8175,
+        "lon": 100.56,
+        "cost_usd": 8,
+        "duration_minutes": 100,
+        "description": "Large private contemporary Thai art museum.",
+        "external": {
+          "wikidata": "Q868920",
+          "osm": null
+        }
+      },
+      {
+        "name": "Bangkok Art and Culture Centre",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "shopping"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7465,
+        "lon": 100.53,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Multi-floor art center by MBK.",
+        "external": {
+          "wikidata": "Q868925",
+          "osm": null
+        }
+      },
+      {
+        "name": "Safari World Bangkok",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "nature",
+          "zoo",
+          "entertainment"
+        ],
+        "neighborhood": "Min Buri",
+        "lat": 13.865,
+        "lon": 100.75,
+        "cost_usd": 40,
+        "duration_minutes": 240,
+        "description": "Safari and marine park on the city edge.",
+        "external": {
+          "wikidata": "Q868930",
+          "osm": null
+        }
+      },
+      {
+        "name": "Dream World",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "theme-park",
+          "entertainment"
+        ],
+        "neighborhood": "Pathum Thani",
+        "lat": 13.98,
+        "lon": 100.69,
+        "cost_usd": 35,
+        "duration_minutes": 240,
+        "description": "Amusement park north of Bangkok.",
+        "external": {
+          "wikidata": "Q868935",
+          "osm": null
+        }
+      },
+      {
+        "name": "Chao Phraya River Cruise Pier Area",
+        "category": "attraction",
+        "tags": [
+          "scenic",
+          "photo",
+          "sightseeing",
+          "nightlife"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.755,
+        "lon": 100.494,
+        "cost_usd": 10,
+        "duration_minutes": 75,
+        "description": "River boats and temple skyline views.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Erawan Shrine",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "shrine",
+          "popular",
+          "photo"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7442,
+        "lon": 100.5405,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Hindu shrine amid Ratchaprasong malls.",
+        "external": {
+          "wikidata": "Q868940",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sukhumvit Nightlife (Thonglor/Ekkamai)",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "food",
+          "urban"
+        ],
+        "neighborhood": "Watthana",
+        "lat": 13.73,
+        "lon": 100.585,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Bars and restaurants along Sukhumvit sois.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Chatuchak Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family"
+        ],
+        "neighborhood": "Chatuchak",
+        "lat": 13.8025,
+        "lon": 100.552,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Park and railway museum near the weekend market.",
+        "external": {
+          "wikidata": "Q868945",
+          "osm": null
+        }
+      },
+      {
+        "name": "Vimanmek Mansion Grounds",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "architecture",
+          "heritage",
+          "history"
+        ],
+        "neighborhood": "Dusit",
+        "lat": 13.7745,
+        "lon": 100.5125,
+        "cost_usd": 5,
+        "duration_minutes": 90,
+        "description": "Teak mansion complex in Dusit Palace area.",
+        "external": {
+          "wikidata": "Q868950",
+          "osm": null
+        }
+      },
+      {
+        "name": "King Power Mahanakhon SkyWalk",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "architecture",
+          "popular"
+        ],
+        "neighborhood": "Bang Rak",
+        "lat": 13.7235,
+        "lon": 100.528,
+        "cost_usd": 30,
+        "duration_minutes": 75,
+        "description": "Glass-tray viewpoint over Silom.",
+        "external": {
+          "wikidata": "Q868955",
+          "osm": null
+        }
+      },
+      {
+        "name": "Flower Market Pak Khlong Talat",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "photo",
+          "culture",
+          "nightlife"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.742,
+        "lon": 100.4975,
+        "cost_usd": 5,
+        "duration_minutes": 60,
+        "description": "Round-the-clock flower wholesale market.",
+        "external": {
+          "wikidata": "Q868960",
+          "osm": null
+        }
+      },
+      {
+        "name": "Suan Lum Night Bazaar Area",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "shopping",
+          "street-food"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.7285,
+        "lon": 100.54,
+        "cost_usd": 8,
+        "duration_minutes": 90,
+        "description": "Night market energy near Lumphini.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Bang Krachao Green Lung",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "nature",
+          "park",
+          "scenic",
+          "biking"
+        ],
+        "neighborhood": "Phra Pradaeng",
+        "lat": 13.68,
+        "lon": 100.56,
+        "cost_usd": 5,
+        "duration_minutes": 150,
+        "description": "Mangrove bike loops opposite the city.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "SEA LIFE Bangkok Ocean World",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "aquarium",
+          "sightseeing"
+        ],
+        "neighborhood": "Pathum Wan",
+        "lat": 13.746,
+        "lon": 100.5345,
+        "cost_usd": 25,
+        "duration_minutes": 100,
+        "description": "Large aquarium under Siam Paragon.",
+        "external": {
+          "wikidata": "Q868965",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ratchada Train Night Market",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "shopping",
+          "market"
+        ],
+        "neighborhood": "Huai Khwang",
+        "lat": 13.7695,
+        "lon": 100.5735,
+        "cost_usd": 10,
+        "duration_minutes": 120,
+        "description": "Night market in refurbished train carriages.",
+        "external": {
+          "wikidata": "Q868970",
+          "osm": null
+        }
+      },
+      {
+        "name": "Democracy Monument Area",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "photo",
+          "urban"
+        ],
+        "neighborhood": "Phra Nakhon",
+        "lat": 13.7565,
+        "lon": 100.502,
+        "cost_usd": 0,
+        "duration_minutes": 30,
+        "description": "Landmark roundabout of modern Thai history.",
+        "external": {
+          "wikidata": "Q868975",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ari Cafe Streets",
+        "category": "attraction",
+        "tags": [
+          "cafe",
+          "shopping",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Phaya Thai",
+        "lat": 13.7795,
+        "lon": 100.5445,
+        "cost_usd": 8,
+        "duration_minutes": 75,
+        "description": "Trendy cafes and boutiques in Ari.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Silom Soi Nightlife",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "Bang Rak",
+        "lat": 13.7285,
+        "lon": 100.5235,
+        "cost_usd": 20,
+        "duration_minutes": 90,
+        "description": "Bars and clubs around Silom and Patpong.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "london": {
+    "pois": [
+      {
+        "name": "British Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "culture",
+          "history",
+          "art",
+          "popular"
+        ],
+        "neighborhood": "Bloomsbury",
+        "lat": 51.5194,
+        "lon": -0.127,
+        "cost_usd": 0,
+        "duration_minutes": 150,
+        "description": "World collections from antiquity to modern.",
+        "external": {
+          "wikidata": "Q6373",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tower of London",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "heritage",
+          "popular",
+          "family"
+        ],
+        "neighborhood": "Tower",
+        "lat": 51.5081,
+        "lon": -0.0759,
+        "cost_usd": 35,
+        "duration_minutes": 120,
+        "description": "Norman fortress and Crown Jewels.",
+        "external": {
+          "wikidata": "Q62378",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tower Bridge",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "photo",
+          "viewpoint",
+          "popular"
+        ],
+        "neighborhood": "Tower",
+        "lat": 51.5055,
+        "lon": -0.0754,
+        "cost_usd": 12,
+        "duration_minutes": 60,
+        "description": "Victorian bascule bridge with glass walkways.",
+        "external": {
+          "wikidata": "Q129351",
+          "osm": null
+        }
+      },
+      {
+        "name": "Westminster Abbey",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "heritage",
+          "history"
+        ],
+        "neighborhood": "Westminster",
+        "lat": 51.4994,
+        "lon": -0.1273,
+        "cost_usd": 28,
+        "duration_minutes": 90,
+        "description": "Gothic church of coronations and poets.",
+        "external": {
+          "wikidata": "Q5933",
+          "osm": null
+        }
+      },
+      {
+        "name": "British Airways i360 / London Eye Area",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "family",
+          "photo",
+          "popular"
+        ],
+        "neighborhood": "South Bank",
+        "lat": 51.5033,
+        "lon": -0.1195,
+        "cost_usd": 30,
+        "duration_minutes": 75,
+        "description": "South Bank viewpoints including the London Eye.",
+        "external": {
+          "wikidata": "Q83171",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tate Modern",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "architecture"
+        ],
+        "neighborhood": "Bankside",
+        "lat": 51.5076,
+        "lon": -0.0994,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Contemporary art in a former power station.",
+        "external": {
+          "wikidata": "Q193375",
+          "osm": null
+        }
+      },
+      {
+        "name": "National Gallery",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "popular"
+        ],
+        "neighborhood": "Trafalgar",
+        "lat": 51.5089,
+        "lon": -0.1283,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "European painting masterpieces on Trafalgar Square.",
+        "external": {
+          "wikidata": "Q180788",
+          "osm": null
+        }
+      },
+      {
+        "name": "Natural History Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science",
+          "architecture"
+        ],
+        "neighborhood": "South Kensington",
+        "lat": 51.4967,
+        "lon": -0.1764,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Dinosaur halls in a landmark Victorian building.",
+        "external": {
+          "wikidata": "Q309388",
+          "osm": null
+        }
+      },
+      {
+        "name": "Science Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science"
+        ],
+        "neighborhood": "South Kensington",
+        "lat": 51.4978,
+        "lon": -0.1745,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Hands-on science and technology museum.",
+        "external": {
+          "wikidata": "Q1531545",
+          "osm": null
+        }
+      },
+      {
+        "name": "Victoria and Albert Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "design"
+        ],
+        "neighborhood": "South Kensington",
+        "lat": 51.4966,
+        "lon": -0.1722,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Decorative arts and design collections.",
+        "external": {
+          "wikidata": "Q213322",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hyde Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Westminster",
+        "lat": 51.5073,
+        "lon": -0.1657,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Vast royal park with Serpentine lake.",
+        "external": {
+          "wikidata": "Q123738",
+          "osm": null
+        }
+      },
+      {
+        "name": "Regent's Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "garden",
+          "family",
+          "nature"
+        ],
+        "neighborhood": "Marylebone",
+        "lat": 51.5313,
+        "lon": -0.157,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Formal gardens and London Zoo approaches.",
+        "external": {
+          "wikidata": "Q123740",
+          "osm": null
+        }
+      },
+      {
+        "name": "Greenwich Park & Observatory",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "museum",
+          "history",
+          "park",
+          "family"
+        ],
+        "neighborhood": "Greenwich",
+        "lat": 51.4769,
+        "lon": -0.0015,
+        "cost_usd": 10,
+        "duration_minutes": 120,
+        "description": "Prime Meridian and skyline views.",
+        "external": {
+          "wikidata": "Q179351",
+          "osm": null
+        }
+      },
+      {
+        "name": "Camden Market",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "shopping",
+          "street-food",
+          "nightlife",
+          "popular"
+        ],
+        "neighborhood": "Camden",
+        "lat": 51.5415,
+        "lon": -0.146,
+        "cost_usd": 10,
+        "duration_minutes": 120,
+        "description": "Alternative markets and canal-side food.",
+        "external": {
+          "wikidata": "Q123750",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shoreditch Street Art",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "nightlife",
+          "urban",
+          "photo"
+        ],
+        "neighborhood": "Shoreditch",
+        "lat": 51.5255,
+        "lon": -0.078,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Murals, galleries, and nightlife east of the City.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Soho Nightlife",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "food",
+          "urban",
+          "shopping"
+        ],
+        "neighborhood": "Soho",
+        "lat": 51.5136,
+        "lon": -0.131,
+        "cost_usd": 20,
+        "duration_minutes": 90,
+        "description": "Bars, theatres, and late dining.",
+        "external": {
+          "wikidata": "Q123760",
+          "osm": null
+        }
+      },
+      {
+        "name": "Borough Market",
+        "category": "attraction",
+        "tags": [
+          "food",
+          "market",
+          "street-food",
+          "popular"
+        ],
+        "neighborhood": "Southwark",
+        "lat": 51.5055,
+        "lon": -0.091,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Historic food market by London Bridge.",
+        "external": {
+          "wikidata": "Q123770",
+          "osm": null
+        }
+      },
+      {
+        "name": "St Paul's Cathedral",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "viewpoint",
+          "heritage"
+        ],
+        "neighborhood": "City",
+        "lat": 51.5138,
+        "lon": -0.0984,
+        "cost_usd": 22,
+        "duration_minutes": 90,
+        "description": "Wren dome with Whispering Gallery.",
+        "external": {
+          "wikidata": "Q173882",
+          "osm": null
+        }
+      },
+      {
+        "name": "Covent Garden",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "family",
+          "entertainment",
+          "urban"
+        ],
+        "neighborhood": "Covent Garden",
+        "lat": 51.512,
+        "lon": -0.123,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Piazza of shops, street performers, and Royal Opera.",
+        "external": {
+          "wikidata": "Q123780",
+          "osm": null
+        }
+      },
+      {
+        "name": "Kew Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "family",
+          "unesco"
+        ],
+        "neighborhood": "Kew",
+        "lat": 51.4787,
+        "lon": -0.2956,
+        "cost_usd": 20,
+        "duration_minutes": 150,
+        "description": "UNESCO botanic gardens in southwest London.",
+        "external": {
+          "wikidata": "Q18919",
+          "osm": null
+        }
+      },
+      {
+        "name": "Shakespeare's Globe",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "architecture",
+          "theatre",
+          "history"
+        ],
+        "neighborhood": "Bankside",
+        "lat": 51.5081,
+        "lon": -0.0972,
+        "cost_usd": 20,
+        "duration_minutes": 75,
+        "description": "Replica Elizabethan playhouse on the Thames.",
+        "external": {
+          "wikidata": "Q123790",
+          "osm": null
+        }
+      },
+      {
+        "name": "Imperial War Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "culture"
+        ],
+        "neighborhood": "Lambeth",
+        "lat": 51.4958,
+        "lon": -0.1086,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Conflict history museum with atrium exhibits.",
+        "external": {
+          "wikidata": "Q123800",
+          "osm": null
+        }
+      },
+      {
+        "name": "Notting Hill / Portobello",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "shopping",
+          "photo",
+          "urban"
+        ],
+        "neighborhood": "Notting Hill",
+        "lat": 51.5155,
+        "lon": -0.205,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Colorful houses and Portobello Road Market.",
+        "external": {
+          "wikidata": "Q123810",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sky Garden",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "architecture",
+          "photo"
+        ],
+        "neighborhood": "City",
+        "lat": 51.5112,
+        "lon": -0.0836,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Free public garden atop the Walkie Talkie.",
+        "external": {
+          "wikidata": "Q123820",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hampstead Heath",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "viewpoint",
+          "scenic"
+        ],
+        "neighborhood": "Hampstead",
+        "lat": 51.56,
+        "lon": -0.165,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Wild heathland with city viewpoints.",
+        "external": {
+          "wikidata": "Q123830",
+          "osm": null
+        }
+      },
+      {
+        "name": "Brick Lane",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "art",
+          "shopping"
+        ],
+        "neighborhood": "Shoreditch",
+        "lat": 51.522,
+        "lon": -0.0715,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Curry houses, vintage markets, and street art.",
+        "external": {
+          "wikidata": "Q123840",
+          "osm": null
+        }
+      },
+      {
+        "name": "Southbank Centre",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "culture",
+          "nightlife",
+          "architecture"
+        ],
+        "neighborhood": "South Bank",
+        "lat": 51.506,
+        "lon": -0.1165,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Arts complex and riverside walk.",
+        "external": {
+          "wikidata": "Q123850",
+          "osm": null
+        }
+      },
+      {
+        "name": "Warner Bros. Studio Tour London",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "museum",
+          "entertainment"
+        ],
+        "neighborhood": "Leavesden",
+        "lat": 51.6905,
+        "lon": -0.418,
+        "cost_usd": 70,
+        "duration_minutes": 210,
+        "description": "Harry Potter studio experience near Watford.",
+        "external": {
+          "wikidata": "Q123860",
+          "osm": null
+        }
+      },
+      {
+        "name": "Oxford Street & Regent Street",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "urban",
+          "architecture",
+          "popular"
+        ],
+        "neighborhood": "West End",
+        "lat": 51.5152,
+        "lon": -0.142,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Flagship shopping streets of the West End.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Dalston / Hackney Bars",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "urban"
+        ],
+        "neighborhood": "Hackney",
+        "lat": 51.5485,
+        "lon": -0.0755,
+        "cost_usd": 22,
+        "duration_minutes": 90,
+        "description": "East London indie bars and music venues.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "marrakech": {
+    "pois": [
+      {
+        "name": "Jemaa el-Fnaa",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "street-food",
+          "popular",
+          "culture",
+          "entertainment"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6258,
+        "lon": -7.9891,
+        "cost_usd": 5,
+        "duration_minutes": 120,
+        "description": "Main square of performers, stalls, and night food.",
+        "external": {
+          "wikidata": "Q275618",
+          "osm": null
+        }
+      },
+      {
+        "name": "Bahia Palace",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "heritage",
+          "palace",
+          "popular"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6215,
+        "lon": -7.9825,
+        "cost_usd": 8,
+        "duration_minutes": 75,
+        "description": "19th-century palace of courtyards and gardens.",
+        "external": {
+          "wikidata": "Q275625",
+          "osm": null
+        }
+      },
+      {
+        "name": "Saadian Tombs",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "heritage",
+          "culture"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6172,
+        "lon": -7.9886,
+        "cost_usd": 7,
+        "duration_minutes": 45,
+        "description": "Ornate royal necropolis rediscovered in 1917.",
+        "external": {
+          "wikidata": "Q275630",
+          "osm": null
+        }
+      },
+      {
+        "name": "Koutoubia Mosque Gardens",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "photo",
+          "culture",
+          "scenic"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6241,
+        "lon": -7.9935,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Landmark minaret and public gardens (non-Muslims outside).",
+        "external": {
+          "wikidata": "Q275635",
+          "osm": null
+        }
+      },
+      {
+        "name": "Majorelle Garden",
+        "category": "attraction",
+        "tags": [
+          "garden",
+          "art",
+          "photo",
+          "popular",
+          "nature"
+        ],
+        "neighborhood": "Ville Nouvelle",
+        "lat": 31.6416,
+        "lon": -8.0031,
+        "cost_usd": 15,
+        "duration_minutes": 75,
+        "description": "Cobalt-blue villa garden once owned by Yves Saint Laurent.",
+        "external": {
+          "wikidata": "Q275640",
+          "osm": null
+        }
+      },
+      {
+        "name": "Yves Saint Laurent Museum Marrakech",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "fashion"
+        ],
+        "neighborhood": "Ville Nouvelle",
+        "lat": 31.6422,
+        "lon": -8.0035,
+        "cost_usd": 12,
+        "duration_minutes": 75,
+        "description": "Fashion museum beside Jardin Majorelle.",
+        "external": {
+          "wikidata": "Q275645",
+          "osm": null
+        }
+      },
+      {
+        "name": "Ben Youssef Madrasa",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "heritage",
+          "art"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.632,
+        "lon": -7.9855,
+        "cost_usd": 5,
+        "duration_minutes": 60,
+        "description": "Historic Islamic college with carved courtyards.",
+        "external": {
+          "wikidata": "Q275650",
+          "osm": null
+        }
+      },
+      {
+        "name": "Secret Garden (Le Jardin Secret)",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "scenic",
+          "architecture"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6305,
+        "lon": -7.9875,
+        "cost_usd": 8,
+        "duration_minutes": 60,
+        "description": "Restored medina palace gardens and tower view.",
+        "external": {
+          "wikidata": "Q275655",
+          "osm": null
+        }
+      },
+      {
+        "name": "Souks of Marrakech",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "market",
+          "culture",
+          "popular"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6285,
+        "lon": -7.987,
+        "cost_usd": 10,
+        "duration_minutes": 120,
+        "description": "Labyrinth of craft and spice souks.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "El Badi Palace",
+        "category": "attraction",
+        "tags": [
+          "history",
+          "architecture",
+          "heritage",
+          "scenic"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6185,
+        "lon": -7.9855,
+        "cost_usd": 7,
+        "duration_minutes": 75,
+        "description": "Ruined Saadian palace with stork nests.",
+        "external": {
+          "wikidata": "Q275660",
+          "osm": null
+        }
+      },
+      {
+        "name": "Menara Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "scenic",
+          "photo",
+          "nature"
+        ],
+        "neighborhood": "Menara",
+        "lat": 31.6135,
+        "lon": -8.0215,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Olive groves and pavilion reflecting Atlas views.",
+        "external": {
+          "wikidata": "Q275665",
+          "osm": null
+        }
+      },
+      {
+        "name": "Agdal Gardens",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "heritage"
+        ],
+        "neighborhood": "Agdal",
+        "lat": 31.6,
+        "lon": -7.985,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Historic royal orchards south of the medina.",
+        "external": {
+          "wikidata": "Q275670",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palais de la Bahia Night Area",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "culture",
+          "photo"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.621,
+        "lon": -7.983,
+        "cost_usd": 5,
+        "duration_minutes": 45,
+        "description": "Evening atmosphere around palace lanes.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Cyber Park Arsat Moulay Abdeslam",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "family",
+          "nature"
+        ],
+        "neighborhood": "Guéliz",
+        "lat": 31.6315,
+        "lon": -8.005,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Central park with Wi‑Fi lawns between medina and Guéliz.",
+        "external": {
+          "wikidata": "Q275675",
+          "osm": null
+        }
+      },
+      {
+        "name": "Musée de Mouassine",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "architecture"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6295,
+        "lon": -7.9895,
+        "cost_usd": 6,
+        "duration_minutes": 60,
+        "description": "Art and photography in a restored riad.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Dar Si Said Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "heritage"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6225,
+        "lon": -7.9845,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Moroccan arts and crafts museum.",
+        "external": {
+          "wikidata": "Q275680",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palais El Badi Sunset Ramparts",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "photo",
+          "history",
+          "scenic"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.618,
+        "lon": -7.986,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Rampart views near El Badi at dusk.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Guéliz Avenue Mohammed V",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "cafe",
+          "urban",
+          "nightlife"
+        ],
+        "neighborhood": "Guéliz",
+        "lat": 31.6345,
+        "lon": -8.01,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "New-town cafes, galleries, and boutiques.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Hivernage Nightlife Strip",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "food",
+          "entertainment"
+        ],
+        "neighborhood": "Hivernage",
+        "lat": 31.62,
+        "lon": -8.015,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Hotels, clubs, and restaurants of Hivernage.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Tanneries Viewpoint",
+        "category": "attraction",
+        "tags": [
+          "culture",
+          "photo",
+          "heritage"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6355,
+        "lon": -7.9825,
+        "cost_usd": 2,
+        "duration_minutes": 30,
+        "description": "Overlook of traditional leather tanning pits.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Maison de la Photographie",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "photo"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.633,
+        "lon": -7.9865,
+        "cost_usd": 5,
+        "duration_minutes": 60,
+        "description": "Historic photos of Morocco from a rooftop riad.",
+        "external": {
+          "wikidata": "Q275685",
+          "osm": null
+        }
+      },
+      {
+        "name": "Palmerae Oasis Edge",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "nature",
+          "scenic",
+          "photo"
+        ],
+        "neighborhood": "Palmerae",
+        "lat": 31.66,
+        "lon": -7.97,
+        "cost_usd": 0,
+        "duration_minutes": 90,
+        "description": "Palm grove tracks on the city's northeast edge.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Atlas Mountains Day-Trip Lookout (city side)",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "nature",
+          "scenic",
+          "photo"
+        ],
+        "neighborhood": "Ourika Road",
+        "lat": 31.55,
+        "lon": -7.95,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Foothill viewpoints on the Ourika road out of town.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Ensemble Artisanal",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "culture",
+          "art",
+          "family"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6235,
+        "lon": -7.995,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Fixed-price artisan cooperative near Koutoubia.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Place des Épices",
+        "category": "attraction",
+        "tags": [
+          "market",
+          "photo",
+          "culture",
+          "street-food"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6308,
+        "lon": -7.9868,
+        "cost_usd": 5,
+        "duration_minutes": 40,
+        "description": "Spice square with basket stalls and cafes.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Medina Rooftop Cafes",
+        "category": "attraction",
+        "tags": [
+          "cafe",
+          "viewpoint",
+          "nightlife",
+          "photo"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.6275,
+        "lon": -7.9885,
+        "cost_usd": 10,
+        "duration_minutes": 60,
+        "description": "Terrace cafes overlooking souk roofs.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Royal Tennis Club Gardens Area",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "scenic"
+        ],
+        "neighborhood": "Hivernage",
+        "lat": 31.6185,
+        "lon": -8.012,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Leafy avenues near Hivernage hotels.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Museum of African Contemporary Art Al Maaden",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "modern",
+          "culture"
+        ],
+        "neighborhood": "Al Maaden",
+        "lat": 31.58,
+        "lon": -7.92,
+        "cost_usd": 10,
+        "duration_minutes": 90,
+        "description": "Contemporary African art outside the center.",
+        "external": {
+          "wikidata": "Q275690",
+          "osm": null
+        }
+      },
+      {
+        "name": "Carriage Ride Ramparts Circuit",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "sightseeing",
+          "photo",
+          "heritage"
+        ],
+        "neighborhood": "Medina",
+        "lat": 31.62,
+        "lon": -7.995,
+        "cost_usd": 15,
+        "duration_minutes": 45,
+        "description": "Horse-carriage loop along ochre city walls.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Kasbah Mosque Quarter",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "culture",
+          "heritage",
+          "photo"
+        ],
+        "neighborhood": "Kasbah",
+        "lat": 31.6165,
+        "lon": -7.9895,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Quiet lanes around the Kasbah mosque.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  },
+  "reykjavik": {
+    "pois": [
+      {
+        "name": "Hallgrímskirkja",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "viewpoint",
+          "photo",
+          "popular",
+          "culture"
+        ],
+        "neighborhood": "Miðborg",
+        "lat": 64.1417,
+        "lon": -21.9266,
+        "cost_usd": 10,
+        "duration_minutes": 60,
+        "description": "Expressionist church tower with city views.",
+        "external": {
+          "wikidata": "Q214235",
+          "osm": null
+        }
+      },
+      {
+        "name": "Harpa Concert Hall",
+        "category": "attraction",
+        "tags": [
+          "architecture",
+          "art",
+          "culture",
+          "nightlife",
+          "photo"
+        ],
+        "neighborhood": "Harbor",
+        "lat": 64.1505,
+        "lon": -21.9325,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Glass harbor concert hall and cultural venue.",
+        "external": {
+          "wikidata": "Q214250",
+          "osm": null
+        }
+      },
+      {
+        "name": "Sun Voyager",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "photo",
+          "scenic",
+          "popular"
+        ],
+        "neighborhood": "Waterfront",
+        "lat": 64.1475,
+        "lon": -21.9222,
+        "cost_usd": 0,
+        "duration_minutes": 20,
+        "description": "Skeletton ship sculpture on the waterfront.",
+        "external": {
+          "wikidata": "Q214260",
+          "osm": null
+        }
+      },
+      {
+        "name": "Perlan Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "viewpoint",
+          "science"
+        ],
+        "neighborhood": "Öskjuhlíð",
+        "lat": 64.1295,
+        "lon": -21.9165,
+        "cost_usd": 25,
+        "duration_minutes": 100,
+        "description": "Exhibits under glass domes with observation deck.",
+        "external": {
+          "wikidata": "Q214270",
+          "osm": null
+        }
+      },
+      {
+        "name": "National Museum of Iceland",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "culture"
+        ],
+        "neighborhood": "Suðurgata",
+        "lat": 64.141,
+        "lon": -21.9485,
+        "cost_usd": 15,
+        "duration_minutes": 90,
+        "description": "Icelandic history from settlement to modern day.",
+        "external": {
+          "wikidata": "Q214280",
+          "osm": null
+        }
+      },
+      {
+        "name": "Reykjavik Art Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "art",
+          "culture",
+          "modern"
+        ],
+        "neighborhood": "Harbor",
+        "lat": 64.149,
+        "lon": -21.94,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Contemporary and modern art across city sites.",
+        "external": {
+          "wikidata": "Q214290",
+          "osm": null
+        }
+      },
+      {
+        "name": "Settlement Exhibition",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "culture"
+        ],
+        "neighborhood": "Downtown",
+        "lat": 64.1472,
+        "lon": -21.9425,
+        "cost_usd": 15,
+        "duration_minutes": 60,
+        "description": "Viking-age ruins beneath a modern museum.",
+        "external": {
+          "wikidata": "Q214300",
+          "osm": null
+        }
+      },
+      {
+        "name": "Laugavegur Shopping Street",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "nightlife",
+          "cafe",
+          "urban"
+        ],
+        "neighborhood": "Miðborg",
+        "lat": 64.1465,
+        "lon": -21.93,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Main shopping and nightlife spine.",
+        "external": {
+          "wikidata": "Q214310",
+          "osm": null
+        }
+      },
+      {
+        "name": "Old Harbor & Whale Watching Pier",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "nature",
+          "sightseeing",
+          "photo"
+        ],
+        "neighborhood": "Harbor",
+        "lat": 64.152,
+        "lon": -21.948,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Boats, museums, and whale-watch departures.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Whales of Iceland",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "nature"
+        ],
+        "neighborhood": "Grandagarður",
+        "lat": 64.1565,
+        "lon": -21.9485,
+        "cost_usd": 25,
+        "duration_minutes": 75,
+        "description": "Life-size whale models in a warehouse museum.",
+        "external": {
+          "wikidata": "Q214320",
+          "osm": null
+        }
+      },
+      {
+        "name": "Aurora Reykjavík",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "family",
+          "science",
+          "photo"
+        ],
+        "neighborhood": "Old Harbor",
+        "lat": 64.1525,
+        "lon": -21.947,
+        "cost_usd": 18,
+        "duration_minutes": 45,
+        "description": "Northern lights exhibition and photography tips.",
+        "external": {
+          "wikidata": "Q214330",
+          "osm": null
+        }
+      },
+      {
+        "name": "Tjörnin Pond & City Hall",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "scenic",
+          "family",
+          "architecture"
+        ],
+        "neighborhood": "Downtown",
+        "lat": 64.1455,
+        "lon": -21.942,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Central pond with waterfowl and City Hall.",
+        "external": {
+          "wikidata": "Q214340",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hljómskálagarður Park",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "park",
+          "nature",
+          "scenic"
+        ],
+        "neighborhood": "Downtown",
+        "lat": 64.1435,
+        "lon": -21.94,
+        "cost_usd": 0,
+        "duration_minutes": 45,
+        "description": "Park sculptures around the south of Tjörnin.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Nauthólsvík Geothermal Beach",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "nature",
+          "family",
+          "scenic"
+        ],
+        "neighborhood": "Nauthólsvík",
+        "lat": 64.12,
+        "lon": -21.935,
+        "cost_usd": 5,
+        "duration_minutes": 75,
+        "description": "Hot-pot beach lagoon near the airport road.",
+        "external": {
+          "wikidata": "Q214350",
+          "osm": null
+        }
+      },
+      {
+        "name": "Öskjuhlíð Forest Walks",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "nature",
+          "park",
+          "hiking"
+        ],
+        "neighborhood": "Öskjuhlíð",
+        "lat": 64.128,
+        "lon": -21.92,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Wooded hill paths around Perlan.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Grótta Lighthouse",
+        "category": "attraction",
+        "tags": [
+          "scenic",
+          "photo",
+          "nature",
+          "viewpoint"
+        ],
+        "neighborhood": "Seltjarnarnes",
+        "lat": 64.164,
+        "lon": -22.0,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Tidal lighthouse spit popular for sunsets.",
+        "external": {
+          "wikidata": "Q214360",
+          "osm": null
+        }
+      },
+      {
+        "name": "FlyOver Iceland",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "entertainment",
+          "viewpoint"
+        ],
+        "neighborhood": "Grandagarður",
+        "lat": 64.1555,
+        "lon": -21.9475,
+        "cost_usd": 35,
+        "duration_minutes": 45,
+        "description": "Immersive flying theatre over Iceland.",
+        "external": {
+          "wikidata": "Q214370",
+          "osm": null
+        }
+      },
+      {
+        "name": "Saga Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "family",
+          "culture"
+        ],
+        "neighborhood": "Grandagarður",
+        "lat": 64.155,
+        "lon": -21.949,
+        "cost_usd": 18,
+        "duration_minutes": 60,
+        "description": "Life-size saga dioramas on the waterfront.",
+        "external": {
+          "wikidata": "Q214380",
+          "osm": null
+        }
+      },
+      {
+        "name": "Hallgrímskirkja Neighborhood Cafes",
+        "category": "attraction",
+        "tags": [
+          "cafe",
+          "shopping",
+          "urban",
+          "art"
+        ],
+        "neighborhood": "Skólavörðustígur",
+        "lat": 64.1435,
+        "lon": -21.9285,
+        "cost_usd": 8,
+        "duration_minutes": 60,
+        "description": "Rainbow street cafes below the church.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Harpa Evening Shows District",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "culture",
+          "architecture"
+        ],
+        "neighborhood": "Harbor",
+        "lat": 64.1508,
+        "lon": -21.932,
+        "cost_usd": 20,
+        "duration_minutes": 90,
+        "description": "Concerts and harbor bars around Harpa.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Laugardalslaug Pool",
+        "category": "attraction",
+        "tags": [
+          "family",
+          "nightlife",
+          "nature"
+        ],
+        "neighborhood": "Laugardalur",
+        "lat": 64.14,
+        "lon": -21.87,
+        "cost_usd": 12,
+        "duration_minutes": 90,
+        "description": "Large geothermal public pool complex.",
+        "external": {
+          "wikidata": "Q214390",
+          "osm": null
+        }
+      },
+      {
+        "name": "Reykjavik Botanic Garden",
+        "category": "rest",
+        "tags": [
+          "rest",
+          "garden",
+          "nature",
+          "family"
+        ],
+        "neighborhood": "Laugardalur",
+        "lat": 64.1395,
+        "lon": -21.868,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Arctic horticulture collections in Laugardalur.",
+        "external": {
+          "wikidata": "Q214400",
+          "osm": null
+        }
+      },
+      {
+        "name": "Árbær Open Air Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "history",
+          "family",
+          "architecture",
+          "heritage"
+        ],
+        "neighborhood": "Árbær",
+        "lat": 64.1185,
+        "lon": -21.815,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Historic turf houses and town buildings.",
+        "external": {
+          "wikidata": "Q214410",
+          "osm": null
+        }
+      },
+      {
+        "name": "Videy Island Ferry Point",
+        "category": "attraction",
+        "tags": [
+          "nature",
+          "art",
+          "scenic",
+          "family"
+        ],
+        "neighborhood": "Sundahöfn",
+        "lat": 64.15,
+        "lon": -21.86,
+        "cost_usd": 15,
+        "duration_minutes": 120,
+        "description": "Short ferry to peace tower and island walks.",
+        "external": {
+          "wikidata": "Q214420",
+          "osm": null
+        }
+      },
+      {
+        "name": "Phallological Museum",
+        "category": "attraction",
+        "tags": [
+          "museum",
+          "culture",
+          "quirky"
+        ],
+        "neighborhood": "Laugavegur",
+        "lat": 64.1458,
+        "lon": -21.9245,
+        "cost_usd": 15,
+        "duration_minutes": 45,
+        "description": "World's unique phallological collection.",
+        "external": {
+          "wikidata": "Q214430",
+          "osm": null
+        }
+      },
+      {
+        "name": "Street Art Grandi District",
+        "category": "attraction",
+        "tags": [
+          "art",
+          "urban",
+          "photo",
+          "cafe"
+        ],
+        "neighborhood": "Grandi",
+        "lat": 64.155,
+        "lon": -21.95,
+        "cost_usd": 0,
+        "duration_minutes": 60,
+        "description": "Murals and food halls in the old fish district.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Esjan Viewpoint Drive",
+        "category": "attraction",
+        "tags": [
+          "viewpoint",
+          "nature",
+          "hiking",
+          "scenic"
+        ],
+        "neighborhood": "Kjalarnes",
+        "lat": 64.24,
+        "lon": -21.7,
+        "cost_usd": 0,
+        "duration_minutes": 120,
+        "description": "Mountain massif north of the city for hikers.",
+        "external": {
+          "wikidata": "Q214440",
+          "osm": null
+        }
+      },
+      {
+        "name": "Solfar Night Walk Waterfront",
+        "category": "attraction",
+        "tags": [
+          "nightlife",
+          "scenic",
+          "photo",
+          "art"
+        ],
+        "neighborhood": "Waterfront",
+        "lat": 64.148,
+        "lon": -21.923,
+        "cost_usd": 0,
+        "duration_minutes": 40,
+        "description": "Evening waterfront stroll by Sun Voyager.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      },
+      {
+        "name": "Kringlan Shopping Centre",
+        "category": "attraction",
+        "tags": [
+          "shopping",
+          "family",
+          "urban"
+        ],
+        "neighborhood": "Kringlan",
+        "lat": 64.13,
+        "lon": -21.894,
+        "cost_usd": 0,
+        "duration_minutes": 75,
+        "description": "Major mall with cinema and dining.",
+        "external": {
+          "wikidata": "Q214450",
+          "osm": null
+        }
+      },
+      {
+        "name": "Downtown Craft Beer Bars",
+        "category": "food",
+        "tags": [
+          "nightlife",
+          "bar",
+          "drinks",
+          "food"
+        ],
+        "neighborhood": "Miðborg",
+        "lat": 64.147,
+        "lon": -21.936,
+        "cost_usd": 25,
+        "duration_minutes": 90,
+        "description": "Compact bar scene around Laugavegur.",
+        "external": {
+          "wikidata": null,
+          "osm": null
+        }
+      }
+    ]
+  }
+}

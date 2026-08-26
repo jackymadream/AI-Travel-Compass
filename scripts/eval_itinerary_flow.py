@@ -115,6 +115,82 @@ CASES: list[dict[str, Any]] = [
         "require_preference_coverage": ["nightlife"],
     },
     {
+        "id": "tokyo_nightlife_food",
+        "slug": "tokyo",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 130,
+        "preferences": ["nightlife", "food"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["nightlife"],
+    },
+    {
+        "id": "tokyo_family_art",
+        "slug": "tokyo",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 140,
+        "preferences": ["family", "art"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["family", "art"],
+        "forbid_all_temple_attractions": True,
+    },
+    {
+        "id": "tokyo_nature_rest",
+        "slug": "tokyo",
+        "days": 2,
+        "pace": "relaxed",
+        "daily_budget_usd": 100,
+        "preferences": ["nature", "park"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["nature", "park"],
+    },
+    {
+        "id": "tokyo_culture_temple",
+        "slug": "tokyo",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 110,
+        "preferences": ["culture", "temple"],
+        "locale": "en",
+        "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["culture", "temple"],
+    },
+    {
+        "id": "kyoto_en_nature_3day",
+        "slug": "kyoto",
+        "days": 3,
+        "pace": "moderate",
+        "daily_budget_usd": 100,
+        "preferences": ["popular", "nature", "quiet gardens", "kid-friendly"],
+        "locale": "en",
+        "expect_city_substrings": ["Kyoto", "京都"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_strict_unique_attractions": True,
+    },
+    {
         "id": "tokyo_moderate_4day",
         "slug": "tokyo",
         "days": 4,
@@ -123,6 +199,94 @@ CASES: list[dict[str, Any]] = [
         "preferences": ["culture", "food"],
         "locale": "en",
         "expect_city_substrings": ["Tokyo"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+    },
+    {
+        "id": "seoul_en_culture_nightlife",
+        "slug": "seoul",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 120,
+        "preferences": ["culture", "nightlife", "museum"],
+        "locale": "en",
+        "expect_city_substrings": ["Seoul"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["nightlife"],
+    },
+    {
+        "id": "rome_en_history_art",
+        "slug": "rome",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 140,
+        "preferences": ["culture", "history", "art", "museum"],
+        "locale": "en",
+        "expect_city_substrings": ["Rome"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+    },
+    {
+        "id": "barcelona_en_architecture_family",
+        "slug": "barcelona",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 130,
+        "preferences": ["architecture", "art", "family"],
+        "locale": "en",
+        "expect_city_substrings": ["Barcelona"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["family", "art"],
+    },
+    {
+        "id": "bangkok_en_temple_nightlife",
+        "slug": "bangkok",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 100,
+        "preferences": ["culture", "temple", "nightlife", "street-food"],
+        "locale": "en",
+        "expect_city_substrings": ["Bangkok"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["nightlife"],
+    },
+    {
+        "id": "london_en_museum_park",
+        "slug": "london",
+        "days": 2,
+        "pace": "moderate",
+        "daily_budget_usd": 150,
+        "preferences": ["museum", "culture", "park", "nature"],
+        "locale": "en",
+        "expect_city_substrings": ["London"],
+        "expect_cjk_narrative": False,
+        "forbid_synthetic_attractions": True,
+        "forbid_denied_photos": True,
+        "require_meals": True,
+        "require_preference_coverage": ["museum", "park"],
+    },
+    {
+        "id": "reykjavik_en_nature_viewpoint",
+        "slug": "reykjavik",
+        "days": 2,
+        "pace": "relaxed",
+        "daily_budget_usd": 160,
+        "preferences": ["nature", "viewpoint", "museum", "family"],
+        "locale": "en",
+        "expect_city_substrings": ["Reykjavik", "Reykjavík"],
         "expect_cjk_narrative": False,
         "forbid_synthetic_attractions": True,
         "forbid_denied_photos": True,
@@ -213,6 +377,8 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
     meals_ok = True
     synth_hits: list[str] = []
     denied_photos: list[str] = []
+    meals_missing_id: list[str] = []
+    meals_missing_photo: list[str] = []
     narrative_bits = [
         city_name,
         str(data.get("agent_reasoning") or ""),
@@ -234,8 +400,28 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
             if act.get("is_food_slot"):
                 narrative_bits.append(str(act.get("poi_name") or ""))
                 narrative_bits.append(str(act.get("description") or ""))
+                if case.get("require_meals"):
+                    if not act.get("poi_id"):
+                        meals_missing_id.append(str(act.get("poi_name") or ""))
+                    # Meal stock photos disabled — UI uses lunch/dinner icons.
+                    if case.get("require_meal_photos") and not str(url or "").strip():
+                        meals_missing_photo.append(str(act.get("poi_name") or ""))
 
     checks.append({"name": "meals_lunch_dinner", "ok": meals_ok, "detail": meals_ok})
+    checks.append(
+        {
+            "name": "meals_from_food_pool",
+            "ok": len(meals_missing_id) == 0,
+            "detail": meals_missing_id[:5],
+        }
+    )
+    checks.append(
+        {
+            "name": "meals_have_photo",
+            "ok": len(meals_missing_photo) == 0,
+            "detail": meals_missing_photo[:5],
+        }
+    )
     synth_ok = len(synth_hits) == 0
     checks.append(
         {
@@ -293,6 +479,15 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
     names_ok = unique_names == name_total or (
         rest_days > 0 and unique_names >= max(1, name_total - 1)
     )
+    if case.get("require_strict_unique_attractions"):
+        attraction_labels = [
+            str(a.get("poi_name") or "")
+            for d in plans
+            for a in (d.get("activities") or [])
+            if not a.get("is_food_slot")
+            and str(a.get("category") or "") == "attraction"
+        ]
+        names_ok = len(attraction_labels) == len({n for n in attraction_labels if n})
     checks.append(
         {
             "name": "unique_non_meal_poi_names",
@@ -374,6 +569,35 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
+    if case.get("forbid_all_temple_attractions"):
+        temple_hits = [
+            str(a.get("poi_name") or "")
+            for d in plans
+            for a in (d.get("activities") or [])
+            if not a.get("is_food_slot")
+            and any(
+                tok in f"{a.get('poi_name')} {a.get('description')}".lower()
+                for tok in ("temple", "shrine", "jingu", "jinja")
+            )
+        ]
+        non_temple = [
+            str(a.get("poi_name") or "")
+            for d in plans
+            for a in (d.get("activities") or [])
+            if not a.get("is_food_slot")
+            and str(a.get("category") or "") == "attraction"
+            and str(a.get("poi_name") or "") not in temple_hits
+        ]
+        # Soft: not every attraction may be a temple when family/art prefs are set.
+        temple_ok = len(non_temple) > 0 or len(temple_hits) == 0
+        checks.append(
+            {
+                "name": "not_all_temple_attractions",
+                "ok": temple_ok,
+                "detail": {"temple_hits": temple_hits[:5], "other": non_temple[:5]},
+            }
+        )
+
     result["checks"] = checks
     result["ok"] = all(c["ok"] for c in checks)
     result["sample_attractions"] = [
@@ -388,15 +612,25 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument(
+        "--slug",
+        action="append",
+        default=[],
+        help="Only run cases for these city slugs (repeatable).",
+    )
     args = parser.parse_args()
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
     failures = 0
+    selected = CASES
+    if args.slug:
+        want = {s.lower() for s in args.slug}
+        selected = [c for c in CASES if str(c["slug"]).lower() in want]
 
     print("Itinerary flow eval (controls → generate → compare)")
     print(f"API: {args.base_url}")
-    for case in CASES:
+    for case in selected:
         print(f"\nCASE {case['id']}")
         print(
             f"  predict: slug={case['slug']} locale={case['locale']} "

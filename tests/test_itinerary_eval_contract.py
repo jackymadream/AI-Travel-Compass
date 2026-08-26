@@ -30,6 +30,12 @@ def test_denied_stock_photos() -> None:
     assert is_denied_stock_photo(
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format"
     )
+    assert is_denied_stock_photo(
+        "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80"
+    )
+    assert is_denied_stock_photo(
+        "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=800&q=80"
+    )
     assert not is_denied_stock_photo(
         "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80"
     )

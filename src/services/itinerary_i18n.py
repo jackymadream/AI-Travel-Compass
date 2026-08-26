@@ -25,8 +25,8 @@ MEAL_PHOTO_DINNER = (
 # Safer generic fallbacks (no desert / Paris bridge / tropical beach).
 CATEGORY_PHOTOS: dict[str, list[str]] = {
     "attraction": [
-        "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=800&q=80",
     ],
     "food": [
         "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
@@ -88,8 +88,12 @@ def photo_shape(poi_name: str, category: str) -> str:
         )
     ):
         return "worship"
-    if category == "rest" or any(tok in hay for tok in ("park", "garden", "nature", "onsen")):
-        return "park" if any(tok in hay for tok in ("park", "garden", "nature")) else "rest"
+    if category == "rest" or any(
+        tok in hay for tok in ("park", "garden", "nature", "onsen", "bamboo", "momiji")
+    ):
+        return "park" if any(
+            tok in hay for tok in ("park", "garden", "nature", "bamboo", "momiji")
+        ) else "rest"
     return (category or "attraction").strip().lower() or "attraction"
 
 
@@ -144,7 +148,7 @@ def photo_candidates(
     )
     for key in keys:
         for url in by_key.get(key) or []:
-            if url and url not in seen:
+            if url and url not in seen and not _denied_photo(url):
                 seen.add(url)
                 ordered.append(url)
     if not ordered:
@@ -155,11 +159,35 @@ def photo_candidates(
             or CATEGORY_PHOTOS["attraction"]
         )
         for url in fallback:
-            if url and url not in seen:
+            if url and url not in seen and not _denied_photo(url):
                 seen.add(url)
                 ordered.append(url)
     if not ordered:
-        ordered = list(CATEGORY_PHOTOS["attraction"])
+        ordered = [u for u in CATEGORY_PHOTOS["attraction"] if not _denied_photo(u)]
+    return ordered
+
+
+def _denied_photo(url: str | None) -> bool:
+    from src.services.itinerary_eval import is_denied_stock_photo
+
+    return is_denied_stock_photo(url)
+
+
+def all_stock_photo_urls() -> list[str]:
+    """Flatten allowlisted stock URLs (defaults + by_key), skipping denied IDs."""
+    data = _photo_map()
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for bucket in (data.get("defaults") or {}).values():
+        for url in bucket or []:
+            if url and url not in seen and not _denied_photo(url):
+                seen.add(url)
+                ordered.append(url)
+    for bucket in (data.get("by_key") or {}).values():
+        for url in bucket or []:
+            if url and url not in seen and not _denied_photo(url):
+                seen.add(url)
+                ordered.append(url)
     return ordered
 
 
@@ -173,6 +201,8 @@ def category_photo(
 ) -> str:
     """Pick a city/cuisine-aware Unsplash URL."""
     candidates = photo_candidates(category, city=city, iso=iso, poi_name=poi_name)
+    if not candidates:
+        return ""
     if poi_name:
         material = poi_name.strip().lower().encode("utf-8")
         index = int(hashlib.md5(material).hexdigest(), 16) % len(candidates)
@@ -180,67 +210,88 @@ def category_photo(
 
 
 def meal_photo(poi_name: str, meal_role: str = "lunch") -> str:
-    data = _photo_map()
-    meals: dict[str, str] = data.get("meals") or {}
-    hay = (poi_name or "").lower()
-    name = poi_name or ""
-    for key in (
-        "monjayaki",
-        "okonomiyaki",
-        "takoyaki",
-        "kushikatsu",
-        "ramen",
-        "izakaya",
-        "tempura",
-        "tonkatsu",
-        "soba",
-        "udon",
-        "yakiniku",
-        "unagi",
-        "kaiseki",
-        "sushi",
-        "tapas",
-        "paella",
-        "tagine",
-        "pizza",
-        "pasta",
-        "bbq",
-    ):
-        if key in hay:
-            return _safe_meal_url(
-                meals.get(key) or meals.get("default_lunch") or MEAL_PHOTO_LUNCH,
-                meal_role,
-            )
-    if any(tok in name for tok in ("拉麵", "ラーメン")):
-        return _safe_meal_url(meals.get("ramen") or MEAL_PHOTO_LUNCH, meal_role)
-    if any(tok in name for tok in ("大阪燒", "章魚", "たこ焼き", "お好み焼き", "もんじゃ", "文字燒")):
-        return _safe_meal_url(
-            meals.get("okonomiyaki") or meals.get("monjayaki") or MEAL_PHOTO_LUNCH,
-            meal_role,
-        )
-    if any(tok in name for tok in ("天婦羅", "天ぷら")):
-        return _safe_meal_url(meals.get("tempura") or MEAL_PHOTO_LUNCH, meal_role)
-    if any(tok in name for tok in ("豬排", "とんかつ", "トンカツ")):
-        return _safe_meal_url(meals.get("tonkatsu") or MEAL_PHOTO_LUNCH, meal_role)
-    if any(tok in name for tok in ("蕎麥", "そば")):
-        return _safe_meal_url(meals.get("soba") or MEAL_PHOTO_LUNCH, meal_role)
-    if any(tok in name for tok in ("烏冬", "うどん")):
-        return _safe_meal_url(meals.get("udon") or MEAL_PHOTO_LUNCH, meal_role)
-    if any(tok in name for tok in ("燒肉", "焼肉")):
-        return _safe_meal_url(
-            meals.get("yakiniku") or meals.get("bbq") or MEAL_PHOTO_DINNER,
-            meal_role,
-        )
-    if "串" in name:
-        return _safe_meal_url(
-            meals.get("kushikatsu") or meals.get("izakaya") or MEAL_PHOTO_DINNER,
-            meal_role,
-        )
-    if any(tok in name for tok in ("壽司", "寿司")):
-        return _safe_meal_url(meals.get("sushi") or MEAL_PHOTO_DINNER, meal_role)
-    if meal_role == "dinner":
-        return _safe_meal_url(meals.get("default_dinner") or MEAL_PHOTO_DINNER, meal_role)
-    return _safe_meal_url(meals.get("default_lunch") or MEAL_PHOTO_LUNCH, meal_role)
+    """Dish → Unsplash meal photo (disabled — planner uses lunch/dinner icons)."""
+    _ = (poi_name, meal_role)
+    return ""
+    # --- meal/food image search (commented out) ---
+    # data = _photo_map()
+    # meals: dict[str, str] = data.get("meals") or {}
+    # hay = (poi_name or "").lower()
+    # name = poi_name or ""
+    # for key in (
+    #     "monjayaki",
+    #     "okonomiyaki",
+    #     "takoyaki",
+    #     "kushikatsu",
+    #     "ramen",
+    #     "izakaya",
+    #     "tempura",
+    #     "tonkatsu",
+    #     "matcha",
+    #     "nishiki",
+    #     "kaiseki",
+    #     "yudofu",
+    #     "obanzai",
+    #     "shojin",
+    #     "tofu",
+    #     "soba",
+    #     "udon",
+    #     "yakiniku",
+    #     "unagi",
+    #     "sushi",
+    #     "tapas",
+    #     "paella",
+    #     "tagine",
+    #     "pizza",
+    #     "pasta",
+    #     "bbq",
+    # ):
+    #     if key in hay:
+    #         return _safe_meal_url(
+    #             meals.get(key) or meals.get("default_lunch") or MEAL_PHOTO_LUNCH,
+    #             meal_role,
+    #         )
+    # if any(tok in name for tok in ("抹茶",)):
+    #     return _safe_meal_url(meals.get("matcha") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("懷石", "懐石", "湯豆腐", "精進")):
+    #     return _safe_meal_url(
+    #         meals.get("kaiseki") or meals.get("tofu") or MEAL_PHOTO_LUNCH,
+    #         meal_role,
+    #     )
+    # if any(tok in name for tok in ("豆腐", "湯葉")):
+    #     return _safe_meal_url(meals.get("tofu") or meals.get("kaiseki") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("錦市場", "錦")):
+    #     return _safe_meal_url(meals.get("nishiki") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("拉麵", "ラーメン")):
+    #     return _safe_meal_url(meals.get("ramen") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("大阪燒", "章魚", "たこ焼き", "お好み焼き", "もんじゃ", "文字燒")):
+    #     return _safe_meal_url(
+    #         meals.get("okonomiyaki") or meals.get("monjayaki") or MEAL_PHOTO_LUNCH,
+    #         meal_role,
+    #     )
+    # if any(tok in name for tok in ("天婦羅", "天ぷら")):
+    #     return _safe_meal_url(meals.get("tempura") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("豬排", "とんかつ", "トンカツ")):
+    #     return _safe_meal_url(meals.get("tonkatsu") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("蕎麥", "そば")):
+    #     return _safe_meal_url(meals.get("soba") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("烏冬", "うどん")):
+    #     return _safe_meal_url(meals.get("udon") or MEAL_PHOTO_LUNCH, meal_role)
+    # if any(tok in name for tok in ("燒肉", "焼肉")):
+    #     return _safe_meal_url(
+    #         meals.get("yakiniku") or meals.get("bbq") or MEAL_PHOTO_DINNER,
+    #         meal_role,
+    #     )
+    # if "串" in name:
+    #     return _safe_meal_url(
+    #         meals.get("kushikatsu") or meals.get("izakaya") or MEAL_PHOTO_DINNER,
+    #         meal_role,
+    #     )
+    # if any(tok in name for tok in ("壽司", "寿司")):
+    #     return _safe_meal_url(meals.get("sushi") or MEAL_PHOTO_DINNER, meal_role)
+    # if meal_role == "dinner":
+    #     return _safe_meal_url(meals.get("default_dinner") or MEAL_PHOTO_DINNER, meal_role)
+    # return _safe_meal_url(meals.get("default_lunch") or MEAL_PHOTO_LUNCH, meal_role)
 
 
 def _safe_meal_url(url: str | None, meal_role: str) -> str:
@@ -904,6 +955,11 @@ CUISINE_FAMILY_NEEDLES: list[tuple[str, tuple[str, ...]]] = [
     ("tempura", ("tempura", "天婦羅", "天ぷら")),
     ("izakaya", ("izakaya", "yakitori", "居酒屋", "焼き鳥", "烤雞串")),
     ("kushikatsu", ("kushikatsu", "串炸", "串カツ")),
+    ("kaiseki", ("kaiseki", "yudofu", "obanzai", "shojin", "懷石", "懐石", "湯豆腐", "おばんざい", "精進")),
+    ("tofu", ("tofu", "yuba", "豆腐", "湯葉")),
+    ("matcha", ("matcha", "抹茶")),
+    ("nishiki", ("nishiki", "錦")),
+    ("unagi", ("unagi", "鰻")),
     ("bbq", ("bbq", "barbecue", "烤肉")),
 ]
 
@@ -911,10 +967,35 @@ CUISINE_FAMILY_NEEDLES: list[tuple[str, tuple[str, ...]]] = [
 def cuisine_family(label: str) -> str:
     text = label or ""
     hay = text.lower()
+    # Some dish labels include multiple cuisine needles (e.g. "Matcha Sweets / Soba").
+    # Choose the "best" family deterministically instead of returning the first match in
+    # CUISINE_FAMILY_NEEDLES ordering.
+    best_family: str | None = None
+    best_score: tuple[int, int, int] | None = None
     for family, needles in CUISINE_FAMILY_NEEDLES:
+        match_count = 0
+        earliest_idx: int | None = None
+        longest_needle_len = 0
         for needle in needles:
-            if needle.lower() in hay or needle in text:
-                return family
+            n = str(needle).lower()
+            idx = hay.find(n)
+            if idx == -1:
+                continue
+            match_count += 1
+            earliest_idx = idx if earliest_idx is None else min(earliest_idx, idx)
+            longest_needle_len = max(longest_needle_len, len(n))
+        if match_count == 0 or earliest_idx is None:
+            continue
+        # Higher is better:
+        # - more needle matches
+        # - earlier occurrence in the string
+        # - longer needle length (more specific)
+        score = (match_count, -earliest_idx, longest_needle_len)
+        if best_score is None or score > best_score:
+            best_family = family
+            best_score = score
+    if best_family:
+        return best_family
     return re.sub(r"\s+", " ", hay).strip()[:32] or "other"
 
 

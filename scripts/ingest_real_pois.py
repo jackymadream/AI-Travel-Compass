@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -62,7 +63,8 @@ CITY_REGISTRY: dict[str, dict[str, Any]] = {
         "slug": "tokyo",
         "iso": "JP",
         "display_name": "Tokyo",
-        "bbox": (35.61, 139.62, 35.78, 139.85),
+        # Wider metro coverage: Shibuya–Asakusa–Odaiba–Mitaka fringe
+        "bbox": (35.60, 139.55, 35.78, 139.90),
     },
     "london": {
         "slug": "london",
@@ -88,7 +90,7 @@ OSM_CATEGORY_RULES: list[tuple[str, str, str, list[str], float, int]] = [
     ("tourism", "zoo", "attraction", ["zoo", "family"], 20, 150),
     ("historic", "monument", "attraction", ["history", "monument"], 0, 45),
     ("historic", "castle", "attraction", ["history", "castle"], 15, 120),
-    ("amenity", "place_of_worship", "attraction", ["culture", "temple"], 0, 60),
+    ("amenity", "place_of_worship", "attraction", ["culture"], 0, 60),
     ("amenity", "restaurant", "food", ["food", "restaurant"], 25, 75),
     ("amenity", "cafe", "food", ["food", "cafe"], 10, 45),
     ("amenity", "fast_food", "food", ["food", "fast-food"], 8, 30),
@@ -111,6 +113,38 @@ PLACES_PRICE_MAP = {
 
 # Keep obscure neighborhood churches out unless the city would miss this floor.
 MIN_ATTRACTION = 6
+
+# Soft theme floors before round-robin truncate (best-effort).
+THEME_QUOTAS: dict[str, int] = {
+    "museum": 3,
+    "nightlife": 4,
+    "park": 2,
+    "garden": 1,
+    "viewpoint": 2,
+    "family": 2,
+}
+
+
+def worship_soft_tags(tags: dict[str, str]) -> list[str]:
+    """Religion-aware tags for place_of_worship (avoid blanket ``temple``)."""
+    religion = str(tags.get("religion") or "").strip().lower()
+    building = str(tags.get("building") or "").strip().lower()
+    name = str(tags.get("name:en") or tags.get("name") or "").lower()
+    out = ["culture"]
+    if religion in {"buddhist", "buddhism"} or "temple" in name or building == "temple":
+        out.extend(["temple", "buddhist"])
+    elif religion in {"shinto"} or "jingu" in name or "jinja" in name or "shrine" in name:
+        out.extend(["shrine", "shinto"])
+    elif religion in {"christian", "catholic", "protestant", "orthodox"} or building == "church":
+        out.extend(["church", "christian"])
+    elif religion in {"jewish"} or "synagogue" in name:
+        out.extend(["synagogue"])
+    elif religion in {"muslim", "islam"} or "mosque" in name:
+        out.extend(["mosque"])
+    else:
+        out.append("worship")
+    return list(dict.fromkeys(out))
+
 
 CATEGORY_BLURBS: dict[str, str] = {
     "museum": "A notable museum in {city}. Budget 1–2 hours for the main galleries.",
@@ -178,26 +212,49 @@ def classify_osm_tags(tags: dict[str, str]) -> tuple[str, list[str], float, int]
         if tags.get(key) == value:
             extra = [t for t in (tags.get("cuisine"), tags.get("tourism"), tags.get("amenity")) if t]
             merged = list(dict.fromkeys([*soft_tags, *extra]))
+            if key == "amenity" and value == "place_of_worship":
+                merged = list(dict.fromkeys([*worship_soft_tags(tags), *extra]))
             return category, merged, cost, duration
     return None
 
 
+_JUNCTION_NAME_RE = re.compile(r"(?i)\b(?:\d+|n|t)[\s-]*way\s+junction\b")
+
+
+def is_osm_junction_poi(tags: dict[str, str], name: str) -> bool:
+    """True for highway/junction OSM nodes and N-Way / T-Way junction names."""
+    if tags.get("highway") or tags.get("junction"):
+        return True
+    return bool(_JUNCTION_NAME_RE.search(name or ""))
+
+
 def build_overpass_query(bbox: tuple[float, float, float, float], limit: int) -> str:
-    """Build a compact Overpass QL query; ``limit`` caps printed nodes server-side."""
+    """Build Overpass QL for nodes, ways, and relations in the city bbox."""
     south, west, north, east = bbox
-    # Overpass accepts ``out body N`` to cap printed elements.
-    out_cap = max(limit * 8, 80)
-    filters = "\n".join(
-        f'  node["{key}"="{value}"]({south},{west},{north},{east});'
-        for key, value, *_ in OSM_CATEGORY_RULES
-    )
+    out_cap = max(limit * 10, 120)
+    parts: list[str] = []
+    for key, value, *_ in OSM_CATEGORY_RULES:
+        parts.append(f'  node["{key}"="{value}"]({south},{west},{north},{east});')
+        parts.append(f'  way["{key}"="{value}"]({south},{west},{north},{east});')
+        parts.append(f'  relation["{key}"="{value}"]({south},{west},{north},{east});')
+    filters = "\n".join(parts)
     return f"""
-[out:json][timeout:90];
+[out:json][timeout:120];
 (
 {filters}
 );
-out body {out_cap};
+out center {out_cap};
 """.strip()
+
+
+def element_lat_lon(el: dict[str, Any]) -> tuple[float | None, float | None]:
+    """Node lat/lon, or way/relation center from ``out center``."""
+    if el.get("lat") is not None and el.get("lon") is not None:
+        return float(el["lat"]), float(el["lon"])
+    center = el.get("center")
+    if isinstance(center, dict) and center.get("lat") is not None and center.get("lon") is not None:
+        return float(center["lat"]), float(center["lon"])
+    return None, None
 
 
 def fetch_overpass_elements(
@@ -246,8 +303,8 @@ def _poi_record_from_element(
 ) -> PoiRecord:
     tags = el.get("tags") or {}
     osm_id = int(el["id"])
-    lat = el.get("lat")
-    lon = el.get("lon")
+    osm_type = str(el.get("type") or "node")
+    lat, lon = element_lat_lon(el)
     description = enrich_poi_description(
         name=name, city=display, tags=tags, category=category
     )
@@ -257,13 +314,13 @@ def _poi_record_from_element(
     if "wikipedia" in tags or tags.get("wikidata"):
         soft_tags = list(dict.fromkeys([*soft_tags, "popular", "wikipedia"]))
     return PoiRecord(
-        id=poi_id_from_osm("node", osm_id),
+        id=poi_id_from_osm(osm_type, osm_id),
         name=name,
         city=display,
         category=category,  # type: ignore[arg-type]
         description=description[:2000],
-        lat=float(lat) if lat is not None else None,
-        lon=float(lon) if lon is not None else None,
+        lat=lat,
+        lon=lon,
         price_level=0 if cost <= 0 else (1 if cost < 15 else 2 if cost < 40 else 3),
         rating=None,
         safety_score=safety_score,
@@ -273,10 +330,54 @@ def _poi_record_from_element(
         duration_minutes=int(duration),
         address=format_address({str(k): str(v) for k, v in tags.items()}),
         source="overpass",
-        osm_type="node",
+        osm_type=osm_type,
         osm_id=osm_id,
         wikidata=wiki_qid or None,
     )
+
+
+def _theme_hits(poi: PoiRecord) -> set[str]:
+    tags = {str(t).lower() for t in poi.tags}
+    hits: set[str] = set()
+    for theme in THEME_QUOTAS:
+        if theme in tags or any(theme in t for t in tags):
+            hits.add(theme)
+    return hits
+
+
+def _apply_theme_quotas(
+    by_category: dict[str, list[PoiRecord]],
+    *,
+    limit: int,
+) -> dict[str, list[PoiRecord]]:
+    """Promote theme-diverse POIs toward the front of each category bucket."""
+    promoted: dict[str, list[PoiRecord]] = {
+        "attraction": [],
+        "food": [],
+        "rest": [],
+    }
+    theme_counts = {t: 0 for t in THEME_QUOTAS}
+    remaining: dict[str, list[PoiRecord]] = {k: list(v) for k, v in by_category.items()}
+
+    # First pass: pull under-quota theme matches.
+    for category in ("attraction", "food", "rest"):
+        kept: list[PoiRecord] = []
+        deferred: list[PoiRecord] = []
+        for poi in remaining[category]:
+            hits = _theme_hits(poi)
+            needed = [t for t in hits if theme_counts.get(t, 0) < THEME_QUOTAS.get(t, 0)]
+            if needed and len(promoted[category]) < max(limit, 10):
+                promoted[category].append(poi)
+                for t in needed:
+                    theme_counts[t] = theme_counts.get(t, 0) + 1
+            else:
+                deferred.append(poi)
+        remaining[category] = deferred
+
+    for category in ("attraction", "food", "rest"):
+        promoted[category].extend(remaining[category])
+        promoted[category] = promoted[category][: max(limit, 10)]
+    return promoted
 
 
 def elements_to_pois(
@@ -298,7 +399,8 @@ def elements_to_pois(
     }
 
     for el in elements:
-        if el.get("type") != "node":
+        osm_type = str(el.get("type") or "")
+        if osm_type not in {"node", "way", "relation"}:
             continue
         tags = el.get("tags") or {}
         if not isinstance(tags, dict):
@@ -306,7 +408,13 @@ def elements_to_pois(
         name = (tags.get("name:en") or tags.get("name") or "").strip()
         if not name or name.lower() in seen_names:
             continue
-        classified = classify_osm_tags({str(k): str(v) for k, v in tags.items()})
+        lat, lon = element_lat_lon(el)
+        if lat is None or lon is None:
+            continue
+        tag_map = {str(k): str(v) for k, v in tags.items()}
+        if is_osm_junction_poi(tag_map, name):
+            continue
+        classified = classify_osm_tags(tag_map)
         if not classified:
             continue
         category, soft_tags, cost, duration = classified
@@ -338,11 +446,11 @@ def elements_to_pois(
             seen_names.add(name.lower())
             continue
         # Cap per category while scanning so we do not hold tens of thousands of records.
-        if len(by_category[category]) >= max(limit, 10):
+        if len(by_category[category]) >= max(limit * 2, 20):
             continue
         seen_names.add(name.lower())
         by_category[category].append(record)
-        if all(len(by_category[c]) >= max(limit, 10) for c in by_category):
+        if all(len(by_category[c]) >= max(limit * 2, 20) for c in by_category):
             break
 
     need = max(0, MIN_ATTRACTION - len(by_category["attraction"]))
@@ -351,6 +459,8 @@ def elements_to_pois(
             break
         by_category["attraction"].append(rec)
         need -= 1
+
+    by_category = _apply_theme_quotas(by_category, limit=limit)
 
     # Round-robin categories so agent tools get attraction/food/rest coverage.
     pois: list[PoiRecord] = []
@@ -376,8 +486,9 @@ def enrich_with_places(
         "Content-Type": "application/json",
         "X-Goog-Api-Key": api_key,
         "X-Goog-FieldMask": (
-            "places.displayName,places.rating,places.userRatingCount,"
-            "places.primaryType,places.priceLevel,places.formattedAddress"
+            "places.name,places.photos,places.displayName,places.rating,"
+            "places.userRatingCount,places.primaryType,places.priceLevel,"
+            "places.formattedAddress"
         ),
         "User-Agent": USER_AGENT,
     }
@@ -422,8 +533,15 @@ def enrich_with_places(
                 "user_ratings_total": place.get("userRatingCount", poi.user_ratings_total),
                 "primary_type": place.get("primaryType", poi.primary_type),
                 "price_level": price_level,
+                "google_place_name": str(place.get("name") or "").strip() or poi.google_place_name,
                 "source": "overpass+places",
             }
+            photos = place.get("photos") or []
+            if isinstance(photos, list) and photos:
+                first_photo = photos[0] if isinstance(photos[0], dict) else {}
+                photo_name = str(first_photo.get("name") or "").strip()
+                if photo_name:
+                    updates["google_photo_name"] = photo_name
             addr = place.get("formattedAddress")
             if addr:
                 updates["address"] = addr
@@ -601,14 +719,36 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(f"  raw elements: {len(elements)}")
 
-    pois = elements_to_pois(
+    overpass_pois = elements_to_pois(
         elements,
         city_key=city_key,
         limit=args.limit,
         city_id=city_id,
         safety_score=safety_score,
     )
-    print(f"  mapped POIs: {len(pois)}")
+    print(f"  mapped Overpass POIs: {len(overpass_pois)}")
+
+    from src.services.signature_pois import (
+        build_signature_pois,
+        merge_signature_and_overpass,
+    )
+
+    signature_city_id = city_id or str(
+        uuid.uuid5(uuid.NAMESPACE_URL, f"dry-run-signature:{city_key}")
+    )
+    signatures = build_signature_pois(
+        city_slug=city_key,
+        city_id=signature_city_id,
+        city_display=str(meta["display_name"]),
+        safety_score=safety_score,
+    )
+    pois = merge_signature_and_overpass(signatures, overpass_pois)
+    if len(pois) > args.limit:
+        sigs = [p for p in pois if p.source == "signature"]
+        rest = [p for p in pois if p.source != "signature"]
+        room = max(0, args.limit - len(sigs))
+        pois = [*sigs, *rest[:room]]
+    print(f"  after signature merge: {len(pois)} (signatures={len(signatures)})")
 
     places_key = os.getenv("GOOGLE_PLACES_API_KEY", "").strip()
     if places_key and not args.skip_places and not args.dry_run:
@@ -671,6 +811,28 @@ def main(argv: list[str] | None = None) -> int:
     except (EmbeddingServiceError, QdrantServiceError) as exc:
         print(f"Vector ingest failed: {exc}", file=sys.stderr)
         return 1
+
+    try:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "enrich_poi_photos", ROOT_DIR / "scripts" / "enrich_poi_photos.py"
+        )
+        if spec is None or spec.loader is None:
+            raise RuntimeError("cannot load enrich_poi_photos")
+        enrich_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(enrich_mod)
+        enrich_mod.after_ingest_photos_and_cuisine(
+            supabase,
+            city_slug=city_key,
+            city_id=str(city_id),
+            city_display=str(meta["display_name"]),
+            safety_score=safety_score,
+            skip_places=bool(args.skip_places),
+            upsert_qdrant=upsert_qdrant_pois,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"  warn: cuisine/photo enrich skipped ({exc})")
 
     print("Done.")
     return 0

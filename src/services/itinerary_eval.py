@@ -40,6 +40,8 @@ BAD_STOCK_PHOTO_IDS = {
     "photo-1499856871958-5b9627545d1a",  # Paris Alexandre III bridge
     "photo-1507525428034-b723cf961d3e",  # tropical beach
     "photo-1546069901-ba9599a7e63c",  # salad / poke (old lunch default)
+    "photo-1505761671935-60b3a7427bad",  # London Big Ben / Parliament
+    "photo-1523906834658-6e24ef2386f9",  # Venice Rialto / gondola
 }
 
 

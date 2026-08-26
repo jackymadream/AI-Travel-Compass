@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 from src.schemas.itinerary import ItineraryRequest
 from src.services import itinerary_i18n as i18n
 from src.services.agent_tools import TRAVEL_BUFFER_MINUTES, pace_constraint_prompt
-from src.services.poi_photos import resolve_poi_photo
+from src.services.poi_photos import persistable_photo_url
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -248,8 +248,8 @@ class LlmService:
         previous_violations: list[str],
         turn: int,
     ) -> dict[str, Any]:
-        """Pro model drafts one day; attractions/rest are grounded in ``poi_pool``."""
-        pool_brief = [
+        """Pro model drafts one day; stops are grounded in ``poi_pool``."""
+        attraction_brief = [
             {
                 "name": p.get("name"),
                 "category": p.get("category"),
@@ -265,6 +265,20 @@ class LlmService:
             for p in poi_pool
             if p.get("category") != "food"
         ]
+        food_brief = [
+            {
+                "name": p.get("name"),
+                "tags": p.get("tags") or [],
+                "cost_usd": p.get("cost_usd"),
+                "id": p.get("id"),
+            }
+            for p in poi_pool
+            if p.get("category") == "food"
+            and (
+                str(p.get("source") or "") == "cuisine_catalog"
+                or "meal_slot" in [str(t).lower() for t in (p.get("tags") or [])]
+            )
+        ]
         pace = request.pace.value if hasattr(request.pace, "value") else request.pace
         prompt = f"""
 You are a travel itinerary agent. Draft day {day_number} of {request.days}.
@@ -278,7 +292,10 @@ Retry turn: {turn}
 {pace_constraint_prompt(str(pace))}
 
 Ground attraction and rest stops in this POI pool (use exact names):
-{json.dumps(pool_brief, ensure_ascii=False)}
+{json.dumps(attraction_brief, ensure_ascii=False)}
+
+Meal slots MUST use exact names from this local-food catalog (not restaurant brands):
+{json.dumps(food_brief, ensure_ascii=False)}
 
 Return JSON only:
 {{
@@ -287,7 +304,7 @@ Return JSON only:
   "activities": [
     {{
       "time_slot": "09:00-11:00",
-      "poi_name": "exact name from pool OR food-type label",
+      "poi_name": "exact name from the matching pool",
       "category": "attraction|food|rest",
       "cost_usd": 0,
       "duration_minutes": 60,
@@ -300,10 +317,8 @@ Return JSON only:
 Hard meal rules:
 - Include at least TWO meal slots every day: Lunch (~12:00-13:30) and Dinner (~18:30-20:00).
 - Meal slots MUST set category "food", is_food_slot true, meal_role "lunch" or "dinner".
-- For meal slots, poi_name MUST be a food TYPE (e.g. "Japanese Ramen / Izakaya",
-  "Authentic Neapolitan Pizza"), NEVER a specific restaurant brand/name.
-- Vary lunch and dinner food types vs other days of this trip; do not repeat
-  yesterday's lunch or dinner labels.
+- For meal slots, poi_name MUST be an exact catalog name from the food list above.
+- Vary lunch and dinner vs other days; do not repeat yesterday's meal names.
 - Attraction/rest activities must use exact pool names; do not invent those POIs.
 - Stay under daily budget; match pool cost/duration when grounding pool POIs.
 - Do not overlap time slots. Leave the {TRAVEL_BUFFER_MINUTES} minute travel buffer implicit in the
@@ -329,14 +344,7 @@ Hard meal rules:
             if p.get("city"):
                 city_hint = str(p["city"])
                 break
-        suggested_lunch, suggested_dinner = i18n.meal_pair(
-            city_hint or "this city",
-            list(request.preferences or []),
-            day_number,
-            request.locale,
-        )
         grounded: list[dict[str, Any]] = []
-        used_urls: set[str] = set()
         for act in data.get("activities") or []:
             is_food_slot = bool(act.get("is_food_slot")) or (
                 str(act.get("meal_role") or "").lower() in {"lunch", "dinner"}
@@ -346,33 +354,44 @@ Hard meal rules:
                 role = str(meal_role or "").lower()
                 if role not in {"lunch", "dinner"}:
                     role = "lunch" if "12:" in str(act.get("time_slot") or "") else "dinner"
+                name = str(act.get("poi_name") or act.get("name") or "")
+                src = by_name.get(name) if name in by_name else None
                 grounded.append(
                     {
                         "time_slot": act.get("time_slot")
                         or ("12:00-13:30" if role == "lunch" else "18:30-20:00"),
-                        "poi_name": str(act.get("poi_name") or act.get("name") or "Local cuisine"),
+                        "poi_name": name or "Local cuisine",
                         "category": "food",
-                        "cost_usd": float(act.get("cost_usd") or (18 if role == "lunch" else 28)),
-                        "duration_minutes": int(act.get("duration_minutes") or 90),
+                        "cost_usd": float(
+                            (src or {}).get("cost_usd")
+                            or act.get("cost_usd")
+                            or (18 if role == "lunch" else 28)
+                        ),
+                        "duration_minutes": int(
+                            (src or {}).get("duration_minutes")
+                            or act.get("duration_minutes")
+                            or 90
+                        ),
                         "description": str(
                             act.get("description")
                             or i18n.meal_description(
                                 role,
                                 city_hint or "this city",
                                 request.locale,
-                                dish=str(act.get("poi_name") or act.get("name") or ""),
+                                dish=name,
                             )
                         ),
                         "is_food_slot": True,
                         "meal_role": role,
-                        "lat": None,
-                        "lon": None,
-                        "poi_id": None,
-                        "address": None,
-                        "photo_url": i18n.meal_photo(
-                            str(act.get("poi_name") or act.get("name") or ""),
-                            role,
-                        ),
+                        "lat": (src or {}).get("lat"),
+                        "lon": (src or {}).get("lon"),
+                        "poi_id": str(src["id"]) if src and src.get("id") else None,
+                        "address": (src or {}).get("address"),
+                        # Meal stock photos disabled — UI icons; optional manual URL later.
+                        # "photo_url": persistable_photo_url(
+                        #     str((src or {}).get("photo_url") or "") or None
+                        # ),
+                        "photo_url": None,
                         "is_custom": False,
                     }
                 )
@@ -407,72 +426,9 @@ Hard meal rules:
                     "lon": src.get("lon"),
                     "poi_id": str(src["id"]) if src.get("id") else None,
                     "address": src.get("address"),
-                    "photo_url": (
-                        str(src.get("photo_url"))
-                        if "upload.wikimedia.org" in str(src.get("photo_url") or "")
-                        else resolve_poi_photo(
-                            str(name),
-                            city=str(src.get("city") or city_hint or "") or None,
-                            category=cat,
-                            used_urls=used_urls,
-                            lat=src.get("lat"),
-                            lon=src.get("lon"),
-                            tags=src.get("tags") or [],
-                        )
+                    "photo_url": persistable_photo_url(
+                        str(src.get("photo_url") or "") or None
                     ),
-                    "is_custom": False,
-                }
-            )
-            if grounded[-1].get("photo_url"):
-                used_urls.add(str(grounded[-1]["photo_url"]))
-
-        # Guarantee lunch + dinner food-type slots.
-        roles = {
-            str(a.get("meal_role") or "").lower()
-            for a in grounded
-            if a.get("is_food_slot")
-        }
-        if "lunch" not in roles:
-            lunch_label = suggested_lunch
-            grounded.append(
-                {
-                    "time_slot": "12:00-13:30",
-                    "poi_name": lunch_label,
-                    "category": "food",
-                    "cost_usd": 12.0,
-                    "duration_minutes": 90,
-                    "description": i18n.meal_description(
-                        "lunch", city_hint or "this city", request.locale, dish=lunch_label
-                    ),
-                    "is_food_slot": True,
-                    "meal_role": "lunch",
-                    "lat": None,
-                    "lon": None,
-                    "poi_id": None,
-                    "address": None,
-                    "photo_url": i18n.meal_photo(lunch_label, "lunch"),
-                    "is_custom": False,
-                }
-            )
-        if "dinner" not in roles:
-            dinner_label = suggested_dinner
-            grounded.append(
-                {
-                    "time_slot": "18:30-20:00",
-                    "poi_name": dinner_label,
-                    "category": "food",
-                    "cost_usd": 20.0,
-                    "duration_minutes": 90,
-                    "description": i18n.meal_description(
-                        "dinner", city_hint or "this city", request.locale, dish=dinner_label
-                    ),
-                    "is_food_slot": True,
-                    "meal_role": "dinner",
-                    "lat": None,
-                    "lon": None,
-                    "poi_id": None,
-                    "address": None,
-                    "photo_url": i18n.meal_photo(dinner_label, "dinner"),
                     "is_custom": False,
                 }
             )

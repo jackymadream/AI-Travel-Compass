@@ -315,7 +315,8 @@ I18n JSONB indexes: per-locale B-tree on `(name->>'en'|'zh-HK'|'ja')` plus GIN `
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-06 | Initial domain model.                                                                                              |
 | 2026-08-06 | Aligned terminology with schema; added SQL/agent boundary contract; exclusion columns and `region_tags` in schema. |
-| 2026-08-18 | Itinerary meals are food **types** (not restaurant brands); cuisine families must not repeat same-day. POI photos: Wikidata/Wikipedia with title overlap, else allowlisted Unsplash. |
+| 2026-08-18 | Itinerary meals are **catalog food POIs** (`source=cuisine_catalog`) with seeded photos; lunch/dinner picked from the SQL pool. Attraction/rest photos are resolved at **ingest** (Wikidata/Wikipedia/Places) into `pois.photo_url`; the planner copies stored URLs only. |
+| 2026-08-26 | **Approach A** multi-city signatures in `data/city_signature_pois.json` (tokyo + osaka/kyoto/seoul/paris/rome/barcelona/bangkok/london/marrakech/reykjavik). Reseed with `--limit 120`. Planner meals/custom stops use category icons by default; Image URL remains editable. |
 | 2026-08-06 | Documented `cities.tags`; `zh-HK` I18n must be Traditional Chinese.                                                |
 
 

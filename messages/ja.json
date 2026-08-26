@@ -36,7 +36,17 @@
     "planTrip": "旅を計画",
     "agentHint": "POIを取得したあと、予算とペースを検証します。",
     "generate": "旅程を作成",
-    "planning": "作成中…"
+    "planning": "作成中…",
+    "progress": {
+      "starting": "旅程エージェントを起動中…",
+      "poi_retrieval": "POIを検索中（観光・食事・休憩）…",
+      "plan_day": "{total}日目のうち{day}日目を計画中…",
+      "draft_day": "{total}日目のうち{day}日目の下書きを作成中…",
+      "validate_day": "日程と予算を検証中 — {day}日目、{turn}回目…",
+      "finalize": "旅程サマリーとヒントを作成中…",
+      "complete": "旅程の準備完了",
+      "detail": "根拠のあるスポットを取得し、ペースと1日の支出を確認します。"
+    }
   },
   "login": {
     "title": "ログイン",

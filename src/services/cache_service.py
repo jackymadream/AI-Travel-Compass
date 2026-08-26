@@ -107,6 +107,13 @@ class InMemoryCacheBackend:
         with self._lock:
             self._store.pop(key, None)
 
+    def delete_prefix(self, prefix: str) -> int:
+        with self._lock:
+            doomed = [key for key in self._store if key.startswith(prefix)]
+            for key in doomed:
+                self._store.pop(key, None)
+            return len(doomed)
+
     def clear(self) -> None:
         with self._lock:
             self._store.clear()
@@ -134,6 +141,13 @@ class RedisCacheBackend:
 
     def delete(self, key: str) -> None:
         self._client.delete(key)
+
+    def delete_prefix(self, prefix: str) -> int:
+        keys = list(self._client.scan_iter(match=f"{prefix}*"))
+        if not keys:
+            return 0
+        self._client.delete(*keys)
+        return len(keys)
 
     def clear(self) -> None:
         # Intentionally not FLUSHDB — too dangerous for shared Redis.
@@ -213,6 +227,12 @@ class CacheService:
         if callable(clearer):
             clearer()
 
+    def delete_prefix(self, prefix: str) -> int:
+        deleter = getattr(self._backend, "delete_prefix", None)
+        if callable(deleter):
+            return int(deleter(prefix))
+        return 0
+
     def get_or_set(
         self,
         key: str,
@@ -251,3 +271,10 @@ def reset_cache_service(service: CacheService | None = None) -> None:
     global _cache_singleton
     with _cache_lock:
         _cache_singleton = service
+
+
+def invalidate_poi_cache(city_id: str) -> int:
+    """Delete cached POI search results for a city across categories/preferences."""
+    if not city_id:
+        return 0
+    return get_cache_service().delete_prefix(f"poi:{city_id}:")

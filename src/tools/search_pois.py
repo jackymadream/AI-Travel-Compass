@@ -16,7 +16,7 @@ from src.services.cache_service import (
     poi_cache_key,
 )
 from src.services.embedding import EmbeddingServiceError, embed_query
-from src.services.itinerary_i18n import category_photo
+from src.services.poi_photos import persistable_photo_url
 from src.services.qdrant_service import (
     POIS_COLLECTION,
     QdrantServiceError,
@@ -116,7 +116,70 @@ def _preference_query(preferences: list[str], category: str) -> str:
     return f"{category} travel points of interest"
 
 
-def _search_qdrant(
+def _poi_identity(poi: dict[str, Any]) -> str:
+    return str(poi.get("id") or poi.get("poi_id") or poi.get("name") or "").strip().lower()
+
+
+def _tag_jaccard(a: dict[str, Any], b: dict[str, Any]) -> float:
+    sa = {str(t).lower() for t in (a.get("tags") or []) if t}
+    sb = {str(t).lower() for t in (b.get("tags") or []) if t}
+    if a.get("name"):
+        sa.add(str(a["name"]).lower())
+    if b.get("name"):
+        sb.add(str(b["name"]).lower())
+    if not sa or not sb:
+        return 0.0
+    inter = len(sa & sb)
+    union = len(sa | sb)
+    return inter / union if union else 0.0
+
+
+def mmr_select(
+    candidates: list[dict[str, Any]],
+    *,
+    limit: int,
+    preferences: list[str],
+    lambda_mult: float = 0.7,
+) -> list[dict[str, Any]]:
+    """Maximal Marginal Relevance over preference score + tag diversity."""
+    if limit <= 0 or not candidates:
+        return []
+    prefs = [p.lower() for p in preferences]
+    remaining = list(candidates)
+    selected: list[dict[str, Any]] = []
+    while remaining and len(selected) < limit:
+        best_idx = 0
+        best_score = float("-inf")
+        for i, cand in enumerate(remaining):
+            rel = float(_preference_score(cand, prefs))
+            if selected:
+                sim = max(_tag_jaccard(cand, s) for s in selected)
+            else:
+                sim = 0.0
+            score = lambda_mult * rel - (1.0 - lambda_mult) * sim
+            # Stable tie-break: prefer higher rel, then name
+            score += rel * 1e-6
+            if score > best_score:
+                best_score = score
+                best_idx = i
+        selected.append(remaining.pop(best_idx))
+    return selected
+
+
+def _merge_poi_hits(batches: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for batch in batches:
+        for poi in batch:
+            key = _poi_identity(poi)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            merged.append(poi)
+    return merged
+
+
+def _search_qdrant_single(
     *,
     city_id: str,
     category: str,
@@ -141,13 +204,51 @@ def _search_qdrant(
         logger.warning("Qdrant POI search failed: %s", exc)
         return []
 
-    results = [_normalize_poi(h, city_id=city_id, category=category) for h in hits]
-    # Re-rank lightly by preference token overlap, then truncate.
-    scored = [
-        (_preference_score(r, [p.lower() for p in preferences]), r) for r in results
-    ]
-    scored.sort(key=lambda item: (-item[0], item[1]["name"]))
-    return [r for _, r in scored[:limit]]
+    return [_normalize_poi(h, city_id=city_id, category=category) for h in hits]
+
+
+def _search_qdrant(
+    *,
+    city_id: str,
+    category: str,
+    preferences: list[str],
+    limit: int,
+    min_safety_score: int | None,
+    min_rating: float | None,
+) -> list[dict]:
+    """Multi-query fan-out per preference + generic category, then MMR truncate."""
+    prefs = [p.strip() for p in preferences if p and str(p).strip()]
+    per_query_limit = max(limit, 8)
+    batches: list[list[dict[str, Any]]] = []
+
+    if prefs:
+        for pref in prefs[:8]:
+            hits = _search_qdrant_single(
+                city_id=city_id,
+                category=category,
+                preferences=[pref],
+                limit=per_query_limit,
+                min_safety_score=min_safety_score,
+                min_rating=min_rating,
+            )
+            if hits:
+                batches.append(hits)
+    # Always include a blended / generic query for coverage.
+    blended = _search_qdrant_single(
+        city_id=city_id,
+        category=category,
+        preferences=prefs,
+        limit=per_query_limit,
+        min_safety_score=min_safety_score,
+        min_rating=min_rating,
+    )
+    if blended:
+        batches.append(blended)
+
+    merged = _merge_poi_hits(batches)
+    if not merged:
+        return []
+    return mmr_select(merged, limit=limit, preferences=prefs)
 
 
 def _search_supabase(
@@ -168,7 +269,7 @@ def _search_supabase(
             .select(
                 "id, city_id, name, category, description, tags, cost_usd, "
                 "duration_minutes, price_level, rating, safety_score, "
-                "latitude, longitude, address, photo_url"
+                "latitude, longitude, address, photo_url, source"
             )
             .eq("city_id", city_id)
             .eq("category", category)
@@ -178,19 +279,17 @@ def _search_supabase(
             query = query.gte("safety_score", int(min_safety_score))
         if min_rating is not None:
             query = query.gte("rating", float(min_rating))
-        response = query.limit(max(limit * 3, limit)).execute()
+        response = query.limit(max(limit * 4, limit)).execute()
         rows = response.data or []
     except Exception as exc:  # noqa: BLE001
         logger.warning("Supabase POI fallback failed: %s", exc)
         return []
 
     prefs = [p.lower() for p in preferences]
-    scored: list[tuple[int, dict]] = []
-    for row in rows:
-        poi = _normalize_poi(row, city_id=city_id, category=category)
-        scored.append((_preference_score(poi, prefs), poi))
-    scored.sort(key=lambda item: (-item[0], item[1]["name"]))
-    return [p for _, p in scored[:limit]]
+    candidates = [
+        _normalize_poi(row, city_id=city_id, category=category) for row in rows
+    ]
+    return mmr_select(candidates, limit=limit, preferences=prefs)
 
 
 def _normalize_poi(
@@ -227,13 +326,8 @@ def _normalize_poi(
         "lon": raw.get("lon", raw.get("longitude")),
         "address": raw.get("address"),
         "city": raw.get("city"),
-        "photo_url": raw.get("photo_url")
-        or category_photo(
-            cat,
-            hash(name) % 4,
-            city=str(raw.get("city") or "") or None,
-            poi_name=name,
-        ),
+        "photo_url": persistable_photo_url(str(raw.get("photo_url") or "") or None),
+        "source": raw.get("source"),
     }
 
 

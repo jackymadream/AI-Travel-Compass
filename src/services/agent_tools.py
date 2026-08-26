@@ -15,7 +15,7 @@ from src.services.cache_service import (
     poi_cache_key,
 )
 from src.services.itinerary_eval import overlapping_activity_pairs
-from src.services.itinerary_i18n import category_photo
+from src.services.poi_photos import persistable_photo_url
 
 # Stable mock city IDs (stand in until a POIs table exists).
 MOCK_CITY_TOKYO = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -419,13 +419,8 @@ def _search_pois_uncached(
                 "lon": poi.get("lon"),
                 "address": poi.get("address"),
                 "city": poi.get("city"),
-                "photo_url": poi.get("photo_url")
-                or category_photo(
-                    poi["category"],
-                    hash(poi["name"]) % 4,
-                    city=str(poi.get("city") or "") or None,
-                    poi_name=str(poi.get("name") or ""),
-                ),
+                "photo_url": persistable_photo_url(str(poi.get("photo_url") or "") or None),
+                "source": poi.get("source"),
             }
         )
     return results

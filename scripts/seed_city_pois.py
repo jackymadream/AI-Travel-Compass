@@ -59,10 +59,9 @@ upsert_supabase_pois = _ingest.upsert_supabase_pois
 validate_structural = _ingest.validate_structural
 
 from src.schemas.poi import PoiRecord  # noqa: E402
-from src.services.itinerary_i18n import category_photo  # noqa: E402
 
 PHASE6_PATH = ROOT_DIR / "data" / "countries_phase6.json"
-BBOX_DELTA = 0.12
+BBOX_DELTA = 0.18
 
 MIN_ATTRACTION = 6
 MIN_FOOD = 4
@@ -385,13 +384,8 @@ def _synthetic_record(
         cost_usd=float(tmpl["cost"]),
         duration_minutes=int(tmpl["duration"]),
         address=f"Central {display}",
-        photo_url=category_photo(
-            category,
-            index,
-            city=display,
-            iso=str(city.get("iso") or "").lower() or None,
-            poi_name=name,
-        ),
+        photo_url=None,
+        photo_source="none",
         source="synthetic",
     )
 
@@ -534,19 +528,6 @@ def delete_overpass_pois(supabase: Any, city_id: str) -> int:
         return 0
 
 
-def attach_fallback_photos(pois: list[PoiRecord], *, iso: str) -> None:
-    for i, poi in enumerate(pois):
-        if poi.photo_url:
-            continue
-        poi.photo_url = category_photo(
-            poi.category,
-            i,
-            city=poi.city,
-            iso=iso.lower() or None,
-            poi_name=poi.name,
-        )
-
-
 def ingest_city(
     city: dict[str, Any],
     *,
@@ -578,41 +559,61 @@ def ingest_city(
             print(f"  removed synthetic: {n_del}")
 
     pois: list[PoiRecord] = []
+    from src.services.signature_pois import (
+        build_signature_pois,
+        merge_signature_and_overpass,
+    )
+
+    signatures = build_signature_pois(
+        city_slug=city_key,
+        city_id=city_id,
+        city_display=str(city["display_name"]),
+        safety_score=safety,
+    )
+    if signatures:
+        print(f"  signature curated: {len(signatures)}")
+
     if try_overpass:
         try:
             elements = fetch_overpass_elements(city_key, limit=limit)
-            pois = elements_to_pois(
+            overpass = elements_to_pois(
                 elements,
                 city_key=city_key,
                 limit=limit,
                 city_id=city_id,
                 safety_score=safety,
             )
-            print(f"  overpass mapped: {len(pois)}")
-            if not dry_run and supabase is not None and pois:
+            print(f"  overpass mapped: {len(overpass)}")
+            if not dry_run and supabase is not None and overpass:
                 n_old = delete_overpass_pois(supabase, city_id)
                 if n_old:
                     print(f"  removed prior overpass: {n_old}")
+            pois = merge_signature_and_overpass(signatures, overpass)
             time.sleep(1.0)
         except Exception as exc:  # noqa: BLE001
-            print(f"  overpass failed ({exc}); continuing with synthetic")
+            print(f"  overpass failed ({exc}); continuing with signatures/synthetic")
+            pois = list(signatures)
+    else:
+        pois = list(signatures)
 
     synthetic = build_synthetic_pois(city=city, city_id=city_id, existing=pois)
     if synthetic:
         print(f"  synthetic backfill: +{len(synthetic)}")
         pois = [*pois, *synthetic]
 
-    # Cap total while keeping category balance — prefer Overpass over synthetic.
+    # Cap total while keeping signatures, then Overpass, then synthetic.
     if len(pois) > limit:
-        real = [p for p in pois if p.source != "synthetic"]
+        sigs = [p for p in pois if p.source == "signature"]
+        real = [p for p in pois if p.source not in {"synthetic", "signature"}]
         synth = [p for p in pois if p.source == "synthetic"]
-        pois = [*real[:limit], *synth][:limit]
+        room = max(0, limit - len(sigs))
+        pois = [*sigs, *real[:room]]
+        if len(pois) < limit:
+            pois = [*pois, *synth][:limit]
 
     places_key = os.getenv("GOOGLE_PLACES_API_KEY", "").strip()
     if places_key and not skip_places and not dry_run and try_overpass:
         pois = enrich_with_places(pois, api_key=places_key)
-
-    attach_fallback_photos(pois, iso=str(city.get("iso") or ""))
 
     if not pois:
         print(f"  no POIs for {city_key}")
@@ -626,6 +627,27 @@ def ingest_city(
     n_db = upsert_supabase_pois(supabase, pois)
     n_vec = upsert_qdrant_pois(pois)
     print(f"  upserted supabase={n_db} qdrant={n_vec}")
+    try:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "enrich_poi_photos", ROOT_DIR / "scripts" / "enrich_poi_photos.py"
+        )
+        if spec is None or spec.loader is None:
+            raise RuntimeError("cannot load enrich_poi_photos")
+        enrich_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(enrich_mod)
+        enrich_mod.after_ingest_photos_and_cuisine(
+            supabase,
+            city_slug=city_key,
+            city_id=city_id,
+            city_display=city["display_name"],
+            safety_score=safety,
+            skip_places=skip_places,
+            upsert_qdrant=upsert_qdrant_pois,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"  warn: cuisine/photo enrich skipped ({exc})")
     return len(pois)
 
 
@@ -633,7 +655,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Seed POIs for phase-6 cities.")
     p.add_argument("--all", action="store_true", help="Process every phase-6 city.")
     p.add_argument("--city", type=str, default=None, help="Single city slug.")
-    p.add_argument("--limit", type=int, default=60, help="Max POIs per city.")
+    p.add_argument("--limit", type=int, default=120, help="Max POIs per city.")
     p.add_argument(
         "--try-overpass",
         action="store_true",

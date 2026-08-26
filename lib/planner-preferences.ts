@@ -4,10 +4,10 @@
 export const PRIMARY_PREFERENCE_CHIPS = [
   "food",
   "culture",
-  "nightlife",
   "nature",
   "wellness",
   "adventure",
+  "architecture",
 ] as const;
 
 /** Mutually exclusive discovery mode. `popular` is on by default. */

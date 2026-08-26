@@ -72,6 +72,12 @@ async def test_heuristic_plan_includes_lunch_dinner() -> None:
         assert "Ichiran" not in m.poi_name
         assert "Ginza Sushi" not in m.poi_name
     lunch = next(a for a in result.daily_plans[0].activities if a.meal_role == "lunch")
+    dinner = next(a for a in result.daily_plans[0].activities if a.meal_role == "dinner")
+    assert lunch.poi_id
+    assert dinner.poi_id
+    # Meal stock photos disabled — UI uses lunch/dinner icons.
+    assert lunch.photo_url in (None, "")
+    assert dinner.photo_url in (None, "")
     afternoon = [
         a
         for a in result.daily_plans[0].activities
@@ -155,15 +161,12 @@ def test_meal_pair_skips_same_cuisine_family() -> None:
     assert cuisine_family(sushi_dinner) != "sushi"
 
 
-def test_meal_photo_monjayaki_is_not_sushi() -> None:
-    from src.services.itinerary_eval import photo_id_from_url
+def test_meal_photo_disabled() -> None:
     from src.services.itinerary_i18n import meal_photo
 
-    monja = meal_photo("Monjayaki / Okonomiyaki", "dinner")
-    sushi = meal_photo("Sushi Set", "dinner")
-    yaki = meal_photo("Yakiniku", "dinner")
-    assert photo_id_from_url(monja) != photo_id_from_url(sushi)
-    assert "1590301157890" not in (yaki or "")
+    assert meal_photo("Kaiseki / Tofu Cuisine", "lunch") == ""
+    assert meal_photo("Monjayaki / Okonomiyaki", "dinner") == ""
+    assert meal_photo("Sushi Set", "dinner") == ""
 
 
 def test_overlapping_lunch_and_rest_is_invalid() -> None:

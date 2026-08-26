@@ -42,6 +42,11 @@ class PoiRecord(BaseModel):
     primary_type: str | None = None
     address: str | None = None
     photo_url: str | None = None
+    photo_source: str | None = None
+    photo_confidence: str | None = None
+    photo_checked_at: str | None = None
+    google_place_name: str | None = None
+    google_photo_name: str | None = None
     source: str = "overpass"
     osm_type: str | None = None
     osm_id: int | None = None
@@ -88,6 +93,10 @@ class PoiRecord(BaseModel):
             "primary_type": self.primary_type,
             "address": self.address,
             "photo_url": self.photo_url,
+            "photo_source": self.photo_source,
+            "photo_confidence": self.photo_confidence,
+            "google_place_name": self.google_place_name,
+            "google_photo_name": self.google_photo_name,
             "source": self.source,
             "osm_type": self.osm_type,
             "osm_id": self.osm_id,
@@ -120,5 +129,10 @@ class PoiRecord(BaseModel):
             "user_ratings_total": self.user_ratings_total,
             "address": self.address,
             "photo_url": self.photo_url,
+            "photo_source": self.photo_source,
+            "photo_confidence": self.photo_confidence,
+            "photo_checked_at": self.photo_checked_at,
+            "google_place_name": self.google_place_name,
+            "google_photo_name": self.google_photo_name,
             "is_active": True,
         }

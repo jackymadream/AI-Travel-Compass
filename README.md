@@ -145,6 +145,7 @@ Fill `.env` (see comments in `.env.example` and the [deployment checklist](./doc
 ```bash
 # Apply schema.sql in the Supabase SQL editor (if not already applied)
 # For existing DBs: also run scripts/migrate_add_pois.sql
+# Then lock down POI writes: scripts/migrate_pois_rls.sql (SQL editor)
 # Phase 6.1 columns: scripts/migrate_phase6_countries.sql
 pip install -r requirements.txt
 python scripts/seed_db.py                 # legacy smaller seed
@@ -154,12 +155,16 @@ python scripts/ensure_qdrant_indexes.py   # city_id / locale / country_id indexe
 
 # Phase 5.1 — real POIs (Overpass; optional Places if GOOGLE_PLACES_API_KEY set)
 python scripts/ingest_real_pois.py --city tokyo --limit 10 --dry-run
-python scripts/seed_city_pois.py --city tokyo --skip-places --limit 60
+# Approach A: curated signatures (data/city_signature_pois.json) + Overpass + cuisine + photos.
+# Signature cities: tokyo, osaka, kyoto, seoul, paris, rome, barcelona, bangkok, london,
+# marrakech, reykjavik. Cap matches a full metro corpus:
+python scripts/seed_city_pois.py --city tokyo --skip-places --limit 120
 # Neighborhood churches without wikipedia/wikidata are skipped; prior Overpass
 # rows for that city are replaced so stale POIs do not linger.
 
-# Optional: itinerary quality eval against a running API
+# Optional: itinerary quality eval against a running API (filter with --slug)
 python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000
+python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000 --slug paris --slug rome
 ```
 
 ### 3. Backend

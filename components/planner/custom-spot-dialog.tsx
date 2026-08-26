@@ -31,7 +31,12 @@ type CustomSpotDialogProps = {
   open: boolean;
   placingOnMap: boolean;
   cityHint?: string | null;
-  initialCoords?: { lat: number; lon: number } | null;
+  initialCoords?: { lat: number; lon: number; address?: string } | null;
+  /** Prefill visiting time (e.g. after the day's last stop). */
+  defaultTimeSlot?: string | null;
+  title?: string;
+  /** `map` overlays the map; `modal` is a centered panel (timeline Add stop). */
+  variant?: "map" | "modal";
   onClose: () => void;
   onStartMapPlace: () => void;
   onSubmit: (spot: CustomSpotPayload) => void;
@@ -72,6 +77,9 @@ export function CustomSpotDialog({
   placingOnMap,
   cityHint,
   initialCoords,
+  defaultTimeSlot = null,
+  title = "Custom spot",
+  variant = "map",
   onClose,
   onStartMapPlace,
   onSubmit,
@@ -95,17 +103,21 @@ export function CustomSpotDialog({
       setPendingCoords(null);
       return;
     }
+    setDraft({
+      ...EMPTY_DRAFT,
+      time_slot: defaultTimeSlot?.trim() || EMPTY_DRAFT.time_slot,
+    });
     if (initialCoords) {
       setPendingCoords({
         lat: initialCoords.lat,
         lon: initialCoords.lon,
-        address: "Dropped on map",
+        address: initialCoords.address || "Dropped on map",
       });
       setDraft((prev) =>
         prev.name.trim() ? prev : { ...prev, name: "Custom spot" }
       );
     }
-  }, [open, initialCoords]);
+  }, [open, initialCoords, defaultTimeSlot]);
 
   if (!open) return null;
 
@@ -164,15 +176,22 @@ export function CustomSpotDialog({
   }
 
   return (
-    <div className="absolute left-3 top-3 z-[1100] max-h-[min(92%,28rem)] w-[min(100%-1.5rem,22rem)] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-lg">
+    <div
+      className={
+        variant === "modal"
+          ? "relative z-[1100] max-h-[min(85vh,36rem)] w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-xl"
+          : "absolute left-3 top-3 z-[1100] max-h-[min(92%,28rem)] w-[min(100%-1.5rem,22rem)] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-lg"
+      }
+    >
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
-            Custom spot
+            {title}
           </p>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-            Add a name, then look up a place or click the map. You can skip extra
-            fields and edit later.
+            {variant === "modal"
+              ? "Add a name and confirm the place. You can skip extra fields and edit later."
+              : "Add a name, then look up a place or click the map. You can skip extra fields and edit later."}
           </p>
         </div>
         <button

@@ -36,7 +36,17 @@
     "planTrip": "Plan the trip",
     "agentHint": "The agent retrieves POIs, then validates budget and pace.",
     "generate": "Generate itinerary",
-    "planning": "Planning…"
+    "planning": "Planning…",
+    "progress": {
+      "starting": "Starting itinerary agent…",
+      "poi_retrieval": "Querying POIs (attractions, food, rest)…",
+      "plan_day": "Planning day {day} of {total}…",
+      "draft_day": "Drafting day {day} of {total}…",
+      "validate_day": "Validating schedule and budget — day {day}, pass {turn}…",
+      "finalize": "Building trip summary and tips…",
+      "complete": "Itinerary ready",
+      "detail": "Retrieving grounded stops, then checking pace and daily spend."
+    }
   },
   "login": {
     "title": "Sign in",
