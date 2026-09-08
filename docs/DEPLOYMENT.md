@@ -174,11 +174,13 @@ Copy from [`.env.example`](../.env.example) and fill every required row before p
 3. `python scripts/smoke_test.py --base-url https://api.jackymadream.com --allow-degraded`
 4. Open `https://travel.jackymadream.com/explore` and `/planner`
 
-After changing Overpass ingest rules or signature catalogs, re-seed live POIs so Cloud Run does not keep serving stale rows. Signature cities (Approach A): tokyo, osaka, kyoto, seoul, paris, rome, barcelona, bangkok, london, marrakech, reykjavik.
+After changing Overpass ingest rules or signature catalogs, re-seed live POIs so Cloud Run does not keep serving stale rows. Approach A signatures cover **all 77 Explore cities**.
 
 ```bash
-python scripts/seed_city_pois.py --city tokyo --skip-places --limit 120
-python scripts/eval_itinerary_flow.py --base-url https://api.jackymadream.com --slug tokyo
+python scripts/reseed_signature_cities.py --limit 120
+# or one city:
+python scripts/seed_city_pois.py --city berlin --skip-places --limit 120
+python scripts/eval_itinerary_flow.py --base-url https://api.jackymadream.com --slug berlin
 ```
 
 ---

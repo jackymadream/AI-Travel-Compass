@@ -154,7 +154,7 @@ Live path:
 
 Gemini drafts use Vertex (`GEMINI_LOCATION`, usually `us-central1`) even when embeddings stay on `GCP_LOCATION` (`asia-southeast1`). Quality eval (running API): `python scripts/eval_itinerary_flow.py`. The eval checks meals, uniqueness, overlaps, and that a day over the pace cap either fits or carries warnings. Filter cities with `--slug`.
 
-**Approach A ingest:** curated signature POIs in [`data/city_signature_pois.json`](../data/city_signature_pois.json) merge ahead of Overpass for theme diversity (nightlife, museum, art, family, park, viewpoint). Signature coverage today: **tokyo, osaka, kyoto, seoul, paris, rome, barcelona, bangkok, london, marrakech, reykjavik**. After merge, cuisine catalog rows and attraction/rest photo enrich run automatically. Meal slots use cuisine types with UI lunch/dinner icons (optional manual Image URL in stop details).
+**Approach A ingest:** curated signature POIs in [`data/city_signature_pois.json`](../data/city_signature_pois.json) merge ahead of Overpass for theme diversity (nightlife, museum, art, family, park, viewpoint). Signature coverage: **all 77 Explore cities** from phase-6 seed data. After merge, cuisine catalog rows and attraction/rest photo enrich run automatically. Meal slots use cuisine types with UI lunch/dinner icons (optional manual Image URL in stop details). Bulk reseed helper: `python scripts/reseed_signature_cities.py --limit 120`.
 
 Re-seed a city (filters obscure worship; replaces prior overpass rows; keeps signatures first under the limit):
 

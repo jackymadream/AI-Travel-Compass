@@ -41,6 +41,60 @@ from src.services.agent_tools import PACE_LIMITS, scheduled_total_minutes  # noq
 
 REPORT_DIR = ROOT / ".scratch" / "eval-itinerary"
 
+# Auto cases for every Approach A signature city not covered by hand-written CASES.
+_HAND_SLUGS = {
+    "tokyo",
+    "osaka",
+    "kyoto",
+    "seoul",
+    "paris",
+    "rome",
+    "barcelona",
+    "bangkok",
+    "london",
+    "marrakech",
+    "reykjavik",
+}
+
+
+def _auto_cases_from_signatures() -> list[dict[str, Any]]:
+    path = ROOT / "data" / "city_signature_pois.json"
+    if not path.is_file():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    out: list[dict[str, Any]] = []
+    for slug in sorted(payload.keys()):
+        if slug in _HAND_SLUGS:
+            continue
+        title = slug.replace("-", " ").title()
+        if slug == "ho-chi-minh-city":
+            expect = ["Ho Chi Minh", "Saigon"]
+        elif slug == "singapore-city":
+            expect = ["Singapore"]
+        elif slug == "mexico-city":
+            expect = ["Mexico City"]
+        else:
+            expect = [title]
+        out.append(
+            {
+                "id": f"{slug}_en_culture_2day",
+                "slug": slug,
+                "days": 2,
+                # Relaxed + higher budget: some cities overfill moderate pace or need budget headroom.
+                "pace": "relaxed",
+                "daily_budget_usd": 180,
+                "preferences": ["culture", "museum", "park", "family"],
+                "locale": "en",
+                "expect_city_substrings": expect,
+                "expect_cjk_narrative": False,
+                "forbid_synthetic_attractions": True,
+                "forbid_denied_photos": True,
+                "require_meals": True,
+            }
+        )
+    return out
+
+
 # city_slug → expectations
 CASES: list[dict[str, Any]] = [
     {
@@ -293,6 +347,9 @@ CASES: list[dict[str, Any]] = [
         "require_meals": True,
     },
 ]
+
+
+CASES.extend(_auto_cases_from_signatures())
 
 
 def http_json(method: str, url: str, payload: dict | None = None) -> dict:
@@ -610,6 +667,13 @@ def evaluate_case(base: str, case: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> int:
+    # Windows consoles (cp950/cp1252) choke on POI names with diacritics.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument(

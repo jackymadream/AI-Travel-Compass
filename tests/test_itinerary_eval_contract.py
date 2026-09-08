@@ -18,6 +18,9 @@ def test_synthetic_osaka_templates() -> None:
     assert is_synthetic_poi_name("Tokyo Historic District Walk")
     assert not is_synthetic_poi_name("Osaka Castle")
     assert not is_synthetic_poi_name("Dotonbori")
+    # Real curated museums whose names collide with the City Museum template.
+    assert not is_synthetic_poi_name("Galway City Museum")
+    assert not is_synthetic_poi_name("Stockholm Stadsmuseum")
 
 
 def test_denied_stock_photos() -> None:

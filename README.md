@@ -156,15 +156,15 @@ python scripts/ensure_qdrant_indexes.py   # city_id / locale / country_id indexe
 # Phase 5.1 — real POIs (Overpass; optional Places if GOOGLE_PLACES_API_KEY set)
 python scripts/ingest_real_pois.py --city tokyo --limit 10 --dry-run
 # Approach A: curated signatures (data/city_signature_pois.json) + Overpass + cuisine + photos.
-# Signature cities: tokyo, osaka, kyoto, seoul, paris, rome, barcelona, bangkok, london,
-# marrakech, reykjavik. Cap matches a full metro corpus:
+# Signature coverage: all 77 Explore cities from data/countries_phase6.json.
+# Helper to reseed every new signature city: python scripts/reseed_signature_cities.py --limit 120
 python scripts/seed_city_pois.py --city tokyo --skip-places --limit 120
 # Neighborhood churches without wikipedia/wikidata are skipped; prior Overpass
 # rows for that city are replaced so stale POIs do not linger.
 
 # Optional: itinerary quality eval against a running API (filter with --slug)
 python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000
-python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000 --slug paris --slug rome
+python scripts/eval_itinerary_flow.py --base-url http://127.0.0.1:8000 --slug amsterdam --slug berlin
 ```
 
 ### 3. Backend
