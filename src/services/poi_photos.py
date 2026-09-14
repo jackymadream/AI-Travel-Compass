@@ -1,19 +1,18 @@
-"""Resolve itinerary POI photos: Wikidata/Wikipedia, then unique city stock."""
+"""Ingest-time POI photo resolution: Wikidata / Wikipedia / Places. No generate-time search."""
 
 from __future__ import annotations
 
 import hashlib
 import logging
 import math
-import os
 import re
+from dataclasses import dataclass
 from typing import Any, Callable, Iterable
 from urllib.parse import quote
 
-from src.services.cache_service import TTL_POI_SECONDS, get_cache_service, make_cache_key
-from src.services.itinerary_eval import photo_id_from_url
+from src.services.itinerary_eval import is_denied_stock_photo, photo_id_from_url
 from src.services.itinerary_i18n import (
-    category_photo,
+    all_stock_photo_urls,
     photo_candidates,
     photo_shape,
 )
@@ -23,14 +22,20 @@ logger = logging.getLogger(__name__)
 WIKI_SUMMARY = "https://en.wikipedia.org/api/rest_v1/page/summary/{title}"
 WIKI_OPENSEARCH = "https://en.wikipedia.org/w/api.php"
 WIKIDATA_ENTITY = "https://www.wikidata.org/wiki/Special:EntityData/{qid}.json"
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 COMMONS_FILE = "https://commons.wikimedia.org/wiki/Special:FilePath/{name}?width=800"
+PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
+PLACES_MEDIA = "https://places.googleapis.com/v1/{name}/media"
 WIKI_USER_AGENT = (
     "GenAITravelCompass/1.0 (itinerary POI photos; https://github.com/)"
 )
 WIKI_TIMEOUT_S = 3.0
+PLACES_TIMEOUT_S = 8.0
 MAX_WIKI_DISTANCE_KM = 25.0
+MAX_PLACES_DISTANCE_KM = 0.5
 
 WikiFetch = Callable[[str, dict[str, str] | None], dict[str, Any] | list[Any] | None]
+PhotoSource = str  # wikidata | wikipedia | places | cuisine_seed | none
 
 _STOPWORDS = {
     "the",
@@ -48,6 +53,46 @@ _STOPWORDS = {
 }
 
 
+@dataclass(frozen=True)
+class PhotoHit:
+    url: str | None
+    source: PhotoSource
+    confidence: str  # high | medium | low
+    google_place_name: str | None = None
+    google_photo_name: str | None = None
+
+
+def resolve_grounded_photo(
+    name: str,
+    *,
+    city: str | None = None,
+    wikidata: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
+    tags: Iterable[str] | None = None,
+    fetch: WikiFetch | None = None,
+) -> PhotoHit:
+    """
+    Fail-closed Wikipedia/Wikidata lookup for ingest.
+
+    Does not fall back to Unsplash stock. Callers persist ``source=none``
+    when ``url`` is None.
+    """
+    qid = wikidata or _wikidata_from_tags(tags)
+    getter = fetch or _http_get_json
+    if qid:
+        wiki = _wikidata_p18(qid, lat=lat, lon=lon, fetch=getter)
+        if wiki and persistable_photo_url(wiki):
+            return PhotoHit(url=wiki, source="wikidata", confidence="high")
+    thumb = _wikipedia_thumbnail(name, city, lat=lat, lon=lon, fetch=getter)
+    if thumb and persistable_photo_url(thumb):
+        return PhotoHit(url=thumb, source="wikipedia", confidence="medium")
+    commons = _commons_thumbnail(name, city, lat=lat, lon=lon, fetch=getter)
+    if commons and persistable_photo_url(commons):
+        return PhotoHit(url=commons, source="wikipedia", confidence="medium")
+    return PhotoHit(url=None, source="none", confidence="low")
+
+
 def resolve_poi_photo(
     name: str,
     *,
@@ -60,32 +105,124 @@ def resolve_poi_photo(
     lon: float | None = None,
     tags: Iterable[str] | None = None,
 ) -> str:
-    """
-    Return a loadable photo URL for ``name``.
-
-    Prefers Wikidata P18, then a Wikipedia thumbnail whose title matches the
-    POI; falls back to category-shaped Unsplash stock.
-    """
-    used = used_urls if used_urls is not None else set()
-    qid = wikidata or _wikidata_from_tags(tags)
-    wiki = None
-    if fetch is not None or not os.getenv("PYTEST_CURRENT_TEST"):
-        wiki = _cached_related_photo(
-            name,
-            city,
-            qid=qid,
-            lat=lat,
-            lon=lon,
-            fetch=fetch,
-        )
-    if wiki and is_allowed_photo_url(wiki):
-        return wiki
-    return unique_stock_photo(
+    """Ingest helper: grounded URL or empty string (never category stock)."""
+    del category, used_urls
+    hit = resolve_grounded_photo(
         name,
-        category=category,
         city=city,
-        used_urls=used,
+        wikidata=wikidata,
+        lat=lat,
+        lon=lon,
+        tags=tags,
+        fetch=fetch,
     )
+    return hit.url or ""
+
+
+def resolve_places_photo(
+    name: str,
+    *,
+    city: str | None,
+    lat: float | None,
+    lon: float | None,
+    api_key: str,
+    google_place_name: str | None = None,
+    google_photo_name: str | None = None,
+    client: Any | None = None,
+) -> PhotoHit:
+    """Google Places photo when the matched venue is within 500 m of OSM coords."""
+    key = (api_key or "").strip()
+    if not key or not (name or "").strip():
+        return PhotoHit(url=None, source="none", confidence="low")
+    try:
+        import httpx
+    except ImportError:
+        return PhotoHit(url=None, source="none", confidence="low")
+
+    own_client = client is None
+    http = client or httpx.Client(timeout=PLACES_TIMEOUT_S, follow_redirects=True)
+    try:
+        photo_name = str(google_photo_name or "").strip()
+        place_name = str(google_place_name or "").strip() or None
+        if photo_name:
+            stored = _places_media_photo(photo_name, key=key, client=http)
+            if stored:
+                return PhotoHit(
+                    url=stored,
+                    source="places",
+                    confidence="high",
+                    google_place_name=place_name,
+                    google_photo_name=photo_name,
+                )
+        body: dict[str, Any] = {
+            "textQuery": f"{name} {city or ''}".strip(),
+            "pageSize": 1,
+        }
+        if lat is not None and lon is not None:
+            body["locationBias"] = {
+                "circle": {
+                    "center": {"latitude": lat, "longitude": lon},
+                    "radius": 500.0,
+                }
+            }
+        headers = {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": key,
+            "X-Goog-FieldMask": (
+                "places.name,places.photos,places.location,"
+                "places.displayName,places.formattedAddress"
+            ),
+        }
+        resp = http.post(PLACES_SEARCH_URL, json=body, headers=headers)
+        if resp.status_code >= 400:
+            logger.info("Places photo search HTTP %s for %s", resp.status_code, name[:80])
+            return PhotoHit(url=None, source="none", confidence="low")
+        places = (resp.json() or {}).get("places") or []
+        if not places:
+            return PhotoHit(url=None, source="none", confidence="low")
+        place = places[0]
+        loc = place.get("location") or {}
+        plat, plon = loc.get("latitude"), loc.get("longitude")
+        if lat is not None and lon is not None and plat is not None and plon is not None:
+            try:
+                dist = _haversine_km(float(lat), float(lon), float(plat), float(plon))
+                if dist > MAX_PLACES_DISTANCE_KM:
+                    return PhotoHit(url=None, source="none", confidence="low")
+            except (TypeError, ValueError):
+                return PhotoHit(url=None, source="none", confidence="low")
+        photos = place.get("photos") or []
+        if not photos:
+            return PhotoHit(url=None, source="none", confidence="low")
+        photo_name = str(photos[0].get("name") or "").strip()
+        if not photo_name:
+            return PhotoHit(url=None, source="none", confidence="low")
+        place_name = str(place.get("name") or "").strip() or None
+        stored = _places_media_photo(photo_name, key=key, client=http)
+        if stored:
+            return PhotoHit(
+                url=stored,
+                source="places",
+                confidence="high",
+                google_place_name=place_name,
+                google_photo_name=photo_name,
+            )
+        return PhotoHit(url=None, source="none", confidence="low")
+    except Exception as exc:  # noqa: BLE001
+        logger.info("Places photo lookup failed for %s: %s", name[:80], exc)
+        return PhotoHit(url=None, source="none", confidence="low")
+    finally:
+        if own_client:
+            http.close()
+
+
+def persistable_photo_url(url: str | None) -> str | None:
+    """HTTPS image URL safe to copy onto an itinerary activity."""
+    text = (url or "").strip()
+    if not text.startswith("https://"):
+        return None
+    if is_allowed_photo_url(text):
+        return text
+    return None
 
 
 def unique_stock_photo(
@@ -96,16 +233,27 @@ def unique_stock_photo(
     iso: str | None = None,
     used_urls: set[str] | None = None,
 ) -> str:
-    """City/category Unsplash pool, indexed by ``name``, skipping used URLs."""
+    """Allowlisted Unsplash for cuisine seeds / UI placeholders — not POI identity."""
     used = used_urls or set()
     shape = photo_shape(name, category)
-    candidates = photo_candidates(shape, city=city, iso=iso, poi_name=name)
+    local: list[str] = []
+    seen: set[str] = set()
+    for key in (shape, category, "park", "rest", "worship", "attraction"):
+        for url in photo_candidates(key, city=city, iso=iso, poi_name=name):
+            if url and url not in seen:
+                seen.add(url)
+                local.append(url)
+    hit = _first_unused_stock(name, local, used)
+    if hit:
+        return hit
+    global_urls = [u for u in all_stock_photo_urls() if u not in seen]
+    return _first_unused_stock(name, global_urls, used) or ""
+
+
+def _first_unused_stock(name: str, urls: list[str], used: set[str]) -> str:
+    candidates = [u for u in urls if is_allowed_photo_url(u) and not is_denied_stock_photo(u)]
     if not candidates:
-        candidates = photo_candidates(category, city=city, iso=iso, poi_name=name)
-    candidates = [u for u in candidates if is_allowed_photo_url(u)]
-    if not candidates:
-        fallback = category_photo(category, 0, city=city, iso=iso, poi_name=name)
-        return fallback if is_allowed_photo_url(fallback) else fallback
+        return ""
     start = int(hashlib.md5(name.strip().lower().encode("utf-8")).hexdigest(), 16) % len(
         candidates
     )
@@ -113,7 +261,7 @@ def unique_stock_photo(
         url = candidates[(start + i) % len(candidates)]
         if url not in used:
             return url
-    return candidates[start]
+    return ""
 
 
 def is_allowed_photo_url(url: str | None) -> bool:
@@ -125,18 +273,27 @@ def is_allowed_photo_url(url: str | None) -> bool:
         return False
     if "upload.wikimedia.org" in lower or "commons.wikimedia.org" in lower:
         return True
+    if "googleusercontent.com" in lower:
+        return True
     if "images.unsplash.com" in lower:
         pid = photo_id_from_url(text)
-        return bool(pid) and pid in _unsplash_allowlist()
+        return bool(pid) and pid in _unsplash_allowlist() and not is_denied_stock_photo(text)
     return False
 
 
-def titles_related(poi_name: str, wiki_title: str) -> bool:
+def titles_related(
+    poi_name: str,
+    wiki_title: str,
+    *,
+    require_all_tokens: bool = False,
+) -> bool:
     """True when Wikipedia title shares meaningful tokens with the POI name."""
     poi = (poi_name or "").strip()
     title = (wiki_title or "").strip()
     if not poi or not title:
         return False
+    if poi.lower() in title.lower() or title.lower() in poi.lower():
+        return True
     cjk_poi = re.findall(r"[\u3040-\u30ff\u4e00-\u9fff]{2,}", poi)
     if cjk_poi and any(tok in title for tok in cjk_poi):
         return True
@@ -147,7 +304,9 @@ def titles_related(poi_name: str, wiki_title: str) -> bool:
     overlap = poi_toks & title_toks
     if not overlap:
         return False
-    return len(overlap) >= 1 and (len(overlap) >= 2 or len(poi_toks) <= 2)
+    if require_all_tokens:
+        return poi_toks <= title_toks
+    return len(overlap) >= 2
 
 
 def _tokens(text: str) -> set[str]:
@@ -173,32 +332,13 @@ def _unsplash_allowlist() -> set[str]:
     return unsplash_allowlist()
 
 
-def _cached_related_photo(
-    name: str,
-    city: str | None,
+def _wikidata_p18(
+    qid: str,
     *,
-    qid: str | None,
     lat: float | None,
     lon: float | None,
     fetch: WikiFetch | None,
 ) -> str | None:
-    key = make_cache_key("photo:wiki", name, city or "", qid or "")
-    cache = get_cache_service()
-    cached = cache.get(key)
-    if cached == "":
-        return None
-    if isinstance(cached, str) and cached.startswith("http"):
-        return cached if is_allowed_photo_url(cached) else None
-    url = None
-    if qid:
-        url = _wikidata_p18(qid, fetch=fetch)
-    if not url:
-        url = _wikipedia_thumbnail(name, city, lat=lat, lon=lon, fetch=fetch)
-    cache.set(key, url or "", ttl_seconds=TTL_POI_SECONDS)
-    return url
-
-
-def _wikidata_p18(qid: str, *, fetch: WikiFetch | None) -> str | None:
     getter = fetch or _http_get_json
     data = getter(WIKIDATA_ENTITY.format(qid=qid), None)
     if not isinstance(data, dict):
@@ -206,6 +346,16 @@ def _wikidata_p18(qid: str, *, fetch: WikiFetch | None) -> str | None:
     entities = data.get("entities") or {}
     entity = entities.get(qid) or entities.get(qid.upper()) or {}
     claims = entity.get("claims") or {}
+    has_poi_coords = lat is not None and lon is not None
+    if has_poi_coords:
+        wlat, wlon = _wikidata_p625(claims)
+        if wlat is None or wlon is None:
+            return None
+        try:
+            if _haversine_km(float(lat), float(lon), float(wlat), float(wlon)) > MAX_WIKI_DISTANCE_KM:
+                return None
+        except (TypeError, ValueError):
+            return None
     p18 = claims.get("P18") or []
     if not p18:
         return None
@@ -218,6 +368,17 @@ def _wikidata_p18(qid: str, *, fetch: WikiFetch | None) -> str | None:
     if filename.lower().endswith(".svg"):
         return None
     return COMMONS_FILE.format(name=quote(filename.replace(" ", "_"), safe=""))
+
+
+def _wikidata_p625(claims: dict[str, Any]) -> tuple[float | None, float | None]:
+    p625 = claims.get("P625") or []
+    if not p625:
+        return None, None
+    try:
+        value = p625[0]["mainsnak"]["datavalue"]["value"]
+        return float(value["latitude"]), float(value["longitude"])
+    except (KeyError, IndexError, TypeError, ValueError):
+        return None, None
 
 
 def _wikipedia_thumbnail(
@@ -269,24 +430,95 @@ def _summary_thumbnail(
     if str(data.get("type") or "") == "disambiguation":
         return None
     wiki_title = str(data.get("title") or title)
-    if not titles_related(poi_name, wiki_title):
+    has_poi_coords = lat is not None and lon is not None
+    if not titles_related(poi_name, wiki_title, require_all_tokens=not has_poi_coords):
         return None
     coords = data.get("coordinates") or {}
-    if lat is not None and lon is not None and isinstance(coords, dict):
+    if has_poi_coords:
+        if not isinstance(coords, dict):
+            return None
         wlat = coords.get("lat")
         wlon = coords.get("lon")
+        if wlat is None or wlon is None:
+            return None
         try:
-            if wlat is not None and wlon is not None:
-                if _haversine_km(float(lat), float(lon), float(wlat), float(wlon)) > MAX_WIKI_DISTANCE_KM:
-                    return None
+            if _haversine_km(float(lat), float(lon), float(wlat), float(wlon)) > MAX_WIKI_DISTANCE_KM:
+                return None
         except (TypeError, ValueError):
-            pass
+            return None
     orig = data.get("originalimage") if isinstance(data.get("originalimage"), dict) else {}
     thumb = data.get("thumbnail") if isinstance(data.get("thumbnail"), dict) else {}
     for blob in (orig, thumb):
         src = blob.get("source") if blob else None
-        if isinstance(src, str) and is_allowed_photo_url(src):
+        if isinstance(src, str) and persistable_photo_url(src):
             return src
+    return None
+
+
+def _commons_thumbnail(
+    name: str,
+    city: str | None,
+    *,
+    lat: float | None,
+    lon: float | None,
+    fetch: WikiFetch | None = None,
+) -> str | None:
+    title = (name or "").strip()
+    if not title:
+        return None
+    getter = fetch or _http_get_json
+    queries: list[str] = []
+    city_s = (city or "").strip()
+    if city_s:
+        queries.append(f'{title} {city_s}')
+    queries.append(title)
+    require_all_tokens = lat is None or lon is None
+    for query in queries:
+        params = {
+            "action": "query",
+            "generator": "search",
+            "gsrsearch": query,
+            "gsrnamespace": "6",
+            "gsrlimit": "3",
+            "prop": "imageinfo|coordinates",
+            "iiprop": "url",
+            "iiurlwidth": "800",
+            "format": "json",
+        }
+        data = getter(COMMONS_API, params)
+        if not isinstance(data, dict):
+            continue
+        pages = (data.get("query") or {}).get("pages") or {}
+        if not isinstance(pages, dict):
+            continue
+        for page in pages.values():
+            if not isinstance(page, dict):
+                continue
+            raw_title = str(page.get("title") or "")
+            file_title = raw_title.replace("File:", "").replace("_", " ").strip()
+            if not titles_related(title, file_title, require_all_tokens=require_all_tokens):
+                continue
+            if lat is not None and lon is not None:
+                coords = page.get("coordinates") or []
+                if not isinstance(coords, list) or not coords:
+                    continue
+                coord = coords[0] if isinstance(coords[0], dict) else {}
+                clat = coord.get("lat")
+                clon = coord.get("lon")
+                if clat is None or clon is None:
+                    continue
+                try:
+                    if _haversine_km(float(lat), float(lon), float(clat), float(clon)) > MAX_WIKI_DISTANCE_KM:
+                        continue
+                except (TypeError, ValueError):
+                    continue
+            infos = page.get("imageinfo") or []
+            if not isinstance(infos, list):
+                continue
+            for info in infos:
+                src = info.get("thumburl") or info.get("url")
+                if isinstance(src, str) and persistable_photo_url(src):
+                    return src
     return None
 
 
@@ -302,6 +534,29 @@ def _opensearch_title(query: str, getter: WikiFetch) -> str | None:
     if isinstance(titles, list) and titles and isinstance(titles[0], str):
         return titles[0]
     return None
+
+
+def _places_media_photo(photo_name: str, *, key: str, client: Any) -> str | None:
+    name = (photo_name or "").strip()
+    if not name:
+        return None
+    media_url = PLACES_MEDIA.format(name=name)
+    media = client.get(
+        media_url,
+        params={"maxHeightPx": 800, "skipHttpRedirect": "true", "key": key},
+    )
+    if media.status_code >= 400:
+        return None
+    payload: Any = {}
+    ctype = media.headers.get("content-type", "")
+    if ctype.startswith("application/json"):
+        payload = media.json()
+    uri = ""
+    if isinstance(payload, dict):
+        uri = str(payload.get("photoUri") or "")
+    if not uri and str(media.url).startswith("https://"):
+        uri = str(media.url)
+    return persistable_photo_url(uri)
 
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

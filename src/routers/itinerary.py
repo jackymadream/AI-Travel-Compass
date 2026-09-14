@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
+from collections.abc import AsyncIterator
 from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from supabase import Client
 
 from src.deps import SupabaseDep
@@ -17,7 +21,7 @@ from src.schemas.saved_itinerary import (
     SaveFromGenerateRequest,
     SaveItineraryRequest,
 )
-from src.services.agent_service import AgentPlanningError, AgentService
+from src.services.agent_service import AgentPlanningError, AgentService, PlanProgress
 from src.services.agent_tools import search_pois_tool
 from src.services.llm import try_get_llm_service
 
@@ -55,6 +59,80 @@ async def generate_itinerary(
                 "violations": exc.violations,
             },
         ) from exc
+
+
+def _progress_payload(progress: PlanProgress) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "type": "progress",
+        "step": progress.step,
+        "percent": progress.percent,
+    }
+    if progress.day_number is not None:
+        payload["day_number"] = progress.day_number
+    if progress.total_days is not None:
+        payload["total_days"] = progress.total_days
+    if progress.turn is not None:
+        payload["turn"] = progress.turn
+    return payload
+
+
+@router.post("/generate/stream")
+async def generate_itinerary_stream(
+    body: ItineraryRequest,
+    service: AgentServiceDep,
+) -> StreamingResponse:
+    """
+    Same as ``/generate`` but streams Server-Sent Events with progress updates
+    followed by the final itinerary JSON.
+    """
+
+    async def event_stream() -> AsyncIterator[str]:
+        queue: asyncio.Queue[dict[str, Any] | None] = asyncio.Queue()
+
+        def on_progress(progress: PlanProgress) -> None:
+            queue.put_nowait(_progress_payload(progress))
+
+        async def run_plan() -> None:
+            try:
+                result = await service.plan_itinerary(body, on_progress=on_progress)
+                await queue.put(
+                    {
+                        "type": "complete",
+                        "result": result.model_dump(mode="json"),
+                    }
+                )
+            except AgentPlanningError as exc:
+                await queue.put(
+                    {
+                        "type": "error",
+                        "message": str(exc),
+                        "violations": exc.violations,
+                    }
+                )
+            finally:
+                await queue.put(None)
+
+        task = asyncio.create_task(run_plan())
+        try:
+            yield ": connected\n\n"
+            while True:
+                item = await queue.get()
+                if item is None:
+                    break
+                yield f"data: {json.dumps(item, ensure_ascii=False)}\n\n"
+                await asyncio.sleep(0)
+        finally:
+            await task
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 def _days_payload(days_data: Any) -> Any:

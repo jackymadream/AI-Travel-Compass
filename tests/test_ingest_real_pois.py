@@ -150,6 +150,70 @@ def test_elements_skip_obscure_worship_when_attractions_exist() -> None:
     assert any(t.startswith("wikidata:") for t in senso.tags)
 
 
+def test_elements_skip_named_highway_junctions() -> None:
+    elements = [
+        {
+            "type": "node",
+            "id": 3001,
+            "lat": 35.01,
+            "lon": 135.76,
+            "tags": {
+                "name": "4-Way Junction",
+                "tourism": "attraction",
+                "highway": "traffic_signals",
+            },
+        },
+        {
+            "type": "node",
+            "id": 3002,
+            "lat": 35.02,
+            "lon": 135.77,
+            "tags": {
+                "name": "T-Way Junction",
+                "tourism": "attraction",
+                "junction": "yes",
+            },
+        },
+        {
+            "type": "node",
+            "id": 3003,
+            "lat": 34.99,
+            "lon": 135.78,
+            "tags": {
+                "name": "Kiyomizu-dera",
+                "tourism": "attraction",
+                "wikidata": "Q223478",
+                "wikipedia": "en:Kiyomizu-dera",
+            },
+        },
+        {
+            "type": "node",
+            "id": 3004,
+            "lat": 35.00,
+            "lon": 135.77,
+            "tags": {"name": "Nishiki Market Cafe", "amenity": "cafe"},
+        },
+        {
+            "type": "node",
+            "id": 3005,
+            "lat": 35.00,
+            "lon": 135.78,
+            "tags": {"name": "Maruyama Park", "leisure": "park"},
+        },
+    ]
+    pois = elements_to_pois(
+        elements,
+        city_key="tokyo",
+        limit=10,
+        city_id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        safety_score=4,
+    )
+    names = {p.name for p in pois}
+    assert "4-Way Junction" not in names
+    assert "T-Way Junction" not in names
+    assert "Kiyomizu-dera" in names
+
+
 def test_enrich_poi_description_uses_category_template() -> None:
     text = enrich_poi_description(
         name="Ueno Museum",

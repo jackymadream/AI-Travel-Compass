@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronDown, ChevronUp, MapPin, Timer } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Plus, Timer } from "lucide-react";
 
 import type { Activity, DailyItinerary } from "@/lib/api";
 import { ActivityPhoto } from "@/components/planner/activity-photo";
+import { Button } from "@/components/ui/button";
 import type { ScheduleWarning } from "@/lib/itinerary-edit";
 import { activityBadgeStyle } from "@/lib/planner-styles";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ type DayTimelineProps = {
     index: number,
     direction: -1 | 1
   ) => void;
+  onAddStop?: (dayNumber: number) => void;
 };
 
 export function DayTimeline({
@@ -32,6 +34,7 @@ export function DayTimeline({
   editable = false,
   warnings = [],
   onMoveActivity,
+  onAddStop,
 }: DayTimelineProps) {
   return (
     <div className="space-y-8">
@@ -75,7 +78,9 @@ export function DayTimeline({
               <TimelineItem
                 key={`${day.day_number}-${activity.poi_name}-${activityIndex}`}
                 activity={activity}
-                isLast={activityIndex === day.activities.length - 1}
+                isLast={
+                  activityIndex === day.activities.length - 1 && !onAddStop
+                }
                 selected={selectedKey === `${day.day_number}-${activityIndex}`}
                 canMoveUp={editable && activityIndex > 0}
                 canMoveDown={
@@ -99,6 +104,24 @@ export function DayTimeline({
                 }
               />
             ))}
+            {onAddStop ? (
+              <li className="relative pb-0">
+                <span
+                  className="absolute -left-[1.9rem] top-3 h-3 w-3 rounded-full border-2 border-dashed border-[var(--primary)] bg-[var(--card)]"
+                  aria-hidden
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="mt-1 gap-1.5"
+                  onClick={() => onAddStop(day.day_number)}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add stop
+                </Button>
+              </li>
+            ) : null}
           </ol>
         </section>
       ))}
@@ -149,12 +172,12 @@ function TimelineItem({
         <div className="flex gap-0 sm:gap-0">
           <ActivityPhoto
             activity={activity}
-            className="hidden h-auto w-28 sm:block sm:min-h-[7.5rem]"
+            className="hidden h-auto w-28 self-stretch sm:flex sm:min-h-[7.5rem]"
           />
           <div className="min-w-0 flex-1 p-4">
             <ActivityPhoto
               activity={activity}
-              className="mb-3 h-32 w-full rounded-lg sm:hidden"
+              className="mb-3 flex h-32 w-full rounded-lg sm:hidden"
             />
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">

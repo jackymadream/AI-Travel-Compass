@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 # Generic seed template suffixes that look fake in the planner UI.
@@ -34,18 +37,58 @@ _SYNTHETIC_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Real museums whose common English name matches a synthetic template.
+_CURATED_TEMPLATE_ALLOWLIST = frozenset(
+    {
+        "galway city museum",
+        "gothenburg city museum",
+        "ho chi minh city museum",
+        "ljubljana city museum",
+        "stockholm city museum",
+        "museum of galway",
+        "museum of gothenburg",
+        "museum of ho chi minh city",
+        "museum of ljubljana",
+        "stockholm stadsmuseum",
+    }
+)
+
 # Unsplash photo IDs that were used as mismatched category stock.
 BAD_STOCK_PHOTO_IDS = {
     "photo-1469854523086-cc02fe5d8800",  # desert road / van
     "photo-1499856871958-5b9627545d1a",  # Paris Alexandre III bridge
     "photo-1507525428034-b723cf961d3e",  # tropical beach
     "photo-1546069901-ba9599a7e63c",  # salad / poke (old lunch default)
+    "photo-1505761671935-60b3a7427bad",  # London Big Ben / Parliament
+    "photo-1523906834658-6e24ef2386f9",  # Venice Rialto / gondola
 }
+
+
+@lru_cache(maxsize=1)
+def _signature_poi_names() -> frozenset[str]:
+    path = Path(__file__).resolve().parents[2] / "data" / "city_signature_pois.json"
+    if not path.is_file():
+        return frozenset()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return frozenset()
+    names: set[str] = set()
+    if isinstance(payload, dict):
+        for block in payload.values():
+            for poi in (block or {}).get("pois") or []:
+                name = str((poi or {}).get("name") or "").strip().casefold()
+                if name:
+                    names.add(name)
+    return frozenset(names)
 
 
 def is_synthetic_poi_name(name: str) -> bool:
     text = (name or "").strip()
     if not text:
+        return False
+    key = text.casefold()
+    if key in _CURATED_TEMPLATE_ALLOWLIST or key in _signature_poi_names():
         return False
     return _SYNTHETIC_RE.match(text) is not None
 

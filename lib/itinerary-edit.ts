@@ -16,6 +16,57 @@ export function slotStartMinutes(slot: string): number {
   return hours * 60 + minutes;
 }
 
+export function slotEndMinutes(slot: string): number {
+  const parts = (slot || "").split("-");
+  if (parts.length >= 2) {
+    const end = slotStartMinutes(parts[1].trim());
+    if (end < 24 * 60) return end;
+  }
+  return slotStartMinutes(slot) + 60;
+}
+
+export function formatMinutes(totalMinutes: number): string {
+  const clamped = Math.max(0, Math.min(24 * 60 - 1, Math.round(totalMinutes)));
+  const hours = Math.floor(clamped / 60);
+  const minutes = clamped % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+/** Re-pack time slots in list order from ``dayStartMin`` using each stop's duration. */
+export function packActivityTimes(
+  activities: Activity[],
+  dayStartMin?: number
+): Activity[] {
+  if (activities.length === 0) return activities;
+  const starts = activities
+    .map((a) => slotStartMinutes(a.time_slot))
+    .filter((m) => m < 24 * 60);
+  let cursor =
+    dayStartMin ??
+    (starts.length ? Math.min(...starts) : 9 * 60);
+  if (!Number.isFinite(cursor) || cursor >= 24 * 60) cursor = 9 * 60;
+  return activities.map((act) => {
+    const dur = Math.max(1, act.duration_minutes || 60);
+    const start = cursor;
+    const end = Math.min(start + dur, 24 * 60 - 1);
+    cursor = end;
+    return {
+      ...act,
+      time_slot: `${formatMinutes(start)}-${formatMinutes(end)}`,
+    };
+  });
+}
+
+export function suggestedSlotAfterLast(
+  activities: Activity[],
+  durationMinutes = 45
+): string {
+  const last = activities[activities.length - 1];
+  const start = last ? slotEndMinutes(last.time_slot) : 15 * 60;
+  const end = Math.min(start + Math.max(1, durationMinutes), 24 * 60 - 1);
+  return `${formatMinutes(start)}-${formatMinutes(end)}`;
+}
+
 export function sortActivities(activities: Activity[]): Activity[] {
   return [...activities].sort(
     (a, b) => slotStartMinutes(a.time_slot) - slotStartMinutes(b.time_slot)
@@ -84,13 +135,6 @@ export function scheduleWarnings(
   return warnings;
 }
 
-const CATEGORY_STOCK: Record<ActivityCategory, string> = {
-  attraction:
-    "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=800&q=80",
-  food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
-  rest: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80",
-};
-
 export function activityFromCustomSpot(spot: CustomSpotPayload): Activity {
   const category = spot.category || "attraction";
   return {
@@ -110,7 +154,7 @@ export function activityFromCustomSpot(spot: CustomSpotPayload): Activity {
     is_custom: true,
     is_food_slot: false,
     meal_role: null,
-    photo_url: CATEGORY_STOCK[category],
+    photo_url: null,
     display_name: spot.name,
   };
 }
@@ -134,6 +178,30 @@ export function insertCustomSpot(
   });
 }
 
+/** Append a custom stop after the last stop of the day (does not re-sort by time). */
+export function appendCustomSpot(
+  days: DailyItinerary[],
+  dayNumber: number,
+  spot: CustomSpotPayload
+): DailyItinerary[] {
+  return days.map((day) => {
+    if (day.day_number !== dayNumber) return day;
+    const duration = spot.duration_minutes ?? 45;
+    const time_slot =
+      spot.time_slot?.trim() ||
+      suggestedSlotAfterLast(day.activities, duration);
+    const activities = [
+      ...day.activities,
+      activityFromCustomSpot({ ...spot, time_slot, duration_minutes: duration }),
+    ];
+    return {
+      ...day,
+      activities,
+      estimated_daily_cost: dayCost(activities),
+    };
+  });
+}
+
 export function moveActivity(
   days: DailyItinerary[],
   dayNumber: number,
@@ -145,10 +213,18 @@ export function moveActivity(
     const next = [...day.activities];
     const toIndex = fromIndex + direction;
     if (toIndex < 0 || toIndex >= next.length) return day;
+    const dayStart = Math.min(
+      ...day.activities.map((a) => slotStartMinutes(a.time_slot))
+    );
     const tmp = next[fromIndex];
     next[fromIndex] = next[toIndex];
     next[toIndex] = tmp;
-    return { ...day, activities: next, estimated_daily_cost: dayCost(next) };
+    const activities = packActivityTimes(next, dayStart);
+    return {
+      ...day,
+      activities,
+      estimated_daily_cost: dayCost(activities),
+    };
   });
 }
 
@@ -181,3 +257,15 @@ export const CATEGORY_OPTIONS: ActivityCategory[] = [
   "food",
   "rest",
 ];
+
+/** Clear auto-seeded cuisine photos so the UI uses lunch/dinner icons by default. */
+export function clearCuisineMealPhotos(
+  days: DailyItinerary[]
+): DailyItinerary[] {
+  return days.map((day) => ({
+    ...day,
+    activities: day.activities.map((act) =>
+      act.is_food_slot ? { ...act, photo_url: null } : act
+    ),
+  }));
+}

@@ -79,7 +79,7 @@ export function PoiDetailDrawer({
         <ActivityPhoto
           key={draft.photo_url || draft.poi_name}
           activity={draft}
-          className="mb-4 h-44 w-full rounded-xl"
+          className="mb-4 flex h-44 w-full rounded-xl"
         />
 
         {onSave ? (
@@ -182,6 +182,11 @@ export function PoiDetailDrawer({
                 className="mt-1 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-sm"
                 placeholder="https://…"
               />
+              {activity.is_food_slot ? (
+                <span className="mt-1 block font-normal normal-case tracking-normal text-[var(--muted-foreground)]">
+                  Optional. Leave blank to keep the lunch/dinner icon.
+                </span>
+              ) : null}
             </label>
             <Button type="button" className="w-full" onClick={save}>
               Save changes

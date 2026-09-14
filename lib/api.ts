@@ -249,6 +249,89 @@ export async function generateItinerary(
   return (await res.json()) as ItineraryResponse;
 }
 
+export type ItineraryProgressEvent = {
+  step: string;
+  percent: number;
+  day_number?: number;
+  total_days?: number;
+  turn?: number;
+};
+
+/** Stream SSE progress events, then return the validated itinerary. */
+export async function generateItineraryWithProgress(
+  payload: ItineraryRequest,
+  onProgress: (event: ItineraryProgressEvent) => void,
+  signal?: AbortSignal
+): Promise<ItineraryResponse> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/v1/itineraries/generate/stream`,
+    {
+      method: "POST",
+      signal,
+      headers: {
+        Accept: "text/event-stream",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(await formatApiError(res, "Itinerary generation failed"));
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error("Streaming is not supported in this browser.");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const normalized = buffer.replace(/\r\n/g, "\n");
+    const chunks = normalized.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const line = chunk.trim();
+      if (!line.startsWith("data: ")) continue;
+      const data = JSON.parse(line.slice(6)) as {
+        type: string;
+        step?: string;
+        percent?: number;
+        day_number?: number;
+        total_days?: number;
+        turn?: number;
+        result?: ItineraryResponse;
+        message?: string;
+      };
+      if (
+        data.type === "progress" &&
+        data.step != null &&
+        data.percent != null
+      ) {
+        onProgress({
+          step: data.step,
+          percent: data.percent,
+          day_number: data.day_number,
+          total_days: data.total_days,
+          turn: data.turn,
+        });
+      } else if (data.type === "complete" && data.result) {
+        return data.result;
+      } else if (data.type === "error") {
+        throw new Error(data.message ?? "Itinerary generation failed");
+      }
+    }
+  }
+
+  throw new Error("Itinerary stream ended without a result.");
+}
+
 export type SavedItinerary = {
   id: string;
   user_id: string;

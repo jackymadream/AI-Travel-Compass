@@ -4,6 +4,7 @@ Phase 3 agent loop + POST /api/v1/itineraries/generate tests.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 from uuid import UUID
 
@@ -15,6 +16,27 @@ from src.services.agent_service import AgentPlanningError, AgentService
 from src.services.agent_tools import MOCK_CITY_TOKYO
 
 TOKYO = UUID(MOCK_CITY_TOKYO)
+
+
+@pytest.mark.asyncio
+async def test_plan_itinerary_emits_progress_events() -> None:
+    service = AgentService(max_turns=3)
+    events: list[str] = []
+    await service.plan_itinerary(
+        ItineraryRequest(
+            city_id=TOKYO,
+            days=2,
+            pace=TripPace.MODERATE,
+            daily_budget_usd=120.0,
+            preferences=["food"],
+            locale="en",
+        ),
+        on_progress=lambda p: events.append(p.step),
+    )
+    assert "starting" in events
+    assert "poi_retrieval" in events
+    assert "plan_day" in events
+    assert events[-1] == "complete"
 
 
 @pytest.mark.asyncio
@@ -459,6 +481,164 @@ def test_refine_moves_morning_shrine_that_runs_into_lunch() -> None:
 
 
 @pytest.mark.asyncio
+async def test_three_day_llm_plan_does_not_repeat_non_meal_names() -> None:
+    """Gemini-style drafts that reuse Day-1 stops must be replaced from the unused pool."""
+
+    kyoto_pool = _kyoto_screenshot_poi_pool()
+    repeats = {"Momiji Tunnel", "4-Way Junction"}
+
+    class RepeatingKyotoLLM:
+        pools: list[list[str]]
+
+        def __init__(self) -> None:
+            self.pools = []
+
+        def propose_daily_plan(
+            self,
+            *,
+            request: ItineraryRequest,
+            day_number: int,
+            poi_pool: list[dict[str, Any]],
+            previous_violations: list[str],
+            turn: int,
+        ) -> dict[str, Any]:
+            self.pools.append([str(p.get("name") or "") for p in poi_pool])
+            by_name = {p["name"]: p for p in kyoto_pool}
+            morning = by_name["Momiji Tunnel"]
+            afternoon = by_name["4-Way Junction"]
+            return {
+                "day_number": day_number,
+                "theme": f"Day {day_number} Kyoto",
+                "activities": [
+                    {
+                        "time_slot": "09:00-10:00",
+                        "poi_name": morning["name"],
+                        "category": "attraction",
+                        "cost_usd": morning["cost_usd"],
+                        "duration_minutes": 60,
+                        "description": morning["description"],
+                        "is_food_slot": False,
+                        "poi_id": morning["id"],
+                    },
+                    {
+                        "time_slot": "12:00-13:30",
+                        "poi_name": "Kaiseki / Tofu Cuisine",
+                        "category": "food",
+                        "cost_usd": 12,
+                        "duration_minutes": 90,
+                        "description": "lunch",
+                        "is_food_slot": True,
+                        "meal_role": "lunch",
+                    },
+                    {
+                        "time_slot": "14:00-15:00",
+                        "poi_name": afternoon["name"],
+                        "category": "attraction",
+                        "cost_usd": afternoon["cost_usd"],
+                        "duration_minutes": 60,
+                        "description": afternoon["description"],
+                        "is_food_slot": False,
+                        "poi_id": afternoon["id"],
+                    },
+                    {
+                        "time_slot": "18:30-20:00",
+                        "poi_name": "Kaiseki Dinner",
+                        "category": "food",
+                        "cost_usd": 20,
+                        "duration_minutes": 90,
+                        "description": "dinner",
+                        "is_food_slot": True,
+                        "meal_role": "dinner",
+                    },
+                ],
+            }
+
+    def search_kyoto(
+        city_id: str,
+        category: str,
+        preferences: list[str],
+        limit: int = 24,
+    ) -> list[dict[str, Any]]:
+        return [p for p in kyoto_pool if p["category"] == category][:limit]
+
+    llm = RepeatingKyotoLLM()
+    service = AgentService(max_turns=3, llm_client=llm, search_pois=search_kyoto)
+    request = ItineraryRequest(
+        city_id=TOKYO,
+        days=3,
+        pace=TripPace.MODERATE,
+        daily_budget_usd=100.0,
+        preferences=["popular", "nature", "quiet gardens", "kid-friendly"],
+        locale="en",
+    )
+    result = await service.plan_itinerary(request)
+    names = [
+        a.poi_name
+        for day in result.daily_plans
+        for a in day.activities
+        if not a.is_food_slot
+    ]
+    assert len(names) == len(set(names)), names
+    assert names.count("Momiji Tunnel") <= 1
+    assert names.count("4-Way Junction") <= 1
+    # Unused pool remains, so Day 2+ must not be offered the Day-1 pair.
+    assert len(llm.pools) >= 2
+    later_pool = set().union(*[set(p) for p in llm.pools[1:]])
+    assert not repeats <= later_pool
+
+
+def _kyoto_screenshot_poi_pool() -> list[dict[str, Any]]:
+    attractions = [
+        ("Momiji Tunnel", ["nature", "garden"]),
+        ("4-Way Junction", ["highway", "junction"]),
+        ("T-Way Junction", ["highway", "junction"]),
+        ("Kyoto City Archaeological Museum", ["museum", "wikipedia", "wikidata:Q1"]),
+        ("Orinasu-kan", ["museum", "wikipedia"]),
+        ("Shiramine Jingu", ["shrine", "wikipedia"]),
+        ("Kiyomizu-dera", ["temple", "wikipedia", "garden"]),
+        ("Fushimi Inari Taisha", ["shrine", "wikipedia"]),
+        ("Arashiyama Bamboo Grove", ["nature", "garden", "wikipedia"]),
+        ("Philosopher's Path", ["garden", "nature"]),
+        ("Nijo Castle", ["castle", "wikipedia"]),
+        ("Ginkaku-ji", ["temple", "garden", "wikipedia"]),
+    ]
+    pool: list[dict[str, Any]] = []
+    for i, (name, tags) in enumerate(attractions):
+        pool.append(
+            {
+                "id": f"kyoto-attr-{i}",
+                "name": name,
+                "category": "attraction",
+                "cost_usd": 0.0,
+                "duration_minutes": 60,
+                "description": name,
+                "tags": tags,
+                "lat": 35.011 + i * 0.002,
+                "lon": 135.768 + i * 0.002,
+                "address": "Kyoto",
+                "city": "Kyoto",
+            }
+        )
+    for i, name in enumerate(["Maruyama Park Rest", "Philosopher Garden Pause"]):
+        pool.append(
+            {
+                "id": f"kyoto-rest-{i}",
+                "name": name,
+                "category": "rest",
+                "cost_usd": 0.0,
+                "duration_minutes": 45,
+                "description": name,
+                "tags": ["park", "garden", "nature"],
+                "lat": 35.003 + i * 0.002,
+                "lon": 135.778 + i * 0.002,
+                "address": "Kyoto",
+                "city": "Kyoto",
+            }
+        )
+    return pool
+
+
+@pytest.mark.asyncio
 async def test_plan_itinerary_resolves_persistent_lunch_shrine_overlap() -> None:
     class OverlappingLunchLLM:
         def propose_daily_plan(
@@ -560,6 +740,36 @@ class TestPostGenerateItinerary:
         for day in body["daily_plans"]:
             assert day["estimated_daily_cost"] <= 100
             assert day["activities"]
+
+    def test_generate_stream_returns_progress_and_result(
+        self, client: TestClient
+    ) -> None:
+        payload = {
+            "city_id": MOCK_CITY_TOKYO,
+            "days": 1,
+            "pace": "moderate",
+            "daily_budget_usd": 120,
+            "preferences": ["food"],
+            "locale": "en",
+        }
+        steps: list[str] = []
+        result_body: dict[str, Any] | None = None
+        with client.stream(
+            "POST", "/api/v1/itineraries/generate/stream", json=payload
+        ) as response:
+            assert response.status_code == 200
+            for line in response.iter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data = json.loads(line[6:])
+                if data.get("type") == "progress":
+                    steps.append(str(data.get("step")))
+                if data.get("type") == "complete":
+                    result_body = data.get("result")
+        assert "poi_retrieval" in steps
+        assert result_body is not None
+        assert result_body["city_name"] == "Tokyo"
+        assert len(result_body["daily_plans"]) == 1
 
     def test_generate_rejects_invalid_days(self, client: TestClient) -> None:
         payload = {

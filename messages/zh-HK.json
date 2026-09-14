@@ -36,7 +36,17 @@
     "planTrip": "規劃行程",
     "agentHint": "代理人會檢索景點，再驗證預算與節奏。",
     "generate": "產生行程",
-    "planning": "規劃中…"
+    "planning": "規劃中…",
+    "progress": {
+      "starting": "正在啟動行程代理人…",
+      "poi_retrieval": "正在查詢景點（景點、美食、休息）…",
+      "plan_day": "正在規劃第 {day} 天（共 {total} 天）…",
+      "draft_day": "正在草擬第 {day} 天（共 {total} 天）…",
+      "validate_day": "正在驗證時間表與預算 — 第 {day} 天，第 {turn} 輪…",
+      "finalize": "正在整理行程摘要與提示…",
+      "complete": "行程已就緒",
+      "detail": "檢索有根據的停點，並檢查節奏與每日支出。"
+    }
   },
   "login": {
     "title": "登入",
